@@ -1,0 +1,378 @@
+/* FRAME - Camera & Film Marketplace Minimalist Styles */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
+
+:root {
+  --color-black: #171717;
+  --color-gray: #8A8A8A;
+  --color-light-gray: #F2F2F2;
+  --color-border: #E8E8E8;
+  --color-bg: #FAFAFA;
+}
+
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-black);
+  letter-spacing: -0.01em;
+}
+
+/* Tracking for brand title */
+.tracking-brand {
+  letter-spacing: 0.22em;
+}
+
+.tracking-brand-wide {
+  letter-spacing: 0.3em;
+}
+
+/* Hide scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Category Pill & Nav Buttons */
+.cat-pill {
+  transition: all 0.15s ease;
+}
+
+.cat-pill.active {
+  background-color: #171717 !important;
+  color: #FFFFFF !important;
+  font-weight: 600;
+}
+
+.cat-pill:not(.active):hover {
+  background-color: #EBEBEB;
+  color: #171717;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #F2F2F2;
+}
+::-webkit-scrollbar-thumb {
+  background: #CCCCCC;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #8A8A8A;
+}
+
+/* Product Card Minimal Hover */
+.product-card {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.product-card:hover {
+  transform: translateY(-3px);
+  border-color: #171717;
+  box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.08);
+}
+
+/* Hero Horizontal Carousel Slider - 큰 사이즈로 비율 및 높이 통일 */
+#heroSliderContainer {
+  height: 520px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+}
+
+@media (max-width: 640px) {
+  #heroSliderContainer {
+    height: 440px;
+  }
+}
+
+#heroSliderTrack {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.65s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: transform;
+}
+
+.hero-slide-item {
+  min-width: 100%;
+  width: 100%;
+  height: 100%;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 모든 슬라이드 사진 비율을 빈틈없이 100% 큰 사이즈로 통일 */
+.hero-slide-item img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  display: block;
+}
+
+/* Hero Slide Indicator Dots */
+.hero-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.4);
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.hero-dot.active {
+  width: 22px;
+  background-color: #FFFFFF;
+}
+
+/* eKYC Liveness Scanner Animation */
+@keyframes scanLine {
+  0% { top: 5%; opacity: 0.8; }
+  50% { top: 90%; opacity: 1; }
+  100% { top: 5%; opacity: 0.8; }
+}
+
+.liveness-scanner {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #171717;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+  animation: scanLine 2.2s infinite ease-in-out;
+}
+
+/* Modal step active styles */
+.step-tab.active {
+  background-color: #171717 !important;
+  color: #FFFFFF !important;
+  font-weight: 700;
+}
+
+/* Toast Notification Animations */
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toastSlideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.96);
+  }
+}
+
+.toast-enter {
+  animation: toastSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.toast-exit {
+  animation: toastSlideOut 0.2s cubic-bezier(0.7, 0, 0.84, 0) forwards;
+}
+
+
+
+
+/* ================= GALLERY DARK MODE (Leica/Studio Monolith Aesthetic) ================= */
+html.dark {
+  --color-black: #F5F5F7;
+  --color-gray: #8E8E93;
+  --color-light-gray: #24242A;
+  --color-border: #2D2D35;
+  --color-bg: #111113;
+  color-scheme: dark;
+}
+
+html.dark body {
+  background-color: #111113 !important;
+  color: #F5F5F7 !important;
+}
+
+/* Header & Sticky Bars */
+html.dark header {
+  background-color: rgba(17, 17, 19, 0.94) !important;
+  border-bottom-color: #26262C !important;
+}
+
+html.dark nav {
+  border-top-color: #26262C !important;
+}
+
+/* Base Surfaces & Cards */
+html.dark .bg-white,
+html.dark .bg-\[\#FFFFFF\],
+html.dark .bg-white\/95,
+html.dark .bg-white\/90 {
+  background-color: #18181C !important;
+}
+
+/* Hero Section Base Background in Dark Mode */
+html.dark section.bg-\[\#FFFFFF\],
+html.dark section.bg-white {
+  background-color: #111113 !important;
+}
+
+/* Gradients override in dark mode */
+html.dark .bg-gradient-to-b.from-\[\#FAFAFA\].to-white,
+html.dark .bg-gradient-to-b {
+  background-image: none !important;
+  background-color: #18181C !important;
+}
+
+html.dark .bg-\[\#FAFAFA\],
+html.dark .bg-\[\#F9F9F9\],
+html.dark .bg-\[\#F7F7F7\],
+html.dark .bg-\[\#F5F5F5\],
+html.dark .bg-\[\#F2F2F2\],
+html.dark .bg-\[\#F0F0F0\],
+html.dark .bg-\[\#EBEBEB\],
+html.dark .bg-\[\#EAEAEA\],
+html.dark .bg-neutral-50,
+html.dark .bg-neutral-100,
+html.dark .bg-zinc-50,
+html.dark .bg-zinc-100 {
+  background-color: #202026 !important;
+}
+
+/* Borders */
+html.dark .border-\[\#EAEAEA\],
+html.dark .border-\[\#E5E5E5\],
+html.dark .border-\[\#F0F0F0\],
+html.dark .border-\[\#F5F5F5\],
+html.dark .border-\[\#E8E8E8\],
+html.dark .border-\[\#CCCCCC\],
+html.dark .border-neutral-200,
+html.dark .border-neutral-100 {
+  border-color: #2C2C34 !important;
+}
+
+/* Typography */
+html.dark .text-\[\#171717\],
+html.dark .text-neutral-900,
+html.dark .text-zinc-900 {
+  color: #F5F5F7 !important;
+}
+
+html.dark .text-\[\#737373\],
+html.dark .text-\[\#8A8A8A\],
+html.dark .text-\[\#888888\],
+html.dark .text-\[\#525252\],
+html.dark .text-neutral-600,
+html.dark .text-neutral-500 {
+  color: #A1A1AA !important;
+}
+
+/* Inputs, Textareas, Selects */
+html.dark input[type="text"],
+html.dark input[type="number"],
+html.dark input[type="search"],
+html.dark textarea,
+html.dark select {
+  background-color: #17171A !important;
+  border-color: #32323C !important;
+  color: #F5F5F7 !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #6E6E78 !important;
+}
+
+/* Product Cards */
+html.dark .product-card {
+  background-color: #18181C !important;
+  border-color: #2A2A32 !important;
+}
+
+html.dark .product-card:hover {
+  border-color: #52525E !important;
+  box-shadow: 0 14px 28px -6px rgba(0, 0, 0, 0.55) !important;
+}
+
+/* Category Navigation Pills */
+html.dark .cat-pill {
+  color: #A1A1AA !important;
+}
+
+html.dark .cat-pill:not(.active):hover {
+  background-color: #282830 !important;
+  color: #FFFFFF !important;
+}
+
+html.dark .cat-pill.active {
+  background-color: #F5F5F7 !important;
+  color: #111113 !important;
+}
+
+/* Modals & Dialogs */
+html.dark #detailModal > div,
+html.dark #registerModal > div,
+html.dark #authModal > div,
+html.dark #livenessModal > div,
+html.dark #googleApiConfigModal > div,
+html.dark #fraudCheckModal > div,
+html.dark #aiSampleExplorerModal > div {
+  background-color: #17171B !important;
+  border-color: #33333E !important;
+  color: #F5F5F7 !important;
+}
+
+/* Dropdown & Overlays */
+html.dark #globalSearchDropdown,
+html.dark #mobileSearchLayer,
+html.dark #mobileSearchDropdown,
+html.dark #chatDrawer {
+  background-color: #18181C !important;
+  border-color: #33333E !important;
+  color: #F5F5F7 !important;
+}
+
+/* Footer */
+html.dark footer {
+  background-color: #0E0E10 !important;
+  border-top-color: #222228 !important;
+}
+
+/* Mobile Bottom Navigation Bar */
+html.dark nav.fixed.bottom-0 {
+  background-color: rgba(17, 17, 19, 0.95) !important;
+  border-top-color: #26262C !important;
+}
+
+/* Dark Mode Scrollbars */
+html.dark ::-webkit-scrollbar-track {
+  background: #17171A;
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: #33333D;
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #4E4E5A;
+}
+
+/* Theme toggle button pulse on hover */
+#themeToggleBtn {
+  transition: transform 0.2s ease, background-color 0.15s ease;
+}
+#themeToggleBtn:hover {
+  transform: rotate(15deg);
+}

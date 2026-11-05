@@ -1,0 +1,2030 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FRAME | CAMERA & FILM MARKETPLACE</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            black: {
+              DEFAULT: '#171717',
+              pure: '#000000',
+              muted: '#262626'
+            },
+            gray: {
+              brand: '#8A8A8A',
+              subtle: '#737373',
+              light: '#F5F5F5',
+              border: '#E5E5E5'
+            }
+          },
+          fontFamily: {
+            sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'Roboto', 'sans-serif'],
+            serif: ['Didot', 'Bodoni MT', 'Cinzel', 'serif']
+          },
+          letterSpacing: {
+            'brand': '0.24em',
+            'brand-wide': '0.32em'
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Pretendard Font -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-[#FAFAFA] text-[#171717] font-sans antialiased selection:bg-[#171717] selection:text-white min-h-screen flex flex-col pb-16 md:pb-0">
+
+  <!-- ================= TOP NOTICE BAR ================= -->
+  <div class="bg-[#171717] text-white px-4 py-2 text-xs border-b border-black/10">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <span class="font-medium tracking-tight text-zinc-300">카메라 & 필름 전문 중고거래 플랫폼 FRAME</span>
+        <span class="text-zinc-500 hidden sm:inline">|</span>
+        <span class="text-zinc-400 hidden sm:inline text-[11px]">좋은 장비는 좋은 순간을 만듭니다</span>
+      </div>
+      <div class="flex items-center gap-4 text-xs text-zinc-300">
+        <a href="https://www.camerashuttercount.com/" target="_blank" rel="noopener noreferrer" class="hover:text-white transition flex items-center gap-1 font-medium underline underline-offset-2">
+          <span>CameraShutterCount 셔터 확인</span>
+          <i data-lucide="external-link" class="w-3 h-3"></i>
+        </a>
+        <span class="text-zinc-600">|</span>
+        <button onclick="openVerificationCenterModal()" class="hover:text-white transition flex items-center gap-1 font-medium text-emerald-300">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+          3단계 본인 인증 센터
+        </button>
+        <span class="text-zinc-600">|</span>
+        <button onclick="openFraudCheckModal()" class="hover:text-white transition flex items-center gap-1">
+          <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-zinc-400"></i>
+          사기 이력 조회
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MAIN HEADER ================= -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#EAEAEA]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20 gap-4">
+        
+        <!-- Logo (From Brand Identity Guide) -->
+        <a href="#" class="flex items-center gap-3 group">
+          <div class="w-10 h-10 rounded-xl bg-[#171717] flex items-center justify-center text-white group-hover:scale-105 transition-transform">
+            <i data-lucide="camera" class="w-5 h-5"></i>
+          </div>
+          <div class="flex flex-col">
+            <span class="font-extrabold text-xl tracking-brand text-[#171717] uppercase">F R A M E</span>
+            <span class="text-[9px] tracking-widest text-[#8A8A8A] uppercase font-medium -mt-0.5">CAMERA & FILM MARKETPLACE</span>
+          </div>
+        </a>
+
+        <!-- Global Search Bar -->
+        <div class="flex-1 max-w-lg mx-4 hidden md:block">
+          <div class="relative" id="globalSearchContainer">
+            <input 
+              type="text" 
+              id="globalSearchInput"
+              placeholder="브랜드, 모델명, 카테고리로 검색해보세요" 
+              class="w-full bg-[#F5F5F5] border border-[#E5E5E5] rounded-full py-2.5 pl-11 pr-20 text-xs text-[#171717] placeholder-[#8A8A8A] focus:outline-none focus:bg-white focus:border-[#171717] transition"
+              onkeypress="if(event.key === 'Enter') handleSearch()"
+              oninput="handleGlobalSearchInput(this.value)"
+              onfocus="handleGlobalSearchFocus()"
+              autocomplete="off"
+            >
+            <div class="absolute left-4 top-1/2 -translate-y-1/2 text-[#8A8A8A]">
+              <i data-lucide="search" class="w-4 h-4"></i>
+            </div>
+            <button 
+              onclick="handleSearch()"
+              class="absolute right-1.5 top-1/2 -translate-y-1/2 px-3 py-1 rounded-full bg-[#171717] text-white text-[11px] font-medium hover:bg-black transition">
+              검색
+            </button>
+
+            <!-- Global Search Autocomplete Dropdown (이모티콘 없이 정갈한 텍스트 전용) -->
+            <div 
+              id="globalSearchDropdown" 
+              class="hidden absolute left-0 right-0 top-full mt-2 bg-white border border-[#E5E5E5] rounded-2xl shadow-xl p-4 z-50 text-left transition-all"
+            >
+              <div class="flex items-center justify-between pb-2 mb-2.5 border-b border-[#F0F0F0]">
+                <span class="text-[11px] font-bold text-[#171717] flex items-center gap-1.5">
+                  <i data-lucide="sparkles" class="w-3.5 h-3.5 text-[#171717]"></i>
+                  <span id="globalSearchDropdownTitle">연관 추천 기종</span>
+                </span>
+                <span class="text-[10px] text-[#8A8A8A]">클릭 시 해당 매물 검색</span>
+              </div>
+              <div id="globalSearchChipsWrap" class="flex flex-wrap gap-1.5">
+                <!-- Text-only chips inserted dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <!-- Mobile Search Toggle Button (md:hidden) -->
+          <button onclick="toggleMobileSearchBar()" class="md:hidden p-2.5 rounded-full hover:bg-[#F2F2F2] text-[#171717] transition cursor-pointer" title="검색창 열기">
+            <i data-lucide="search" class="w-5 h-5"></i>
+          </button>
+
+          <!-- Gallery Dark Mode Toggle Button -->
+          <button 
+            id="themeToggleBtn" 
+            onclick="toggleDarkMode()" 
+            class="p-2.5 rounded-full hover:bg-[#F2F2F2] text-[#171717] transition cursor-pointer flex items-center justify-center border border-[#E5E5E5]" 
+            title="갤러리 다크 모드 전환">
+            <i id="themeToggleIcon" data-lucide="moon" class="w-4 h-4"></i>
+          </button>
+
+          <button onclick="openChatDrawer('header')" class="p-2.5 rounded-full hover:bg-[#F2F2F2] text-[#171717] transition relative" title="채팅 (안 읽은 메시지 2건)">
+            <i data-lucide="message-square" class="w-5 h-5"></i>
+            <span id="headerChatBadge" class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-[#171717] text-white text-[10px] font-bold flex items-center justify-center leading-none border-2 border-white shadow-xs">
+              2
+            </span>
+          </button>
+
+          <button onclick="openRegisterModal()" class="flex items-center gap-1.5 sm:gap-2 bg-[#171717] hover:bg-black text-white text-xs sm:text-sm font-semibold px-3 sm:px-4 py-2 sm:py-2.5 rounded-full transition active:scale-95 shadow-sm">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">매물 등록</span>
+            <span class="sm:hidden">등록</span>
+          </button>
+
+          <!-- User Profile / Login Area (사람 모양 아이콘 기본 노출) -->
+          <div id="userHeaderArea" class="flex items-center gap-2 pl-2 border-l border-[#E5E5E5]">
+            <button onclick="handleUserIconClick()" class="p-2 rounded-full hover:bg-[#F2F2F2] text-[#171717] transition border border-[#E5E5E5] flex items-center justify-center cursor-pointer" title="로그인 / 회원가입">
+              <i data-lucide="user" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Category Navigation (카메라 / 렌즈 / 필름 카메라 / 필름 카메라 렌즈) -->
+      <nav class="flex items-center space-x-2 py-2.5 overflow-x-auto no-scrollbar border-t border-[#F0F0F0] text-xs font-medium">
+        <button onclick="filterCategory('all')" data-cat="all" class="cat-pill active px-4 py-1.5 rounded-full text-[#737373] whitespace-nowrap">
+          전체 매물
+        </button>
+        <button onclick="filterCategory('wishlist')" data-cat="wishlist" class="cat-pill px-4 py-1.5 rounded-full text-[#737373] whitespace-nowrap flex items-center gap-1.5">
+          <i data-lucide="heart" class="w-3.5 h-3.5 text-red-500"></i>
+          <span>관심 매물</span>
+          <span id="wishlistCountBadge" class="hidden ml-0.5 px-1.5 py-0.2 rounded-full text-[10px] bg-red-100 text-red-600 font-bold">0</span>
+        </button>
+        <button onclick="filterCategory('camera')" data-cat="camera" class="cat-pill px-4 py-1.5 rounded-full text-[#737373] whitespace-nowrap flex items-center gap-1.5">
+          <i data-lucide="camera" class="w-3.5 h-3.5"></i>
+          카메라
+        </button>
+        <button onclick="filterCategory('lens')" data-cat="lens" class="cat-pill px-4 py-1.5 rounded-full text-[#737373] whitespace-nowrap flex items-center gap-1.5">
+          <i data-lucide="disc" class="w-3.5 h-3.5"></i>
+          렌즈
+        </button>
+        <button onclick="filterCategory('film-camera')" data-cat="film-camera" class="cat-pill px-4 py-1.5 rounded-full text-[#737373] whitespace-nowrap flex items-center gap-1.5">
+          <i data-lucide="video" class="w-3.5 h-3.5"></i>
+          필름 카메라
+        </button>
+        <button onclick="filterCategory('film-lens')" data-cat="film-lens" class="cat-pill px-4 py-1.5 rounded-full text-[#737373] whitespace-nowrap flex items-center gap-1.5">
+          <i data-lucide="circle-dot" class="w-3.5 h-3.5"></i>
+          필름 카메라 렌즈
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Mobile Search Bar Overlay (md:hidden) -->
+  <div id="mobileSearchLayer" class="hidden md:hidden px-4 py-3 bg-white border-b border-[#EAEAEA] sticky top-20 z-30 shadow-md transition-all">
+    <div class="relative">
+      <input 
+        type="text" 
+        id="mobileSearchInput"
+        placeholder="브랜드, 모델명으로 검색해보세요" 
+        class="w-full bg-[#F5F5F5] border border-[#E5E5E5] rounded-full py-2.5 pl-10 pr-16 text-xs text-[#171717] placeholder-[#8A8A8A] focus:outline-none focus:bg-white focus:border-[#171717] transition"
+        onkeypress="if(event.key === 'Enter') handleMobileSearch()"
+        oninput="handleMobileSearchInput(this.value)"
+        autocomplete="off"
+      >
+      <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8A8A]">
+        <i data-lucide="search" class="w-4 h-4"></i>
+      </div>
+      <button 
+        onclick="handleMobileSearch()"
+        class="absolute right-1 top-1/2 -translate-y-1/2 px-3 py-1 rounded-full bg-[#171717] text-white text-[11px] font-medium hover:bg-black transition">
+        검색
+      </button>
+
+      <!-- Mobile Autocomplete Dropdown -->
+      <div 
+        id="mobileSearchDropdown" 
+        class="hidden absolute left-0 right-0 top-full mt-2 bg-white border border-[#E5E5E5] rounded-2xl shadow-xl p-3 z-50 text-left transition-all"
+      >
+        <div class="flex items-center justify-between pb-1.5 mb-2 border-b border-[#F0F0F0]">
+          <span class="text-[11px] font-bold text-[#171717]">연관 추천 기종</span>
+          <span class="text-[10px] text-[#8A8A8A]">클릭 시 해당 매물 검색</span>
+        </div>
+        <div id="mobileSearchChipsWrap" class="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto">
+          <!-- Text-only chips inserted dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= HERO SECTION (Brand Guide Mood) ================= -->
+  <section class="bg-white dark:bg-[#111113] border-b border-[#EAEAEA] dark:border-[#26262C] pt-8 pb-12 sm:pt-14 sm:pb-16 transition-colors duration-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Brand Message & Hero Layout -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        
+        <!-- Left: Editorial Typography Copy (Vertically Centered & Balanced) -->
+        <div class="lg:col-span-6 flex flex-col justify-center my-auto space-y-7 py-2 sm:py-6">
+          <div class="inline-flex items-center px-3.5 py-1 rounded-full bg-[#F5F5F5] dark:bg-[#202026] border border-[#E5E5E5] dark:border-[#2C2C34] text-[11px] font-medium text-[#737373] dark:text-[#A1A1AA] w-fit">
+            <span>장비를 아는 사람들의 중고거래 플랫폼</span>
+          </div>
+
+          <h1 class="text-4xl sm:text-5xl lg:text-[56px] font-extrabold text-[#171717] dark:text-[#F5F5F7] leading-[1.16] tracking-tight">
+            좋은 장비는<br>
+            좋은 순간을 만듭니다.
+          </h1>
+
+          <p class="text-sm sm:text-base text-[#737373] dark:text-[#A1A1AA] leading-relaxed max-w-lg">
+            FRAME은 카메라, 렌즈, 필름 카메라, 필름 카메라 렌즈만을 거래하는 전문 플랫폼입니다. 장비를 아는 사람들이 모여, 더 좋은 장비가 좋은 주인을 만날 수 있도록.
+          </p>
+
+          <div class="text-[11px] tracking-brand-wide text-[#8A8A8A] dark:text-[#71717A] uppercase font-semibold pt-1">
+            BETTER EQUIPMENT · BETTER MOMENTS
+          </div>
+        </div>
+
+        <!-- Right: "새롭게 올라온 상품" Horizontal Sliding Carousel (큰 사이즈로 통일) -->
+        <div class="lg:col-span-6">
+          <div id="heroSliderContainer" class="relative rounded-2xl overflow-hidden shadow-xl bg-[#171717] w-full h-[460px] sm:h-[520px] lg:h-[540px] group select-none">
+            
+            <!-- Horizontal Sliding Track -->
+            <div id="heroSliderTrack">
+              <!-- Slides injected by JavaScript -->
+            </div>
+
+            <!-- Slide Navigation Buttons (Always visible with soft opacity, hover full) -->
+            <button onclick="prevHeroSlide(event)" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center backdrop-blur-md border border-white/20 transition-all opacity-75 hover:opacity-100 hover:scale-105 z-30 cursor-pointer shadow-lg" aria-label="이전 상품">
+              <i data-lucide="chevron-left" class="w-5 h-5"></i>
+            </button>
+            <button onclick="nextHeroSlide(event)" class="absolute right-3.5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center backdrop-blur-md border border-white/20 transition-all opacity-75 hover:opacity-100 hover:scale-105 z-30 cursor-pointer shadow-lg" aria-label="다음 상품">
+              <i data-lucide="chevron-right" class="w-5 h-5"></i>
+            </button>
+
+            <!-- Counter Badge (Top Right) -->
+            <div class="absolute top-4 right-4 z-20 flex items-center bg-black/60 backdrop-blur-md border border-white/20 px-3 py-1 rounded-full text-white text-[11px] font-mono tracking-wider shadow-sm">
+              <span id="heroSlideCounter">1 / 5</span>
+            </div>
+
+            <!-- Bottom Progress Line -->
+            <div class="absolute bottom-0 left-0 right-0 h-1 bg-white/15 z-20 overflow-hidden">
+              <div id="heroSlideProgress" class="h-full bg-white w-0"></div>
+            </div>
+
+            <!-- Dot Indicators (Bottom Right) -->
+            <div id="heroSlideDots" class="absolute bottom-4 right-4 z-20 flex items-center gap-1.5"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 5 Core Service Values (AI Sample Finder + Core Services) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 mt-12 pt-8 border-t border-[#F0F0F0] dark:border-[#26262C]">
+        
+        <!-- 1. AI 작례 & 미디어 탐색 (맨 앞 신규 기능) -->
+        <div class="p-4 rounded-xl border border-[#171717]/25 dark:border-[#383842] bg-gradient-to-b from-[#FAFAFA] to-white dark:from-[#18181C] dark:to-[#18181C] hover:border-[#171717] dark:hover:border-[#52525E] transition-all flex flex-col justify-between shadow-xs hover:shadow-sm group relative">
+          <div>
+            <div class="flex items-center justify-between mb-2.5">
+              <div class="w-8 h-8 rounded-lg bg-[#171717] dark:bg-[#25252C] text-white flex items-center justify-center shadow-xs">
+                <i data-lucide="sparkles" class="w-4 h-4"></i>
+              </div>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#171717] dark:bg-[#F5F5F7] text-white dark:text-[#111113] tracking-tight">AI 퀵탐색</span>
+            </div>
+            <h3 class="text-xs font-bold text-[#171717] dark:text-[#F5F5F7] mb-1 flex items-center gap-1.5">
+              <span>장비 작례 & 미디어 탐색</span>
+            </h3>
+            <p class="text-[11px] text-[#737373] dark:text-[#A1A1AA] leading-relaxed mb-2.5">
+              모델명 검색 시 실제 작례 사진, 블로그 리뷰, 유튜브 영상을 AI가 즉시 모아 대조합니다.
+            </p>
+
+            <!-- Quick Search Input inside Card -->
+            <div class="relative mb-2">
+              <input type="text" id="cardAiSearchInput" placeholder="예: 헬리오스 44 작례 보여줘" 
+                onkeydown="if(event.key === 'Enter') handleCardAiSearch()"
+                class="w-full text-[11px] pl-2.5 pr-8 py-1.5 rounded-lg border border-[#E5E5E5] dark:border-[#32323C] focus:outline-none focus:border-[#171717] dark:focus:border-[#F5F5F7] bg-white dark:bg-[#121214] text-[#171717] dark:text-[#F5F5F7] placeholder:text-[#A3A3A3] dark:placeholder:text-[#6E6E78] transition">
+              <button onclick="handleCardAiSearch()" class="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 text-[#737373] dark:text-[#A1A1AA] hover:text-[#171717] dark:hover:text-white transition cursor-pointer" title="AI 작례 검색">
+                <i data-lucide="search" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+
+            <!-- Quick Tag Pills -->
+            <div class="flex flex-wrap items-center gap-1">
+              <button type="button" onclick="openAiSampleSearchModal('슈퍼 타쿠마')" class="text-[10px] px-1.5 py-0.5 rounded bg-[#171717] dark:bg-[#F5F5F7] text-white dark:text-[#111113] hover:bg-black font-mono font-semibold transition cursor-pointer">슈퍼타쿠마</button>
+              <button type="button" onclick="openAiSampleSearchModal('헬리오스 44')" class="text-[10px] px-1.5 py-0.5 rounded bg-[#F5F5F5] dark:bg-[#25252C] hover:bg-[#EAEAEA] dark:hover:bg-[#32323A] text-[#525252] dark:text-[#D1D1D6] font-mono transition cursor-pointer">헬리오스44</button>
+              <button type="button" onclick="openAiSampleSearchModal('라이카 Q2')" class="text-[10px] px-1.5 py-0.5 rounded bg-[#F5F5F5] dark:bg-[#25252C] hover:bg-[#EAEAEA] dark:hover:bg-[#32323A] text-[#525252] dark:text-[#D1D1D6] font-mono transition cursor-pointer">Q2</button>
+              <button type="button" onclick="openAiSampleSearchModal('리코 GR III')" class="text-[10px] px-1.5 py-0.5 rounded bg-[#F5F5F5] dark:bg-[#25252C] hover:bg-[#EAEAEA] dark:hover:bg-[#32323A] text-[#525252] dark:text-[#D1D1D6] font-mono transition cursor-pointer">GR3</button>
+              <button type="button" onclick="openAiSampleSearchModal('소니 Alpha A7 IV')" class="text-[10px] px-1.5 py-0.5 rounded bg-[#F5F5F5] dark:bg-[#25252C] hover:bg-[#EAEAEA] dark:hover:bg-[#32323A] text-[#525252] dark:text-[#D1D1D6] font-mono transition cursor-pointer">A7M4</button>
+            </div>
+          </div>
+          
+          <div class="pt-2.5 mt-2 border-t border-[#F5F5F5] dark:border-[#26262C] flex items-center justify-between">
+            <button type="button" onclick="openAiSampleSearchModal()" class="text-[11px] font-semibold text-[#171717] dark:text-[#F5F5F7] hover:underline flex items-center gap-1 group-hover:translate-x-0.5 transition-transform cursor-pointer">
+              <span>작례 탐색기 열기</span>
+              <i data-lucide="arrow-right" class="w-3 h-3"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. 셔터 수 확인 연동 -->
+        <div class="p-4 rounded-xl border border-[#EAEAEA] dark:border-[#2A2A32] bg-white dark:bg-[#18181C] hover:border-[#171717] dark:hover:border-[#52525E] transition flex flex-col justify-between">
+          <div>
+            <div class="w-8 h-8 rounded-lg bg-[#F5F5F5] dark:bg-[#25252C] text-[#171717] dark:text-[#F5F5F7] flex items-center justify-center mb-3">
+              <i data-lucide="binary" class="w-4 h-4"></i>
+            </div>
+            <h3 class="text-xs font-bold text-[#171717] dark:text-[#F5F5F7] mb-1">CameraShutterCount 연동</h3>
+            <p class="text-[11px] text-[#737373] dark:text-[#A1A1AA] leading-relaxed">
+              공식 사이트를 통해 원본 사진 업로드 즉시 실제 셔터 횟수를 무료로 직접 대조합니다.
+            </p>
+          </div>
+          <div class="pt-3 mt-2 border-t border-[#F5F5F5] dark:border-[#26262C]">
+            <a href="https://www.camerashuttercount.com/" target="_blank" rel="noopener noreferrer" class="text-[11px] font-semibold text-[#171717] dark:text-[#F5F5F7] hover:underline flex items-center gap-1">
+              <span>camerashuttercount.com</span>
+              <i data-lucide="external-link" class="w-3 h-3"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- 3. 필름 영상 증빙 -->
+        <div class="p-4 rounded-xl border border-[#EAEAEA] dark:border-[#2A2A32] bg-white dark:bg-[#18181C] hover:border-[#171717] dark:hover:border-[#52525E] transition flex flex-col justify-between">
+          <div>
+            <div class="w-8 h-8 rounded-lg bg-[#F5F5F5] dark:bg-[#25252C] text-[#171717] dark:text-[#F5F5F7] flex items-center justify-center mb-3">
+              <i data-lucide="video" class="w-4 h-4"></i>
+            </div>
+            <h3 class="text-xs font-bold text-[#171717] dark:text-[#F5F5F7] mb-1">필름 카메라 작동 영상</h3>
+            <p class="text-[11px] text-[#737373] dark:text-[#A1A1AA] leading-relaxed">
+              15~30초 저속·고속 셔터막 열림과 와인딩 레버 텐션 영상을 직접 확인합니다.
+            </p>
+          </div>
+          <div class="pt-3 mt-2 border-t border-[#F5F5F5] dark:border-[#26262C] text-[11px] text-[#8A8A8A] dark:text-[#71717A]">
+            고질병 사전 방어
+          </div>
+        </div>
+
+        <!-- 4. 실거래가 시세 차트 -->
+        <div class="p-4 rounded-xl border border-[#EAEAEA] dark:border-[#2A2A32] bg-white dark:bg-[#18181C] hover:border-[#171717] dark:hover:border-[#52525E] transition flex flex-col justify-between">
+          <div>
+            <div class="w-8 h-8 rounded-lg bg-[#F5F5F5] dark:bg-[#25252C] text-[#171717] dark:text-[#F5F5F7] flex items-center justify-center mb-3">
+              <i data-lucide="trending-up" class="w-4 h-4"></i>
+            </div>
+            <h3 class="text-xs font-bold text-[#171717] dark:text-[#F5F5F7] mb-1">개인 매물 실거래 시세</h3>
+            <p class="text-[11px] text-[#737373] dark:text-[#A1A1AA] leading-relaxed">
+              사업자 매물 거품을 제거하고 개인 실거래가 기준의 6개월 변동 그래프를 제공합니다.
+            </p>
+          </div>
+          <div class="pt-3 mt-2 border-t border-[#F5F5F5] dark:border-[#26262C] text-[11px] text-[#8A8A8A] dark:text-[#71717A]">
+            외부 장터 링크 연동
+          </div>
+        </div>
+
+        <!-- 5. 본인 인증 직거래 -->
+        <div class="p-4 rounded-xl border border-[#EAEAEA] dark:border-[#2A2A32] bg-white dark:bg-[#18181C] hover:border-[#171717] dark:hover:border-[#52525E] transition flex flex-col justify-between">
+          <div>
+            <div class="w-8 h-8 rounded-lg bg-[#F5F5F5] dark:bg-[#25252C] text-[#171717] dark:text-[#F5F5F7] flex items-center justify-center mb-3">
+              <i data-lucide="shield-check" class="w-4 h-4"></i>
+            </div>
+            <h3 class="text-xs font-bold text-[#171717] dark:text-[#F5F5F7] mb-1">안심 본인 인증 직거래</h3>
+            <p class="text-[11px] text-[#737373] dark:text-[#A1A1AA] leading-relaxed">
+              신원 확인을 완료한 사용자 간의 1:1 대면 거래로 장비를 직접 확인하고 인수합니다.
+            </p>
+          </div>
+          <div class="pt-3 mt-2 border-t border-[#F5F5F5] dark:border-[#26262C] text-[11px] text-[#8A8A8A] dark:text-[#71717A]">
+            수수료 없는 대면 직거래
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= PRODUCT LISTINGS & TOOLBAR ================= -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Filter Toolbar -->
+    <div class="bg-white border border-[#EAEAEA] rounded-xl p-4 mb-6">
+      <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+        
+        <!-- Multi Select Filter Elements -->
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-xs font-semibold text-[#171717] flex items-center gap-1">
+            <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-[#8A8A8A]"></i>
+            필터:
+          </span>
+
+          <!-- Brand Select -->
+          <select id="brandFilter" onchange="applyFilters()" class="bg-[#F5F5F5] border border-[#E5E5E5] text-[#171717] text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#171717]">
+            <option value="all">모든 브랜드</option>
+            <option value="Sony">소니 (Sony)</option>
+            <option value="Canon">캐논 (Canon)</option>
+            <option value="Nikon">니콘 (Nikon)</option>
+            <option value="Fujifilm">후지필름 (Fujifilm)</option>
+            <option value="Leica">라이카 (Leica)</option>
+          </select>
+
+          <!-- Mount Select -->
+          <select id="mountFilter" onchange="applyFilters()" class="bg-[#F5F5F5] border border-[#E5E5E5] text-[#171717] text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#171717]">
+            <option value="all">모든 마운트</option>
+            <option value="E-Mount">소니 E-마운트</option>
+            <option value="RF-Mount">캐논 RF-마운트</option>
+            <option value="EF-Mount">캐논 EF-마운트</option>
+            <option value="Z-Mount">니콘 Z-마운트</option>
+            <option value="F-Mount">니콘 F-마운트</option>
+            <option value="M-Mount">라이카 M-마운트</option>
+            <option value="L-Mount">라이카/파나소닉 L-마운트</option>
+            <option value="X-Mount">후지필름 X-마운트</option>
+            <option value="M43-Mount">마이크로 포서드</option>
+            <option value="Fixed-Lens">일체형 (똑딱이/콤팩트)</option>
+            <option value="M42-Mount">M42 스크류 마운트</option>
+          </select>
+
+          <!-- Verified filter only (NO LEVELS) -->
+          <label class="flex items-center gap-1.5 bg-[#F5F5F5] hover:bg-[#EBEBEB] border border-[#E5E5E5] rounded-lg px-3 py-1.5 cursor-pointer text-xs text-[#171717] transition">
+            <input type="checkbox" id="verifiedOnlyFilter" onchange="applyFilters()" class="rounded border-[#CCCCCC] text-[#171717] focus:ring-0">
+            <span class="flex items-center gap-1">
+              <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-[#171717]"></i>
+              검증 완료 매물만
+            </span>
+          </label>
+        </div>
+
+        <!-- Sort Select & Count -->
+        <div class="flex items-center justify-between sm:justify-end gap-3 pt-2 lg:pt-0 border-t lg:border-t-0 border-[#F0F0F0]">
+          <div class="text-xs text-[#737373]">
+            총 <span id="itemCountDisplay" class="font-bold text-[#171717]">0</span>개 매물
+          </div>
+          <select id="sortSelect" onchange="applyFilters()" class="bg-[#F5F5F5] border border-[#E5E5E5] text-[#171717] text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#171717]">
+            <option value="latest">최신 등록순</option>
+            <option value="price-asc">낮은 가격순</option>
+            <option value="price-desc">높은 가격순</option>
+            <option value="deal-good">시세 대비 저렴한 순</option>
+          </select>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Active Filters Indicators (Chips) -->
+    <div id="filterChipsContainer" class="flex flex-wrap items-center gap-2 mb-6 hidden">
+      <span class="text-xs text-[#8A8A8A]">적용된 조건:</span>
+      <div id="filterChipsList" class="flex flex-wrap gap-1.5"></div>
+      <button onclick="resetAllFilters()" class="text-xs text-[#171717] font-semibold hover:underline ml-2">필터 초기화</button>
+    </div>
+
+    <!-- Product Grid -->
+    <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5"></div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden text-center py-20 bg-white rounded-2xl border border-[#EAEAEA] my-8">
+      <div class="w-12 h-12 rounded-full bg-[#F5F5F5] text-[#8A8A8A] flex items-center justify-center mx-auto mb-3">
+        <i data-lucide="camera-off" class="w-6 h-6"></i>
+      </div>
+      <h3 class="text-sm font-bold text-[#171717] mb-1">조건에 맞는 장비 매물이 없습니다</h3>
+      <p class="text-xs text-[#8A8A8A] max-w-sm mx-auto mb-4">검색어나 필터 조건을 변경하거나 초기화해 보세요.</p>
+      <button onclick="resetAllFilters()" class="px-4 py-2 rounded-full bg-[#171717] text-white text-xs font-medium transition">
+        필터 초기화
+      </button>
+    </div>
+
+  </main>
+
+  <!-- ================= PRODUCT DETAIL MODAL (Minimal Monochrome) ================= -->
+  <div id="detailModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+    <div class="relative bg-white border border-[#E5E5E5] rounded-2xl w-full max-w-4xl max-h-[92vh] overflow-y-auto shadow-2xl text-[#171717] flex flex-col">
+      
+      <!-- Modal Header -->
+      <div class="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-[#EAEAEA] px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span id="modalCategoryBadge" class="text-xs font-semibold px-2.5 py-1 rounded bg-[#F5F5F5] text-[#171717] border border-[#E5E5E5]">카메라</span>
+          <span id="modalVerificationTopBadge" class="text-xs font-semibold px-2.5 py-1 rounded bg-[#171717] text-white flex items-center gap-1">
+            <i data-lucide="check" class="w-3.5 h-3.5"></i>
+            검증 완료 매물
+          </span>
+        </div>
+        <button onclick="closeDetailModal()" class="p-1.5 rounded-lg text-[#8A8A8A] hover:text-[#171717] hover:bg-[#F5F5F5] transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 space-y-6">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          <!-- Image -->
+          <div class="space-y-3">
+            <!-- Image / Video Main Viewport -->
+            <div class="relative aspect-[4/3] rounded-xl overflow-hidden bg-[#F5F5F5] border border-[#EAEAEA]">
+              <img id="modalProductImage" src="" alt="Camera Preview" class="w-full h-full object-cover">
+              <video id="modalProductVideo" class="hidden w-full h-full object-cover bg-black" controls playsinline></video>
+            </div>
+
+            <!-- Multiple image thumbnails strip if available -->
+            <div id="modalThumbnailsStrip" class="hidden flex items-center gap-2 overflow-x-auto no-scrollbar pb-1"></div>
+
+            <!-- Spec Grid -->
+            <div class="grid grid-cols-3 gap-2 text-center text-[11px] text-[#737373]">
+              <div class="p-2 rounded-lg bg-[#FAFAFA] border border-[#EAEAEA]">
+                <span class="block text-[#8A8A8A] text-[10px]">외관 상태</span>
+                <span class="font-semibold text-[#171717]" id="modalConditionGrade">A+급</span>
+              </div>
+              <div class="p-2 rounded-lg bg-[#FAFAFA] border border-[#EAEAEA]">
+                <span class="block text-[#8A8A8A] text-[10px]">센서/렌즈알</span>
+                <span class="font-semibold text-[#171717]" id="modalSensorStatus">클리닝 완료</span>
+              </div>
+              <div class="p-2 rounded-lg bg-[#FAFAFA] border border-[#EAEAEA]">
+                <span class="block text-[#8A8A8A] text-[10px]">구성품</span>
+                <span class="font-semibold text-[#171717]" id="modalPackageStatus">풀박스</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Product Info & Seller (Clean: No Temp, No Level) -->
+          <div class="flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between text-xs text-[#8A8A8A] mb-1">
+                <span id="modalLocation">서울 강남구 직거래</span>
+                <span id="modalCreatedAt">30분 전</span>
+              </div>
+              <h2 id="modalProductTitle" class="text-2xl font-bold text-[#171717] mb-2 leading-tight">소니 Alpha A7 IV 바디</h2>
+              
+              <div class="flex items-baseline gap-3 mb-4">
+                <span id="modalPrice" class="text-3xl font-extrabold text-[#171717]">2,150,000원</span>
+                <span id="modalMarketDiff" class="text-xs px-2 py-0.5 rounded bg-[#F5F5F5] text-[#171717] border border-[#E5E5E5] font-semibold">
+                  시세 대비 -50,000원
+                </span>
+              </div>
+
+              <!-- Seller Card (Clean Minimal: Temperature and Level REMOVED) -->
+              <div class="p-4 rounded-xl border border-[#EAEAEA] bg-[#FAFAFA] mb-4">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <img id="modalSellerAvatar" src="" class="w-10 h-10 rounded-full border border-[#E5E5E5] object-cover">
+                    <div>
+                      <div class="flex items-center gap-1.5">
+                        <span id="modalSellerName" class="text-sm font-bold text-[#171717]">포토그래퍼김씨</span>
+                        <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#171717] text-white">
+                          본인 인증 판매자
+                        </span>
+                      </div>
+                      <p class="text-[11px] text-[#737373]">계좌 및 실명 인증 완료 직거래자</p>
+                    </div>
+                  </div>
+                  <button onclick="reportSellerPrompt()" class="text-[#8A8A8A] hover:text-[#171717] text-xs underline">신고</button>
+                </div>
+              </div>
+
+              <p id="modalDescription" class="text-xs text-[#737373] leading-relaxed bg-[#FAFAFA] p-3 rounded-lg border border-[#EAEAEA] mb-4">
+                서브 바디로 조심스럽게 사용했습니다.
+              </p>
+            </div>
+
+            <div class="flex items-center gap-3 pt-2">
+              <button onclick="startChatFromModal()" class="flex-1 py-3 px-4 rounded-full bg-[#171717] hover:bg-black text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition active:scale-95 shadow-sm">
+                <i data-lucide="message-square" class="w-4 h-4"></i>
+                1:1 직거래 문의하기
+              </button>
+              <button onclick="toggleBookmark(this)" class="p-3 rounded-full border border-[#E5E5E5] hover:bg-[#F5F5F5] text-[#171717] transition">
+                <i data-lucide="heart" class="w-5 h-5"></i>
+              </button>
+            </div>
+
+            <!-- AI Sample & Media Quick Button -->
+            <button type="button" onclick="openAiSampleFromDetailModal()" class="w-full mt-2.5 py-2.5 px-3 rounded-xl border border-[#171717]/20 hover:border-[#171717] bg-white hover:bg-[#FAFAFA] text-[#171717] font-semibold text-xs flex items-center justify-center gap-1.5 transition shadow-2xs cursor-pointer group">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-[#171717] group-hover:rotate-12 transition-transform"></i>
+              <span>이 기종 실제 촬영 작례 & 블로그·유튜브 리뷰 AI 확인</span>
+              <i data-lucide="arrow-right" class="w-3 h-3 text-[#8A8A8A] group-hover:translate-x-0.5 transition-transform"></i>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Verification Report Box -->
+        <div class="bg-[#FAFAFA] rounded-xl border border-[#EAEAEA] p-5">
+          <div class="flex items-center justify-between mb-4 pb-3 border-b border-[#EAEAEA]">
+            <div class="flex items-center gap-2">
+              <i data-lucide="file-check-2" class="w-5 h-5 text-[#171717]"></i>
+              <h3 class="text-sm font-bold text-[#171717]">장비 전문 검증 리포트</h3>
+            </div>
+            <span class="text-[11px] text-[#8A8A8A]">FRAME Equipment Engine</span>
+          </div>
+
+          <div id="verificationReportContent"></div>
+        </div>
+
+        <!-- Price Trend & External Marketplaces -->
+        <div class="bg-[#FAFAFA] rounded-xl border border-[#EAEAEA] p-5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-[#EAEAEA]">
+            <div>
+              <div class="flex items-center gap-2">
+                <i data-lucide="trending-up" class="w-4 h-4 text-[#171717]"></i>
+                <h3 class="text-sm font-bold text-[#171717]">개인 간 실거래 시세 분석</h3>
+              </div>
+              <p class="text-xs text-[#737373] mt-0.5">사업자 매물 왜곡을 제거한 최근 6개월 개인 실거래가 그래프입니다.</p>
+            </div>
+            
+            <!-- External Links (번개장터, 당근) -->
+            <div class="flex items-center gap-2 flex-shrink-0">
+              <span class="text-xs text-[#8A8A8A]">외부 장터 시세 비교:</span>
+              <a id="btnBunjangSearch" href="#" target="_blank" class="px-2.5 py-1.5 rounded-lg bg-white hover:bg-[#F5F5F5] text-xs font-semibold text-[#171717] border border-[#E5E5E5] flex items-center gap-1 transition">
+                <span>번개장터</span>
+                <i data-lucide="external-link" class="w-3 h-3"></i>
+              </a>
+              <a id="btnDaangnSearch" href="#" target="_blank" class="px-2.5 py-1.5 rounded-lg bg-white hover:bg-[#F5F5F5] text-xs font-semibold text-[#171717] border border-[#E5E5E5] flex items-center gap-1 transition">
+                <span>당근</span>
+                <i data-lucide="external-link" class="w-3 h-3"></i>
+              </a>
+            </div>
+          </div>
+
+          <div class="w-full h-52 relative">
+            <canvas id="itemPriceChart"></canvas>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-4 text-center text-xs">
+            <div class="p-2.5 rounded-lg bg-white border border-[#EAEAEA]">
+              <span class="text-[#8A8A8A] block text-[10px]">최근 6개월 평균</span>
+              <span id="statAvgPrice" class="font-bold text-[#171717] text-sm">2,200,000원</span>
+            </div>
+            <div class="p-2.5 rounded-lg bg-white border border-[#EAEAEA]">
+              <span class="text-[#8A8A8A] block text-[10px]">최저 거래가</span>
+              <span id="statMinPrice" class="font-bold text-[#171717] text-sm">2,050,000원</span>
+            </div>
+            <div class="p-2.5 rounded-lg bg-white border border-[#EAEAEA]">
+              <span class="text-[#8A8A8A] block text-[10px]">최고 거래가</span>
+              <span id="statMaxPrice" class="font-bold text-[#171717] text-sm">2,350,000원</span>
+            </div>
+            <div class="p-2.5 rounded-lg bg-white border border-[#EAEAEA]">
+              <span class="text-[#8A8A8A] block text-[10px]">시세 비교 평가</span>
+              <span id="statPriceMerit" class="font-bold text-emerald-600 text-sm">시세 대비 저렴</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= REGISTRATION MODAL ================= -->
+  <div id="registerModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+    <div class="relative bg-white border border-[#E5E5E5] rounded-2xl w-full max-w-3xl max-h-[92vh] overflow-y-auto shadow-2xl text-[#171717] p-6">
+      
+      <div class="flex items-center justify-between pb-4 border-b border-[#EAEAEA] mb-6">
+        <div>
+          <h2 class="text-xl font-bold text-[#171717] flex items-center gap-2">
+            <i data-lucide="camera" class="w-5 h-5"></i>
+            전문 장비 매물 등록
+          </h2>
+          <p class="text-xs text-[#737373] mt-0.5">FRAME 규격화 스펙 입력 및 CameraShutterCount 연동</p>
+        </div>
+        <button onclick="closeRegisterModal()" class="p-1.5 rounded-lg text-[#8A8A8A] hover:text-[#171717]">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="productRegisterForm" onsubmit="handleProductSubmit(event)" class="space-y-6">
+        
+        <!-- 포트폴리오 체험용 자동 채우기 안내 바 -->
+        <div class="p-3 bg-[#F5F5F5] border border-[#E5E5E5] rounded-xl flex items-center justify-between text-xs">
+          <div class="flex items-center gap-2 text-[#737373]">
+            <i data-lucide="sparkles" class="w-4 h-4 text-[#171717]"></i>
+            <span class="font-medium">포트폴리오 등록 시뮬레이션:</span>
+          </div>
+          <button 
+            type="button" 
+            onclick="fillSampleRegisterData()" 
+            class="px-2.5 py-1 bg-white hover:bg-[#171717] hover:text-white border border-[#D4D4D4] rounded-lg text-[11px] font-bold text-[#171717] transition cursor-pointer shadow-2xs"
+          >
+            ⚡ 테스트용 샘플 매물 자동 채우기
+          </button>
+        </div>
+        
+        <!-- Category Radios -->
+        <div>
+          <label class="block text-xs font-semibold text-[#171717] mb-2">1. 장비 카테고리 선택 (필수)</label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <label class="cursor-pointer">
+              <input type="radio" name="regCategory" value="camera" checked onchange="toggleRegCategorySpec(this.value)" class="peer sr-only">
+              <div class="p-3 rounded-xl border border-[#E5E5E5] bg-[#FAFAFA] peer-checked:border-[#171717] peer-checked:bg-[#171717] peer-checked:text-white text-center transition">
+                <i data-lucide="camera" class="w-5 h-5 mx-auto mb-1"></i>
+                <div class="text-xs font-bold">카메라</div>
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="regCategory" value="lens" onchange="toggleRegCategorySpec(this.value)" class="peer sr-only">
+              <div class="p-3 rounded-xl border border-[#E5E5E5] bg-[#FAFAFA] peer-checked:border-[#171717] peer-checked:bg-[#171717] peer-checked:text-white text-center transition">
+                <i data-lucide="disc" class="w-5 h-5 mx-auto mb-1"></i>
+                <div class="text-xs font-bold">렌즈</div>
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="regCategory" value="film-camera" onchange="toggleRegCategorySpec(this.value)" class="peer sr-only">
+              <div class="p-3 rounded-xl border border-[#E5E5E5] bg-[#FAFAFA] peer-checked:border-[#171717] peer-checked:bg-[#171717] peer-checked:text-white text-center transition">
+                <i data-lucide="video" class="w-5 h-5 mx-auto mb-1"></i>
+                <div class="text-xs font-bold">필름 카메라</div>
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="regCategory" value="film-lens" onchange="toggleRegCategorySpec(this.value)" class="peer sr-only">
+              <div class="p-3 rounded-xl border border-[#E5E5E5] bg-[#FAFAFA] peer-checked:border-[#171717] peer-checked:bg-[#171717] peer-checked:text-white text-center transition">
+                <i data-lucide="circle-dot" class="w-5 h-5 mx-auto mb-1"></i>
+                <div class="text-xs font-bold">필름 카메라 렌즈</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- 2. 장비 실물 사진 등록 (카테고리별 동적 전환) -->
+        <!-- 2-A: 카메라 바디 전용 사진 등록 (최소 1장 ~ 최대 10장) -->
+        <div id="cameraUploadContainer" class="space-y-2.5">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-semibold text-[#171717]">
+              2. 카메라 실물 사진 등록 <span class="text-red-500">*</span>
+              <span class="text-[11px] text-[#737373] font-normal ml-1.5">(최소 1장 ~ 최대 10장)</span>
+            </label>
+            <span id="imageCountBadge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#F5F5F5] text-[#737373] border border-[#E5E5E5]">
+              0 / 10장
+            </span>
+          </div>
+
+          <!-- Drag and Drop & Upload Area -->
+          <div 
+            id="imageDropArea" 
+            onclick="document.getElementById('regImageFiles').click()"
+            ondragover="handleDragOver(event)"
+            ondragleave="handleDragLeave(event)"
+            ondrop="handleDrop(event)"
+            class="border-2 border-dashed border-[#CCCCCC] hover:border-[#171717] rounded-xl p-5 text-center cursor-pointer transition bg-[#FAFAFA] hover:bg-white group select-none"
+          >
+            <input 
+              type="file" 
+              id="regImageFiles" 
+              accept="image/*" 
+              multiple 
+              onchange="handleImageFileSelect(event)" 
+              class="hidden"
+            >
+            <div class="w-10 h-10 rounded-full bg-white border border-[#E5E5E5] flex items-center justify-center mx-auto mb-2 text-[#171717] group-hover:scale-105 transition-transform shadow-xs">
+              <i data-lucide="image-plus" class="w-5 h-5"></i>
+            </div>
+            <div class="text-xs font-bold text-[#171717] mb-1">
+              클릭하여 카메라 바디 사진 첨부 또는 파일 드래그 & 드롭
+            </div>
+            <p class="text-[11px] text-[#737373]">
+              바디 전·후면, 센서, 셔터/핫슈, 시리얼 번호 등 상태를 확인할 수 있는 실물 사진 (JPG, PNG, WebP)
+            </p>
+          </div>
+
+          <!-- Image Preview Thumbnail Grid (최대 10장: 5개씩 2줄) -->
+          <div id="imagePreviewGrid" class="hidden grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-1">
+            <!-- Dynamically populated previews -->
+          </div>
+        </div>
+
+        <!-- 2-B: 렌즈 전용 3대 필수 광학 검증 사진 등록 (최소 3장 필수 ~ 최대 6장) -->
+        <div id="lensUploadContainer" class="hidden space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <label class="block text-xs font-semibold text-[#171717]">
+                2. 렌즈 3대 필수 광학 검증 사진 등록 <span class="text-red-500">*</span>
+                <span class="text-[11px] text-[#737373] font-normal ml-1.5">(최소 3장 필수 ~ 최대 6장)</span>
+              </label>
+              <p class="text-[11px] text-[#737373] mt-0.5">
+                사기 및 하자 방지를 위해 <strong>앞면(필터부)</strong>, <strong>뒷면(마운트부)</strong>, <strong>조리개 개방 관통 투과</strong> 3장은 필수입니다.
+              </p>
+            </div>
+            <span id="lensImageCountBadge" class="text-[10px] font-mono px-2.5 py-1 rounded-full bg-[#F5F5F5] text-[#737373] border border-[#E5E5E5] flex-shrink-0">
+              0 / 6장 (필수 0/3)
+            </span>
+          </div>
+
+          <!-- 안내 배너 -->
+          <div class="p-3.5 rounded-xl bg-[#FAFAFA] border border-[#E5E5E5] flex items-start gap-3">
+            <div class="w-8 h-8 rounded-lg bg-[#171717] text-white flex items-center justify-center flex-shrink-0 mt-0.5">
+              <i data-lucide="disc" class="w-4 h-4"></i>
+            </div>
+            <div class="text-xs space-y-1">
+              <div class="font-bold text-[#171717] flex items-center gap-1.5">
+                <span>렌즈 거래 3대 필수 검수 포인트</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-black text-white font-mono">FRAME 안심 규격</span>
+              </div>
+              <p class="text-[#737373] text-[11px] leading-relaxed">
+                • <strong>앞면:</strong> 필터 스크류 나사선 찌그러짐 및 대물렌즈 스크래치 점검<br>
+                • <strong>뒷면:</strong> 카메라 마운트 체결부 유격/마모 및 후면 렌즈알 점검<br>
+                • <strong>조리개 개방 관통:</strong> 조리개를 최대로 열고 밝은 빛을 투과해 <strong>내부 곰팡이/먼지/발삼/기름</strong> 점검
+              </p>
+            </div>
+          </div>
+
+          <!-- 일괄 사진 첨부 (3~6장 한번에 첨부 가능) -->
+          <div 
+            id="lensBatchDropArea"
+            onclick="document.getElementById('regLensBatchFiles').click()"
+            ondragover="handleLensDragOver(event)"
+            ondragleave="handleLensDragLeave(event)"
+            ondrop="handleLensDrop(event)"
+            class="border border-dashed border-[#CCCCCC] hover:border-[#171717] rounded-xl p-3 text-center cursor-pointer transition bg-white hover:bg-[#FAFAFA] group select-none"
+          >
+            <input 
+              type="file" 
+              id="regLensBatchFiles" 
+              accept="image/*" 
+              multiple 
+              onchange="handleLensBatchFileSelect(event)" 
+              class="hidden"
+            >
+            <div class="flex items-center justify-center gap-1.5 text-xs text-[#171717] font-semibold">
+              <i data-lucide="layers" class="w-4 h-4"></i>
+              <span>렌즈 사진 3~6장 일괄 선택 또는 드래그 & 드롭</span>
+            </div>
+            <p class="text-[10px] text-[#8A8A8A] mt-0.5">
+              한 번에 등록하시면 앞면(1) → 뒷면(2) → 조리개 관통(3) → 추가 사진(4~6) 순으로 자동 배치됩니다.
+            </p>
+          </div>
+
+          <!-- 개별 슬롯 전용 숨김 파일 입력창 -->
+          <input type="file" id="lensInputFront" accept="image/*" onchange="handleSingleLensSlotFile('front', event)" class="hidden">
+          <input type="file" id="lensInputRear" accept="image/*" onchange="handleSingleLensSlotFile('rear', event)" class="hidden">
+          <input type="file" id="lensInputThrough" accept="image/*" onchange="handleSingleLensSlotFile('through', event)" class="hidden">
+          <input type="file" id="lensInputExtra" accept="image/*" multiple onchange="handleLensExtraFileSelect(event)" class="hidden">
+
+          <!-- 3대 필수 검증 사진 슬롯 그리드 -->
+          <div>
+            <div class="text-xs font-bold text-[#171717] mb-2 flex items-center justify-between">
+              <span>필수 검증 슬롯 (3종 모두 등록 필수)</span>
+              <span id="lensMandatoryProgress" class="text-[11px] font-mono text-[#737373]">0 / 3 등록됨</span>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <!-- 슬롯 1: 앞면 -->
+              <div id="lensSlotCard_front" class="border border-[#E5E5E5] rounded-xl p-3 bg-white flex flex-col justify-between transition hover:border-[#171717] min-h-[160px]">
+                <!-- populated by renderLensPreviews() -->
+              </div>
+
+              <!-- 슬롯 2: 뒷면 -->
+              <div id="lensSlotCard_rear" class="border border-[#E5E5E5] rounded-xl p-3 bg-white flex flex-col justify-between transition hover:border-[#171717] min-h-[160px]">
+                <!-- populated by renderLensPreviews() -->
+              </div>
+
+              <!-- 슬롯 3: 조리개 개방 관통 투과 -->
+              <div id="lensSlotCard_through" class="border border-[#E5E5E5] rounded-xl p-3 bg-white flex flex-col justify-between transition hover:border-[#171717] min-h-[160px]">
+                <!-- populated by renderLensPreviews() -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 추가 상세 사진 등록 (선택, 최대 3장 추가) -->
+          <div class="pt-2 border-t border-[#F0F0F0]">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-semibold text-[#171717]">외관 및 구성품 추가 사진 (선택, 최대 3장)</span>
+              <span id="lensExtraCountBadge" class="text-[10px] font-mono text-[#737373]">0 / 3장</span>
+            </div>
+            <p class="text-[11px] text-[#737373] mb-2.5">
+              초점링/줌링 고무 백화 상태, 정품 후드 및 앞뒤 캡, 전용 파우치/박스, 시리얼 번호 사진을 추가할 수 있습니다.
+            </p>
+            <div id="lensExtraGrid" class="grid grid-cols-3 gap-2.5">
+              <!-- populated by renderLensPreviews() -->
+            </div>
+          </div>
+        </div>
+
+        <!-- 2-C: 필름 카메라 전용 2대 필수 작동 영상 & 실물 사진 등록 (영상 2개 + 사진 최대 8장) -->
+        <div id="filmCameraUploadContainer" class="hidden space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <label class="block text-xs font-semibold text-[#171717]">
+                2. 필름 카메라 셔터막 구동 영상 & 실물 사진 등록 <span class="text-red-500">*</span>
+                <span class="text-[11px] text-[#737373] font-normal ml-1.5">(필수 영상 2개 + 사진 최대 8장)</span>
+              </label>
+              <p class="text-[11px] text-[#737373] mt-0.5">
+                필름 카메라 고장의 90%인 <strong>1초 저속 셔터 늘어짐</strong>과 <strong>고속 셔터 찢어짐</strong>을 사전에 검증합니다.
+              </p>
+            </div>
+            <span id="filmImageCountBadge" class="text-[10px] font-mono px-2.5 py-1 rounded-full bg-[#F5F5F5] text-[#737373] border border-[#E5E5E5] flex-shrink-0">
+              0 / 8장 (영상 0/2)
+            </span>
+          </div>
+
+          <!-- 안내 배너 -->
+          <div class="p-3.5 rounded-xl bg-[#FAFAFA] border border-[#E5E5E5] flex items-start gap-3">
+            <div class="w-8 h-8 rounded-lg bg-[#171717] text-white flex items-center justify-center flex-shrink-0 mt-0.5">
+              <i data-lucide="video" class="w-4 h-4"></i>
+            </div>
+            <div class="text-xs space-y-1">
+              <div class="font-bold text-[#171717] flex items-center gap-1.5">
+                <span>2대 핵심 셔터막 쇼츠 영상 검증 (각 5~15초 권장)</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-black text-white font-mono">FRAME 기계식 규격</span>
+              </div>
+              <p class="text-[#737373] text-[11px] leading-relaxed">
+                스마트폰으로 카메라 뒤판을 열고 <strong>1초 저속 셔터</strong>와 <strong>1/1000초 고속 셔터</strong>를 누르는 장면을 각각 10초 내외로 촬영해 첨부해 주세요. (MP4, MOV, WebM 지원)
+              </p>
+            </div>
+          </div>
+
+          <!-- 2대 필수 영상 등록 슬롯 Grid -->
+          <div>
+            <div class="text-xs font-bold text-[#171717] mb-2 flex items-center justify-between">
+              <span>필수 작동 영상 (2종 모두 등록 필수)</span>
+              <span id="filmVideoCountBadge" class="text-[11px] font-mono text-[#737373]">0 / 2개 완료</span>
+            </div>
+
+            <!-- Hidden Video File Inputs -->
+            <input type="file" id="filmInputVideoSlow" accept="video/*" onchange="handleFilmVideoSelect('slow', event)" class="hidden">
+            <input type="file" id="filmInputVideoFast" accept="video/*" onchange="handleFilmVideoSelect('fast', event)" class="hidden">
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <!-- 슬롯 1: 저속 1초 셔터 영상 -->
+              <div id="filmSlotCard_slow" class="border border-[#E5E5E5] rounded-xl p-3 bg-white flex flex-col justify-between transition hover:border-[#171717] min-h-[170px]">
+                <!-- populated by renderFilmMediaPreviews() -->
+              </div>
+
+              <!-- 슬롯 2: 고속 1/1000초 셔터 영상 -->
+              <div id="filmSlotCard_fast" class="border border-[#E5E5E5] rounded-xl p-3 bg-white flex flex-col justify-between transition hover:border-[#171717] min-h-[170px]">
+                <!-- populated by renderFilmMediaPreviews() -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 필름 카메라 바디 및 필름실 실물 사진 등록 (최대 8장) -->
+          <div class="pt-3 border-t border-[#F0F0F0] space-y-2.5">
+            <div class="flex items-center justify-between">
+              <label class="block text-xs font-semibold text-[#171717]">
+                필름 카메라 실물 사진 <span class="text-red-500">*</span>
+                <span class="text-[11px] text-[#737373] font-normal ml-1.5">(최소 1장 ~ 최대 8장)</span>
+              </label>
+              <span id="filmPhotoBadge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#F5F5F5] text-[#737373] border border-[#E5E5E5]">
+                0 / 8장
+              </span>
+            </div>
+
+            <!-- Drag and Drop & Upload Area for Film Camera -->
+            <div 
+              id="filmImageDropArea" 
+              onclick="document.getElementById('regFilmImageFiles').click()"
+              ondragover="handleFilmDragOver(event)"
+              ondragleave="handleFilmDragLeave(event)"
+              ondrop="handleFilmDrop(event)"
+              class="border-2 border-dashed border-[#CCCCCC] hover:border-[#171717] rounded-xl p-4 text-center cursor-pointer transition bg-[#FAFAFA] hover:bg-white group select-none"
+            >
+              <input 
+                type="file" 
+                id="regFilmImageFiles" 
+                accept="image/*" 
+                multiple 
+                onchange="handleFilmImageFileSelect(event)" 
+                class="hidden"
+              >
+              <div class="w-9 h-9 rounded-full bg-white border border-[#E5E5E5] flex items-center justify-center mx-auto mb-1.5 text-[#171717] group-hover:scale-105 transition-transform shadow-xs">
+                <i data-lucide="camera" class="w-4 h-4"></i>
+              </div>
+              <div class="text-xs font-bold text-[#171717] mb-0.5">
+                클릭하여 필름 카메라 사진 첨부 또는 드래그 & 드롭
+              </div>
+              <p class="text-[11px] text-[#737373]">
+                바디 전·후면, 필름실 내부 차광 스펀지, 뷰파인더 이중합치 노란 상, 배터리실 누액 여부, 상단 카운터, 시리얼 (최대 8장)
+              </p>
+            </div>
+
+            <!-- Film Photo Preview Grid (4개씩 2줄) -->
+            <div id="filmImagePreviewGrid" class="hidden grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
+              <!-- Dynamically populated previews -->
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. 검증 항목 연동 (카테고리별) -->
+        <!-- Camera: CameraShutterCount Integration Block -->
+        <div id="specDigitalBlock" class="p-4 rounded-xl bg-[#FAFAFA] border border-[#E5E5E5] space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <span class="text-xs font-bold text-[#171717] flex items-center gap-1.5">
+              <i data-lucide="binary" class="w-4 h-4"></i>
+              3. CameraShutterCount 셔터 수 확인 연동
+            </span>
+            <a href="https://www.camerashuttercount.com/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#171717] text-white rounded-lg text-xs font-medium hover:bg-black transition flex-shrink-0">
+              <span>camerashuttercount.com 바로가기</span>
+              <i data-lucide="external-link" class="w-3 h-3"></i>
+            </a>
+          </div>
+          
+          <div class="p-3 bg-white rounded-xl border border-[#EAEAEA] text-xs text-[#737373] space-y-2">
+            <p class="leading-relaxed">
+              CameraShutterCount 사이트에 원본 사진을 업로드하여 셔터 수를 확인한 뒤 등록해 주세요.
+            </p>
+            <button type="button" onclick="simulateExifExtraction()" class="px-3 py-1.5 rounded-lg bg-[#F5F5F5] hover:bg-[#EAEAEA] text-[#171717] border border-[#E5E5E5] text-xs font-medium transition">
+              camerashuttercount.com 결과 불러오기 시뮬레이션
+            </button>
+          </div>
+
+          <div id="exifResultSim" class="hidden p-3 rounded-lg bg-[#F5F5F5] border border-[#CCCCCC] text-xs">
+            <div class="flex items-center justify-between font-semibold text-[#171717] mb-1">
+              <span>✓ CameraShutterCount 검증 완료</span>
+              <span class="font-mono bg-[#171717] text-white px-2 py-0.5 rounded text-[11px]">Shutter: 3,420</span>
+            </div>
+            <div class="text-[11px] text-[#737373]">
+              기종: SONY ILCE-7M4 일치 확인
+            </div>
+          </div>
+        </div>
+
+        <!-- Film Camera Video Block -->
+        <div id="specFilmBlock" class="hidden p-4 rounded-xl bg-[#FAFAFA] border border-[#E5E5E5] space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-[#171717] flex items-center gap-1.5">
+              <i data-lucide="video" class="w-4 h-4"></i>
+              3. 필름 카메라 기계식 셔터 안심 검증 리포트
+            </span>
+            <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-[#171717] text-white font-medium">
+              FRAME 안심 검증
+            </span>
+          </div>
+          <div class="p-3 bg-white rounded-xl border border-[#EAEAEA] text-xs space-y-2">
+            <div class="flex items-start gap-2 text-zinc-700">
+              <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+              <span><strong>① 1초 저속 셔터:</strong> 1초 저속 거버너 굳음 및 셔터막 늘어짐(Lag) 없음 확인</span>
+            </div>
+            <div class="flex items-start gap-2 text-zinc-700">
+              <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+              <span><strong>② 1/1000초 고속 셔터:</strong> 선막·후막 교차 타이밍 일치, 셔터 찢어짐(Capping) 없이 빛 관통 확인</span>
+            </div>
+            <div class="flex items-start gap-2 text-zinc-700">
+              <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+              <span><strong>③ 필름 와인딩 레버 & 프레임 카운터:</strong> 더블 스트로크 걸림 없이 부드러운 와인딩 및 카운터 복귀 정상</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lens Light Block -->
+        <div id="specLensBlock" class="hidden p-4 rounded-xl bg-[#FAFAFA] border border-[#E5E5E5] space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-[#171717] flex items-center gap-1.5">
+              <i data-lucide="sun" class="w-4 h-4"></i>
+              3. 렌즈 광학 상태 3대 필수 체크리스트
+            </span>
+            <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-[#171717] text-white font-medium">
+              FRAME 안심 검증
+            </span>
+          </div>
+          <div class="p-3 bg-white rounded-xl border border-[#EAEAEA] text-xs space-y-2">
+            <div class="flex items-start gap-2 text-zinc-700">
+              <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+              <span><strong>① 렌즈 앞면:</strong> 대물렌즈알 코팅 손상 및 필터 결합 나사선 찌그러짐 점검</span>
+            </div>
+            <div class="flex items-start gap-2 text-zinc-700">
+              <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+              <span><strong>② 렌즈 뒷면:</strong> 카메라 체결 마운트 링 유격/마모 및 후면 렌즈알 스크래치 점검</span>
+            </div>
+            <div class="flex items-start gap-2 text-zinc-700">
+              <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+              <span><strong>③ 조리개 개방 관통 투과:</strong> 조리개 최대 개방 후 빛(스탠드/플래시)을 투과해 <strong>내부 곰팡이/먼지/발삼/조리개 기름</strong> 이상 없음 검증</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Info fields -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-[#171717] mb-1">장비 모델명</label>
+            <input type="text" id="regTitle" required placeholder="예: 소니 Alpha A7 IV 바디" class="w-full bg-[#FAFAFA] border border-[#E5E5E5] rounded-lg px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-[#171717]">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-[#171717] mb-1">브랜드</label>
+            <select id="regBrand" class="w-full bg-[#FAFAFA] border border-[#E5E5E5] rounded-lg px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-[#171717]">
+              <option value="Sony">소니 (Sony)</option>
+              <option value="Canon">캐논 (Canon)</option>
+              <option value="Nikon">니콘 (Nikon)</option>
+              <option value="Fujifilm">후지필름 (Fujifilm)</option>
+              <option value="Leica">라이카 (Leica)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-[#171717] mb-1">판매 희망 가격 (원)</label>
+            <input type="number" id="regPrice" required placeholder="2150000" class="w-full bg-[#FAFAFA] border border-[#E5E5E5] rounded-lg px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-[#171717]">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-[#171717] mb-1">마운트 규격</label>
+            <select id="regMount" class="w-full bg-[#FAFAFA] border border-[#E5E5E5] rounded-lg px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-[#171717]">
+              <option value="E-Mount">소니 E-마운트 (FE / E)</option>
+              <option value="RF-Mount">캐논 RF-마운트</option>
+              <option value="EF-Mount">캐논 EF-마운트 (DSLR / 필름)</option>
+              <option value="Z-Mount">니콘 Z-마운트</option>
+              <option value="F-Mount">니콘 F-마운트 (SLR / 수동 / AF)</option>
+              <option value="X-Mount">후지필름 X-마운트</option>
+              <option value="M-Mount">라이카 M-마운트 (레인지파인더)</option>
+              <option value="L-Mount">L-마운트 (라이카 / 파나소닉 / 시그마)</option>
+              <option value="M43-Mount">마이크로 포서드 (M4/3)</option>
+              <option value="Fixed-Lens">일체형 렌즈 (똑딱이 / 콤팩트 / Q시리즈)</option>
+              <option value="M42-Mount">M42 스크류 마운트 (빈티지 올드렌즈)</option>
+              <option value="기타 마운트">기타 마운트</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-[#171717] mb-1">직거래 희망 지역</label>
+            <input type="text" id="regLocation" placeholder="예: 서울 강남역" class="w-full bg-[#FAFAFA] border border-[#E5E5E5] rounded-lg px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-[#171717]">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-[#171717] mb-1">상세 설명</label>
+          <textarea id="regDescription" rows="3" placeholder="사용 빈도 및 구성품 내역을 적어주세요." class="w-full bg-[#FAFAFA] border border-[#E5E5E5] rounded-lg p-3 text-xs focus:bg-white focus:outline-none focus:border-[#171717]"></textarea>
+        </div>
+
+        <div class="pt-3 border-t border-[#EAEAEA] flex items-center justify-end gap-3">
+          <button type="button" onclick="closeRegisterModal()" class="px-4 py-2 rounded-full border border-[#E5E5E5] text-xs font-medium text-[#737373] hover:bg-[#F5F5F5]">
+            취소
+          </button>
+          <button type="submit" class="px-5 py-2 rounded-full bg-[#171717] hover:bg-black text-white text-xs font-semibold">
+            매물 등록 완료
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= FRAUD DB MODAL ================= -->
+  <div id="fraudCheckModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+    <div class="relative bg-white border border-[#E5E5E5] rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl p-6 text-[#171717]">
+      <div class="flex items-center justify-between pb-3 border-b border-[#EAEAEA] mb-4">
+        <h3 class="text-sm font-bold text-[#171717] flex items-center gap-2">
+          <i data-lucide="shield-alert" class="w-4 h-4"></i>
+          사기 의심 계좌·연락처 조회
+        </h3>
+        <button onclick="closeFraudCheckModal()" class="p-1 rounded text-[#8A8A8A] hover:text-[#171717]">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-[#737373] mb-4">거래 전 판매자의 전화번호나 계좌번호를 입력해 기존 신고 이력을 확인하세요.</p>
+
+      <div class="flex gap-2 mb-4">
+        <input type="text" id="fraudSearchInput" placeholder="전화번호 또는 계좌번호 입력" class="flex-1 bg-[#FAFAFA] border border-[#E5E5E5] rounded-lg px-3 py-2 text-xs">
+        <button onclick="checkFraudDb()" class="px-4 py-2 bg-[#171717] text-white font-medium text-xs rounded-lg hover:bg-black">조회</button>
+      </div>
+
+      <div id="fraudResultBox" class="hidden p-3 rounded-lg text-xs"></div>
+    </div>
+  </div>
+
+  <!-- ================= CHAT DRAWER ================= -->
+  <div id="chatDrawer" class="fixed inset-y-0 right-0 z-50 w-full sm:w-96 bg-white border-l border-[#EAEAEA] shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+    <div class="p-4 border-b border-[#EAEAEA] flex items-center justify-between bg-white">
+      <div class="flex items-center gap-2">
+        <i data-lucide="message-square" class="w-4 h-4 text-[#171717]"></i>
+        <h3 id="chatDrawerTitle" class="text-xs font-bold text-[#171717] tracking-tight">채팅</h3>
+      </div>
+      <button onclick="closeChatDrawer()" class="p-1 rounded text-[#8A8A8A] hover:text-[#171717]">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+
+    <!-- Chat Tabs -->
+    <div class="flex border-b border-[#F0F0F0] bg-[#FAFAFA] text-xs">
+      <button onclick="switchChatTab('conversations')" id="chatTabConversations" class="flex-1 py-2.5 font-bold text-[#171717] border-b-2 border-[#171717] text-center transition">
+        대화 목록 (2)
+      </button>
+      <button onclick="switchChatTab('active')" id="chatTabActive" class="flex-1 py-2.5 font-medium text-[#8A8A8A] text-center hover:text-[#171717] transition">
+        현재 대화
+      </button>
+    </div>
+
+    <!-- 1. Conversations List View -->
+    <div id="chatConversationsList" class="flex-1 overflow-y-auto divide-y divide-[#F0F0F0] bg-white">
+      <div onclick="selectConversation('포토그래퍼김씨', '소니 Alpha A7 IV', '2,150,000원')" class="p-3.5 hover:bg-[#F9F9F9] cursor-pointer transition flex items-center gap-3">
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" class="w-9 h-9 rounded-full object-cover border border-[#EAEAEA]">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between mb-0.5">
+            <span class="text-xs font-bold text-[#171717] truncate">포토그래퍼김씨</span>
+            <span class="text-[10px] text-[#8A8A8A]">방금</span>
+          </div>
+          <p class="text-[11px] text-[#737373] truncate">네, 메시지 확인했습니다! 직거래 장소와 시간 조율 가능합니다.</p>
+          <span class="inline-block text-[10px] text-[#8A8A8A] font-mono mt-0.5">소니 Alpha A7 IV · 2,150,000원</span>
+        </div>
+      </div>
+      <div onclick="selectConversation('아날로그필름', '라이카 M6 클래식', '3,850,000원')" class="p-3.5 hover:bg-[#F9F9F9] cursor-pointer transition flex items-center gap-3">
+        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100" class="w-9 h-9 rounded-full object-cover border border-[#EAEAEA]">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between mb-0.5">
+            <span class="text-xs font-bold text-[#171717] truncate">아날로그필름</span>
+            <span class="text-[10px] text-[#8A8A8A]">어제</span>
+          </div>
+          <p class="text-[11px] text-[#737373] truncate">와인딩 텐션 아주 부드럽습니다. 합정역에서 언제든 뵙죠.</p>
+          <span class="inline-block text-[10px] text-[#8A8A8A] font-mono mt-0.5">라이카 M6 클래식 · 3,850,000원</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Active Chat Room View -->
+    <div id="chatMessageRoom" class="hidden flex-1 flex flex-col">
+      <div class="px-3.5 py-2 bg-[#F5F5F5] border-b border-[#EAEAEA] flex items-center justify-between text-xs">
+        <div class="flex items-center gap-2">
+          <button onclick="switchChatTab('conversations')" class="text-[#8A8A8A] hover:text-[#171717] p-1">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          </button>
+          <div>
+            <span id="chatRoomSellerName" class="font-bold text-[#171717] block leading-tight">포토그래퍼김씨</span>
+            <span id="chatRoomItemTitle" class="text-[10px] text-[#8A8A8A]">소니 Alpha A7 IV</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="chatMessageList" class="flex-1 overflow-y-auto p-4 space-y-3 text-xs bg-[#FAFAFA]">
+        <div class="text-center py-2 text-[#8A8A8A] text-[11px]">
+          FRAME 안심 직거래 대화창입니다.
+        </div>
+      </div>
+
+      <div class="p-3 border-t border-[#EAEAEA] bg-white flex items-center gap-2">
+        <input type="text" id="chatInput" placeholder="메시지를 입력하세요..." class="flex-1 bg-[#F5F5F5] border border-[#E5E5E5] rounded-lg px-3 py-2 text-xs text-[#171717] focus:outline-none focus:border-[#171717]" onkeypress="if(event.key === 'Enter') sendChatMessage()">
+        <button onclick="sendChatMessage()" class="p-2 rounded-lg bg-[#171717] text-white hover:bg-black cursor-pointer">
+          <i data-lucide="send" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= AUTH MODAL (LOGIN / SIGNUP / FIND) ================= -->
+  <div id="authModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+    <div class="relative bg-white border border-[#E5E5E5] rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl p-7 text-[#171717]">
+      
+      <!-- Close Button -->
+      <button onclick="closeAuthModal()" class="absolute right-4 top-4 p-1 rounded-lg text-[#8A8A8A] hover:text-[#171717] hover:bg-[#F5F5F5] transition cursor-pointer">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- Brand Header -->
+      <div class="text-center mb-6">
+        <span class="font-extrabold text-xl tracking-brand text-[#171717] uppercase block">F R A M E</span>
+        <span class="text-[9px] tracking-widest text-[#8A8A8A] uppercase font-medium">CAMERA & FILM MARKETPLACE</span>
+      </div>
+
+      <!-- VIEW 1: LOGIN VIEW -->
+      <div id="loginView">
+        <h3 class="text-base font-bold text-[#171717] mb-4 text-center">로그인</h3>
+        
+        <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="space-y-4">
+          <!-- ID Field -->
+          <div>
+            <label class="block text-xs font-bold text-[#171717] mb-1.5">ID:</label>
+            <input 
+              type="text" 
+              id="loginId" 
+              required 
+              placeholder="아이디를 입력하세요" 
+              class="w-full bg-[#FAFAFA] border border-[#E5E5E5] rounded-xl px-3.5 py-2.5 text-xs text-[#171717] focus:bg-white focus:outline-none focus:border-[#171717] transition"
+            >
+          </div>
+
+          <!-- PW Field with Eye Toggle -->
+          <div>
+            <label class="block text-xs font-bold text-[#171717] mb-1.5">PW:</label>
+            <div class="relative">
+              <input 
+                type="password" 
+                id="loginPw" 
+                required 
+                placeholder="비밀번호를 입력하세요" 
+                class="w-full bg-[#FAFAFA] border border-[#E5E5E5] rounded-xl px-3.5 py-2.5 pr-10 text-xs text-[#171717] focus:bg-white focus:outline-none focus:border-[#171717] transition"
+              >
+              <button 
+                type="button" 
+                onclick="togglePasswordVisibility('loginPw', 'loginEyeIcon')" 
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-[#8A8A8A] hover:text-[#171717] p-1 focus:outline-none cursor-pointer"
+                aria-label="비밀번호 보기/숨기기"
+              >
+                <i id="loginEyeIcon" data-lucide="eye" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- 로그인 하기 버튼 -->
+          <div class="pt-1">
+            <button 
+              type="submit" 
+              class="w-full py-3 rounded-full bg-[#171717] hover:bg-black text-white text-xs sm:text-sm font-semibold transition active:scale-[0.99] shadow-sm cursor-pointer"
+            >
+              로그인 하기
+            </button>
+          </div>
+
+          <!-- 아이디 저장 버튼 (로그인 하기 밑에 작게 한 줄로) -->
+          <div class="flex items-center text-xs text-[#737373] pt-0.5">
+            <label class="flex items-center gap-1.5 cursor-pointer select-none">
+              <input type="checkbox" id="saveIdCheck" class="rounded border-[#CCCCCC] text-[#171717] focus:ring-0 w-3.5 h-3.5">
+              <span class="text-[11px] text-[#737373]">아이디 저장</span>
+            </label>
+          </div>
+
+          <!-- 아이디 · 비밀번호 찾기 / 회원가입 버튼 -->
+          <div class="flex items-center justify-center gap-3 text-xs text-[#8A8A8A] pt-4 border-t border-[#F0F0F0]">
+            <button type="button" onclick="switchAuthView('find')" class="hover:text-[#171717] transition text-[11px] cursor-pointer">
+              아이디 · 비밀번호 찾기
+            </button>
+            <span class="text-[#E0E0E0]">|</span>
+            <button type="button" onclick="switchAuthView('signup')" class="font-semibold text-[#171717] hover:underline transition text-[11px] cursor-pointer">
+              회원가입
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- VIEW 2: SIGNUP VIEW (기획서 기반 필수/선택 및 약관 분리) -->
+      <div id="signupView" class="hidden">
+        <h3 class="text-base font-bold text-[#171717] mb-1 text-center">회원가입</h3>
+        <p class="text-[11px] text-[#737373] text-center mb-4">FRAME의 안심 장비 거래를 위해 기본 정보를 입력해 주세요.</p>
+        
+        <form id="signupForm" onsubmit="handleSignupSubmit(event)" class="space-y-3">
+          <!-- 이메일 (로그인 ID) -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-xs font-bold text-[#171717]">이메일 (로그인 ID) <span class="text-red-500">*</span></label>
+              <button type="button" onclick="checkEmailDuplicate()" class="text-[10px] text-[#171717] font-semibold underline hover:text-black">중복 확인</button>
+            </div>
+            <input type="email" id="signupEmail" required placeholder="example@camera.com" class="w-full bg-[#FAFAFA] border border-[#E5E5E5] rounded-xl px-3.5 py-2 text-xs text-[#171717] focus:bg-white focus:outline-none focus:border-[#171717]">
+          </div>
+
+          <!-- 닉네임 -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-xs font-bold text-[#171717]">닉네임 <span class="text-red-500">*</span></label>
+              <button type="button" onclick="checkNicknameDuplicate()" class="text-[10px] text-[#171717] font-semibold underline hover:text-black">중복 확인</button>
+            </div>
+            <input type="text" id="signupNickname" required placeholder="거래 화면에 노출될 이름" class="w-full bg-[#FAFAFA] border border-[#E5E5E5] rounded-xl px-3.5 py-2 text-xs text-[#171717] focus:bg-white focus:outline-none focus:border-[#171717]">
+          </div>
+
+          <!-- 비밀번호 -->
+          <div>
+            <label class="block text-xs font-bold text-[#171717] mb-1">비밀번호 <span class="text-red-500">*</span></label>
+            <div class="relative">
+              <input type="password" id="signupPw" required placeholder="영문, 숫자 포함 8자 이상" class="w-full bg-[#FAFAFA] border border-[#E5E5E5] rounded-xl px-3.5 py-2 pr-10 text-xs text-[#171717] focus:bg-white focus:outline-none focus:border-[#171717]">
+              <button type="button" onclick="togglePasswordVisibility('signupPw', 'signupEyeIcon')" class="absolute right-3 top-1/2 -translate-y-1/2 text-[#8A8A8A] hover:text-[#171717] p-1 cursor-pointer">
+                <i id="signupEyeIcon" data-lucide="eye" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- 비밀번호 확인 -->
+          <div>
+            <label class="block text-xs font-bold text-[#171717] mb-1">비밀번호 확인 <span class="text-red-500">*</span></label>
+            <div class="relative">
+              <input type="password" id="signupPwConfirm" required placeholder="비밀번호 재입력" class="w-full bg-[#FAFAFA] border border-[#E5E5E5] rounded-xl px-3.5 py-2 pr-10 text-xs text-[#171717] focus:bg-white focus:outline-none focus:border-[#171717]">
+              <button type="button" onclick="togglePasswordVisibility('signupPwConfirm', 'signupEyeConfirmIcon')" class="absolute right-3 top-1/2 -translate-y-1/2 text-[#8A8A8A] hover:text-[#171717] p-1 cursor-pointer">
+                <i id="signupEyeConfirmIcon" data-lucide="eye" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- 약관 동의 체크리스트 (필수/선택 분리) -->
+          <div class="p-3 bg-[#F9F9F9] rounded-xl border border-[#EAEAEA] space-y-2 text-xs">
+            <label class="flex items-center gap-2 cursor-pointer pb-2 border-b border-[#E5E5E5] font-bold text-[#171717] select-none">
+              <input type="checkbox" id="termsAll" onchange="toggleAllTerms(this.checked)" class="rounded border-[#CCCCCC] text-[#171717] focus:ring-0 w-3.5 h-3.5">
+              <span>약관 전체 동의</span>
+            </label>
+            
+            <div class="space-y-1.5 text-[11px] text-[#737373] pl-1 select-none">
+              <label class="flex items-center justify-between cursor-pointer">
+                <span class="flex items-center gap-1.5">
+                  <input type="checkbox" id="termService" required class="terms-item rounded border-[#CCCCCC] text-[#171717] focus:ring-0 w-3 h-3">
+                  <span>[필수] 이용약관 동의</span>
+                </span>
+                <span class="text-[10px] text-[#8A8A8A] underline cursor-pointer" onclick="alert('FRAME 이용약관 전문이 표시됩니다.')">보기</span>
+              </label>
+
+              <label class="flex items-center justify-between cursor-pointer">
+                <span class="flex items-center gap-1.5">
+                  <input type="checkbox" id="termPrivacy" required class="terms-item rounded border-[#CCCCCC] text-[#171717] focus:ring-0 w-3 h-3">
+                  <span>[필수] 개인정보 수집 및 이용 동의 (주민번호 미수집)</span>
+                </span>
+                <span class="text-[10px] text-[#8A8A8A] underline cursor-pointer" onclick="alert('개인정보보호법에 의거 주민등록번호는 직접 수집하지 않으며, CI/DI 연계 정보로 처리됩니다.')">보기</span>
+              </label>
+
+              <label class="flex items-center cursor-pointer">
+                <input type="checkbox" id="termAge" required class="terms-item rounded border-[#CCCCCC] text-[#171717] focus:ring-0 w-3 h-3 mr-1.5">
+                <span>[필수] 만 14세 이상 회원 확인</span>
+              </label>
+
+              <label class="flex items-center cursor-pointer">
+                <input type="checkbox" id="termMarketing" class="terms-item rounded border-[#CCCCCC] text-[#171717] focus:ring-0 w-3 h-3 mr-1.5">
+                <span>[선택] 신규 매물 알림 및 마케팅 정보 수신 동의</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="pt-2">
+            <button type="submit" class="w-full py-2.5 rounded-full bg-[#171717] hover:bg-black text-white text-xs font-semibold transition active:scale-[0.99] shadow-sm cursor-pointer">
+              회원가입 완료 (Lv.1 가입)
+            </button>
+          </div>
+
+          <div class="text-center pt-2 border-t border-[#F0F0F0]">
+            <button type="button" onclick="switchAuthView('login')" class="text-xs text-[#737373] hover:text-[#171717] underline cursor-pointer">
+              이미 계정이 있으신가요? 로그인하기
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- VIEW 2-1: SIGNUP COMPLETE PROMPT (Lv.1 -> Lv.2/3 인증 유도) -->
+      <div id="signupSuccessPrompt" class="hidden text-center space-y-4">
+        <div class="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center mx-auto">
+          <i data-lucide="check" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-[#171717] mb-1">회원가입이 완료되었습니다!</h3>
+          <p class="text-xs text-[#737373] leading-relaxed">
+            현재 <strong>Lv.1 (둘러보기 & 문의)</strong> 등급입니다.<br>
+            장비 판매 등록과 안심 직거래를 위해 <strong>본인 인증(PASS 실명 / 계좌 / eKYC 신분증)</strong>을 진행하시겠습니까?
+          </p>
+        </div>
+
+        <div class="p-3 bg-[#FAFAFA] rounded-xl border border-[#EAEAEA] text-left text-xs space-y-1.5">
+          <div class="flex items-center gap-1.5 font-bold text-[#171717]">
+            <span class="w-4 h-4 rounded-full bg-black text-white text-[10px] flex items-center justify-center">2</span>
+            <span>Lv.2: PASS 휴대폰 실명 인증 (상품 등록 권한)</span>
+          </div>
+          <div class="flex items-center gap-1.5 font-bold text-[#171717]">
+            <span class="w-4 h-4 rounded-full bg-black text-white text-[10px] flex items-center justify-center">3</span>
+            <span>Lv.3: 계좌 + 신분증/실시간 셀피 (안심 판매자 배지)</span>
+          </div>
+        </div>
+
+        <div class="space-y-2 pt-1">
+          <button onclick="startVerificationFlowFromSignup()" class="w-full py-2.5 rounded-full bg-[#171717] hover:bg-black text-white text-xs font-semibold shadow-sm cursor-pointer">
+            본인 인증 진행하기 (추천)
+          </button>
+          <button onclick="closeAuthModal()" class="w-full py-2 rounded-full border border-[#E5E5E5] text-xs font-medium text-[#737373] hover:bg-[#F5F5F5] cursor-pointer">
+            나중에 하기 (둘러보기)
+          </button>
+        </div>
+      </div>
+
+      <!-- VIEW 3: FIND ACCOUNT VIEW -->
+      <div id="findView" class="hidden">
+        <h3 class="text-base font-bold text-[#171717] mb-2 text-center">아이디 · 비밀번호 찾기</h3>
+        <p class="text-xs text-[#737373] text-center mb-4">가입 시 등록한 휴대폰 번호 또는 이메일을 입력해 주세요.</p>
+        
+        <form onsubmit="handleFindSubmit(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-[#171717] mb-1.5">이메일 또는 휴대폰 번호</label>
+            <input type="text" id="findInput" required placeholder="예: user@example.com 또는 01012345678" class="w-full bg-[#FAFAFA] border border-[#E5E5E5] rounded-xl px-3.5 py-2.5 text-xs text-[#171717] focus:bg-white focus:outline-none focus:border-[#171717]">
+          </div>
+
+          <button type="submit" class="w-full py-2.5 rounded-full bg-[#171717] hover:bg-black text-white text-xs font-semibold transition cursor-pointer">
+            인증 링크 / 임시 비밀번호 발급
+          </button>
+
+          <div class="text-center pt-3 border-t border-[#F0F0F0]">
+            <button type="button" onclick="switchAuthView('login')" class="text-xs text-[#737373] hover:text-[#171717] underline cursor-pointer">
+              로그인 화면으로 돌아가기
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+<!-- ================= VERIFICATION CENTER MODAL (3단계 본인 인증 센터) ================= -->
+  <div id="verificationCenterModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-black/65 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+    <div class="relative bg-white border border-[#E5E5E5] rounded-2xl w-full max-w-xl max-h-[92vh] overflow-y-auto shadow-2xl p-6 sm:p-7 text-[#171717]">
+      
+      <!-- Close Button -->
+      <button onclick="closeVerificationCenterModal()" class="absolute right-4 top-4 p-1 rounded-lg text-[#8A8A8A] hover:text-[#171717] hover:bg-[#F5F5F5] transition cursor-pointer">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- Modal Header -->
+      <div class="mb-4 pb-3 border-b border-[#EAEAEA]">
+        <div class="flex items-center gap-2 mb-1">
+          <div class="w-7 h-7 rounded-lg bg-[#171717] text-white flex items-center justify-center">
+            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+          </div>
+          <h2 class="text-lg font-bold text-[#171717]">FRAME 안심 본인 인증 센터</h2>
+          <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-300 font-semibold font-mono">Toss Sandbox Mode</span>
+        </div>
+        <p class="text-xs text-[#737373] leading-relaxed">
+          토스 본인인증(Toss Identity) 및 토스페이먼츠 1원 계좌 실명 대조 샌드박스 연동 가이드 기반 3단계 검증 시스템
+        </p>
+      </div>
+
+      <!-- Interview / Architecture Info Banner -->
+      <div class="mb-5 p-3 rounded-xl bg-[#F7F7F7] border border-[#E5E5E5] text-xs text-[#737373] flex items-start gap-2.5">
+        <i data-lucide="info" class="w-4 h-4 text-[#171717] flex-shrink-0 mt-0.5"></i>
+        <div class="text-[11px] leading-relaxed">
+          <strong class="text-[#171717]">토스 인증 테스트 환경 (가상 사용자 모드):</strong> 실제 외부 연동은 계약이 필요하므로 토스 테스트 환경(가상 사용자)과 연결하였으며, 비즈니스 로직은 <code class="text-[#171717] font-semibold font-mono bg-white px-1 py-0.5 rounded border border-[#E0E0E0]">VerificationProvider</code> 전략 패턴으로 완전 분리하여 정식 계약 시 설정값만 변경하면 즉시 상용 서비스로 전환되도록 설계되었습니다. (신분증·셀피는 보안 규정 준수를 위해 Mock으로 안전하게 시뮬레이션됩니다.)
+        </div>
+      </div>
+
+      <!-- 3-Step Level Indicator Header -->
+      <div class="grid grid-cols-3 gap-2 mb-6 text-center select-none">
+        <button type="button" onclick="switchVerifyStep(1)" id="verifyTabStep1" class="step-tab active p-2.5 rounded-xl border border-[#E5E5E5] transition text-left cursor-pointer">
+          <div class="text-[10px] text-[#8A8A8A] font-bold">LEVEL 1</div>
+          <div class="text-xs font-bold truncate">기본 가입</div>
+          <div class="text-[10px] text-emerald-600 font-semibold mt-0.5">✓ 완료됨</div>
+        </button>
+
+        <button type="button" onclick="switchVerifyStep(2)" id="verifyTabStep2" class="step-tab p-2.5 rounded-xl border border-[#E5E5E5] bg-[#FAFAFA] transition text-left cursor-pointer">
+          <div class="text-[10px] text-[#8A8A8A] font-bold">LEVEL 2</div>
+          <div class="text-xs font-bold truncate">PASS 휴대폰</div>
+          <div id="step2StatusBadge" class="text-[10px] text-[#8A8A8A] mt-0.5">미인증 (상품등록)</div>
+        </button>
+
+        <button type="button" onclick="switchVerifyStep(3)" id="verifyTabStep3" class="step-tab p-2.5 rounded-xl border border-[#E5E5E5] bg-[#FAFAFA] transition text-left cursor-pointer">
+          <div class="text-[10px] text-[#8A8A8A] font-bold">LEVEL 3</div>
+          <div class="text-xs font-bold truncate">계좌 + eKYC</div>
+          <div id="step3StatusBadge" class="text-[10px] text-[#8A8A8A] mt-0.5">미인증 (안심배지)</div>
+        </button>
+      </div>
+
+      <!-- STEP 1 CONTENT: 기본 정보 및 권한 안내 -->
+      <div id="verifyStepContent1" class="space-y-4">
+        <div class="p-4 rounded-xl bg-[#FAFAFA] border border-[#EAEAEA] space-y-2">
+          <div class="flex items-center justify-between text-xs font-bold text-[#171717]">
+            <span>현재 기본 권한 (레벨 1)</span>
+            <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 text-[10px]">정상 이용 중</span>
+          </div>
+          <p class="text-xs text-[#737373] leading-relaxed">
+            이메일 및 닉네임으로 가입이 완료된 상태입니다. 카메라 매물 탐색, 실거래 시세 그래프 조회, 1:1 단순 문의가 가능합니다.
+          </p>
+        </div>
+
+        <div class="p-4 rounded-xl border border-[#171717] bg-[#171717] text-white flex items-center justify-between gap-4">
+          <div>
+            <div class="text-xs font-bold mb-0.5">장비 판매글을 등록하시겠습니까?</div>
+            <div class="text-[11px] text-zinc-300">PASS 실명 인증(Lv.2)을 거치면 즉시 매물 등록 및 직거래가 가능합니다.</div>
+          </div>
+          <button onclick="switchVerifyStep(2)" class="px-3.5 py-2 rounded-full bg-white text-[#171717] text-xs font-bold hover:bg-zinc-100 transition flex-shrink-0 cursor-pointer">
+            Lv.2 인증 시작 →
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 2 CONTENT: PASS 휴대폰 실명 인증 -->
+      <div id="verifyStepContent2" class="hidden space-y-4">
+        <div class="p-3.5 rounded-xl bg-[#FAFAFA] border border-[#EAEAEA] flex items-start justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-1.5 mb-1">
+              <h4 class="text-xs font-bold text-[#171717]">토스 본인인증 / PASS 실명 확인</h4>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 font-semibold border border-emerald-300">Sandbox 가상 사용자</span>
+            </div>
+            <p class="text-[11px] text-[#737373] leading-relaxed">
+              본인 명의의 휴대폰으로 실명을 확인하며, 사기 이력 조회 및 동일인의 악의적 다중 계정 생성을 방지하기 위한 암호화 DI(중복가입확인정보)가 발급됩니다.
+            </p>
+          </div>
+          <button type="button" onclick="fillTossVirtualUser()" class="px-2.5 py-1.5 rounded-lg border border-[#171717] bg-white text-[#171717] text-[10px] font-bold hover:bg-[#171717] hover:text-white transition flex-shrink-0 cursor-pointer shadow-xs" title="토스 샌드박스 표준 가상 사용자(홍길동) 자동 입력">
+            가상 사용자 자동입력
+          </button>
+        </div>
+
+        <form id="passVerifyForm" onsubmit="handlePassVerifySubmit(event)" class="space-y-3 text-xs">
+          <!-- 통신사 선택 -->
+          <div>
+            <label class="block font-bold text-[#171717] mb-1">통신사 선택</label>
+            <div class="grid grid-cols-4 gap-2">
+              <label class="cursor-pointer">
+                <input type="radio" name="passCarrier" value="SKT" checked class="peer sr-only">
+                <div class="py-2 text-center rounded-lg border border-[#E5E5E5] peer-checked:border-[#171717] peer-checked:bg-[#171717] peer-checked:text-white font-semibold transition">SKT</div>
+              </label>
+              <label class="cursor-pointer">
+                <input type="radio" name="passCarrier" value="KT" class="peer sr-only">
+                <div class="py-2 text-center rounded-lg border border-[#E5E5E5] peer-checked:border-[#171717] peer-checked:bg-[#171717] peer-checked:text-white font-semibold transition">KT</div>
+              </label>
+              <label class="cursor-pointer">
+                <input type="radio" name="passCarrier" value="LGU+" class="peer sr-only">
+                <div class="py-2 text-center rounded-lg border border-[#E5E5E5] peer-checked:border-[#171717] peer-checked:bg-[#171717] peer-checked:text-white font-semibold transition">LG U+</div>
+              </label>
+              <label class="cursor-pointer">
+                <input type="radio" name="passCarrier" value="MVNO" class="peer sr-only">
+                <div class="py-2 text-center rounded-lg border border-[#E5E5E5] peer-checked:border-[#171717] peer-checked:bg-[#171717] peer-checked:text-white font-semibold transition">알뜰폰</div>
+              </label>
+            </div>
+          </div>
+
+          <!-- 이름 & 생년월일 -->
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-bold text-[#171717] mb-1">성명</label>
+              <input type="text" id="passName" required placeholder="홍길동" class="w-full bg-[#FAFAFA] border border-[#E5E5E5] rounded-lg px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-[#171717]">
+            </div>
+            <div>
+              <label class="block font-bold text-[#171717] mb-1">생년월일 (6자리)</label>
+              <input type="text" id="passBirth" required maxlength="6" placeholder="950815" class="w-full bg-[#FAFAFA] border border-[#E5E5E5] rounded-lg px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-[#171717]">
+            </div>
+          </div>
+
+          <!-- 휴대폰 번호 & 인증번호 요청 -->
+          <div>
+            <label class="block font-bold text-[#171717] mb-1">휴대폰 번호</label>
+            <div class="flex gap-2">
+              <input type="tel" id="passPhone" required placeholder="01012345678" class="flex-1 bg-[#FAFAFA] border border-[#E5E5E5] rounded-lg px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-[#171717]">
+              <button type="button" onclick="requestPassOtp()" class="px-3 py-2 bg-[#171717] text-white rounded-lg text-xs font-semibold hover:bg-black transition flex-shrink-0 cursor-pointer">
+                인증번호 요청
+              </button>
+            </div>
+          </div>
+
+          <!-- OTP 입력창 -->
+          <div id="passOtpBlock" class="hidden p-3 rounded-xl bg-[#F5F5F5] border border-[#E5E5E5] space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="font-bold text-[#171717]">SMS 인증번호 (6자리)</label>
+              <span id="passTimer" class="text-[11px] text-red-500 font-mono">03:00</span>
+            </div>
+            <div class="flex gap-2">
+              <input type="text" id="passOtpInput" maxlength="6" placeholder="123456" class="flex-1 bg-white border border-[#E5E5E5] rounded-lg px-3 py-2 text-xs tracking-widest font-mono text-center focus:outline-none focus:border-[#171717]">
+              <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition cursor-pointer">
+                확인 및 Lv.2 승급
+              </button>
+            </div>
+            <p class="text-[10px] text-[#737373]">💡 포트폴리오 시연 모드: 요청 시 자동으로 6자리 코드가 시뮬레이션 채번됩니다.</p>
+          </div>
+        </form>
+
+        <!-- Pass Result Simulation Output -->
+        <div id="passSuccessResult" class="hidden p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/25 space-y-2">
+          <div class="flex items-center justify-between text-xs font-bold text-emerald-700">
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="check-circle" class="w-4 h-4"></i>
+              PASS 본인 인증 완료 (Lv.2 승격)
+            </span>
+            <span class="text-[10px] font-mono bg-emerald-600 text-white px-2 py-0.5 rounded">STATUS: VERIFIED</span>
+          </div>
+          <div class="text-[11px] text-zinc-600 space-y-0.5 font-mono">
+            <div>• DI 해시(중복가입차단): 7f83b165...9b8e (식별 완료)</div>
+            <div>• 실명/연락처: <span id="passVerifiedInfoText">홍길동 (010-****-5678)</span></div>
+            <div>• 부여된 권한: 상품 등록, 1:1 직거래 채팅 개설 활성화</div>
+          </div>
+          <div class="pt-2">
+            <button onclick="switchVerifyStep(3)" class="w-full py-2.5 rounded-full bg-[#171717] hover:bg-black text-white text-xs font-bold transition cursor-pointer">
+              다음: Lv.3 계좌 + eKYC 신분증 인증하기 →
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3 CONTENT: 계좌 인증 & eKYC 신분증·셀피 라이브니스 -->
+      <div id="verifyStepContent3" class="hidden space-y-5">
+        
+        <!-- Part A: 1원 계좌 실명 인증 -->
+        <div class="p-4 rounded-xl bg-[#FAFAFA] border border-[#EAEAEA] space-y-3 text-xs">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-black text-white text-[10px] font-bold flex items-center justify-center">A</span>
+              <h4 class="font-bold text-[#171717]">토스페이먼츠 1원 계좌 실명 인증 (가상 계좌 테스트)</h4>
+            </div>
+            <span id="bankVerifiedBadge" class="text-[10px] px-2 py-0.5 rounded bg-zinc-200 text-zinc-600 font-semibold">미인증</span>
+          </div>
+          <p class="text-[11px] text-[#737373]">
+            판매 대금을 수령할 본인 명의 계좌를 검증하며, 자체 사기 신고 DB와 대조하여 불량 계좌 여부를 사전 검증합니다.
+          </p>
+
+          <div class="grid grid-cols-3 gap-2">
+            <select id="bankNameSelect" class="bg-white border border-[#E5E5E5] rounded-lg px-2.5 py-2 text-xs text-[#171717] focus:outline-none focus:border-[#171717]">
+              <option value="KB국민은행">KB국민은행</option>
+              <option value="신한은행">신한은행</option>
+              <option value="하나은행">하나은행</option>
+              <option value="우리은행">우리은행</option>
+              <option value="토스뱅크">토스뱅크</option>
+              <option value="카카오뱅크">카카오뱅크</option>
+              <option value="NH농협">NH농협은행</option>
+            </select>
+            <input type="text" id="bankAccountNum" placeholder="계좌번호 (- 없이 입력)" class="col-span-2 bg-white border border-[#E5E5E5] rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-[#171717]">
+          </div>
+
+          <button type="button" onclick="sendBank1WonVerify()" class="w-full py-2 bg-[#171717] hover:bg-black text-white rounded-lg text-xs font-semibold transition cursor-pointer">
+            1원 입금 및 실명 확인 요청
+          </button>
+
+          <!-- 1원 입금 코드 확인 창 -->
+          <div id="bankCodeBlock" class="hidden p-3 rounded-lg bg-white border border-[#E5E5E5] space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-semibold text-[11px] text-zinc-700">입금자명 인증코드 (예: 프레임482)</span>
+              <span class="text-[10px] text-emerald-600 font-bold">1원 입금 완료</span>
+            </div>
+            <div class="flex gap-2">
+              <input type="text" id="bankVerifyCode" placeholder="프레임 뒤 3자리 숫자" maxlength="4" class="flex-1 bg-[#FAFAFA] border border-[#E5E5E5] rounded-lg px-3 py-1.5 text-xs text-center font-mono">
+              <button type="button" onclick="confirmBank1Won()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition cursor-pointer">
+                계좌 인증
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Part B: eKYC 신분증 진위 & 실시간 셀피 라이브니스 -->
+        <div class="p-4 rounded-xl bg-[#FAFAFA] border border-[#EAEAEA] space-y-3 text-xs">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-black text-white text-[10px] font-bold flex items-center justify-center">B</span>
+              <h4 class="font-bold text-[#171717]">신분증 OCR & 실시간 안면 라이브니스 (보안 Mock 검증)</h4>
+            </div>
+            <span id="ekycVerifiedBadge" class="text-[10px] px-2 py-0.5 rounded bg-zinc-200 text-zinc-600 font-semibold">미인증</span>
+          </div>
+          <p class="text-[11px] text-[#737373]">
+            개인정보 비저장 원칙(주민번호 마스킹 후 즉시 파기) 준수 하에 실시간 안면 생체 반응을 대조하여 타인 도용 및 사기를 원천 차단합니다.
+          </p>
+
+          <!-- 신분증 OCR 가이드 박스 -->
+          <div class="border-2 border-dashed border-[#CCCCCC] hover:border-black rounded-xl p-3.5 text-center cursor-pointer transition bg-white" onclick="simulateOcrScan()">
+            <div class="flex items-center justify-center gap-2 mb-1">
+              <i data-lucide="credit-card" class="w-4 h-4 text-[#171717]"></i>
+              <span class="font-bold text-xs text-[#171717]">주민등록증 / 운전면허증 촬영 시뮬레이션</span>
+            </div>
+            <p class="text-[10px] text-[#737373]">클릭 시 행정안전부 진위 확인 및 OCR 자동 판독이 시뮬레이션됩니다.</p>
+          </div>
+
+          <div id="ocrResultBox" class="hidden p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-zinc-700 space-y-0.5">
+            <div class="font-bold text-emerald-800">✓ 신분증 진위 확인 성공 (행정기관 대조 일치)</div>
+            <div class="font-mono text-[10px] text-[#737373]">• 성명: 일치 | 생년월일: 일치 | 주민번호 뒷자리: 마스킹 후 즉시 폐기</div>
+          </div>
+
+          <!-- 실시간 셀피 라이브니스 뷰파인더 -->
+          <div class="p-4 rounded-xl bg-white border border-[#EAEAEA] text-center space-y-3">
+            <div class="font-bold text-xs text-[#171717]">실시간 셀피 라이브니스(Liveness) 검사</div>
+            <p class="text-[11px] text-[#737373]">사진 도용 방지를 위해 카메라 정면을 응시하고 눈을 깜빡여주세요.</p>
+
+            <div class="w-32 h-32 mx-auto rounded-full border-2 border-dashed border-[#171717] relative overflow-hidden flex items-center justify-center bg-[#F9F9F9]">
+              <div id="livenessScannerBar" class="hidden liveness-scanner"></div>
+              <div id="livenessAvatarPreview" class="text-zinc-300 flex flex-col items-center">
+                <i data-lucide="user" class="w-16 h-16"></i>
+              </div>
+            </div>
+
+            <button type="button" id="btnStartLiveness" onclick="startLivenessScan()" class="px-5 py-2 rounded-full bg-[#171717] hover:bg-black text-white text-xs font-semibold transition cursor-pointer">
+              실시간 라이브니스 검사 시작
+            </button>
+          </div>
+
+        </div>
+
+        <!-- 최종 Lv.3 승급 축하 배너 -->
+        <div id="lv3FinalSuccessBanner" class="hidden p-5 rounded-2xl bg-black text-white text-center space-y-2">
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[11px] font-bold">
+            <i data-lucide="badge-check" class="w-4 h-4"></i>
+            Lv.3 안심 인증 판매자 승격 완료
+          </div>
+          <h3 class="text-base font-bold">축하합니다! 모든 본인 검증이 완료되었습니다.</h3>
+          <p class="text-xs text-zinc-300 max-w-sm mx-auto leading-relaxed">
+            이제 프로필과 등록하신 모든 카메라·렌즈 매물에 <strong>'안심 인증 판매자'</strong> 공식 배지가 노출되어 구매자에게 최고의 신뢰를 제공합니다.
+          </p>
+          <div class="pt-2">
+            <button onclick="closeVerificationCenterModal()" class="px-6 py-2.5 rounded-full bg-white text-[#171717] text-xs font-bold hover:bg-zinc-100 transition cursor-pointer">
+              인증 센터 완료 및 닫기
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= AI SAMPLE & MEDIA EXPLORER MODAL (신규 AI 작례 탐색기) ================= -->
+  <div id="aiSampleExplorerModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-black/65 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+    <div class="relative bg-white border border-[#E5E5E5] rounded-2xl w-full max-w-6xl max-h-[94vh] overflow-hidden shadow-2xl text-[#171717] flex flex-col my-auto">
+      
+      <!-- Top Modal Header -->
+      <div class="px-6 py-4 border-b border-[#EAEAEA] flex items-center justify-between bg-white z-10 flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-[#171717] text-white flex items-center justify-center shadow-xs">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-base sm:text-lg font-bold text-[#171717]">AI 장비 작례 & 미디어 탐색기</h2>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#171717] text-white font-mono tracking-tight">AI ENGINE</span>
+              <div id="crawlerServerStatusBadge" onclick="checkCrawlerServerHealth(true)" class="cursor-pointer text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600 border border-zinc-200 flex items-center gap-1.5 transition hover:bg-zinc-200" title="클릭하여 서버 연결 상태 새로고침">
+                <span id="crawlerServerStatusDot" class="w-1.5 h-1.5 rounded-full bg-zinc-400"></span>
+                <span id="crawlerServerStatusText">실시간 서버 감지 중...</span>
+              </div>
+            </div>
+            <p class="text-xs text-[#737373]">
+              카메라·렌즈 모델명을 검색하면 Flickr, Lomography, YouTube, Naver Blog의 실제 작례와 미디어를 실시간으로 수집합니다.
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="openCrawlerServerModal()" class="text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-[#E5E5E5] hover:border-[#171717] text-[#525252] hover:text-[#171717] bg-white transition flex items-center gap-1.5 cursor-pointer shadow-2xs" title="실시간 크롤러 서버 상태 및 가이드">
+            <i data-lucide="terminal" class="w-3.5 h-3.5 text-[#171717]"></i>
+            <span class="hidden sm:inline">크롤러 서버 안내</span>
+          </button>
+          <button type="button" onclick="closeAiSampleSearchModal()" class="p-1.5 rounded-lg text-[#8A8A8A] hover:text-[#171717] hover:bg-[#F5F5F5] transition cursor-pointer" title="닫기">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Search & Popular Tag Bar -->
+      <div class="p-4 sm:p-5 bg-[#FAFAFA] border-b border-[#EAEAEA] flex-shrink-0">
+        <div class="flex items-center gap-2 max-w-2xl">
+          <div class="relative flex-1">
+            <i data-lucide="search" class="w-4 h-4 text-[#8A8A8A] absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+            <input type="text" id="aiModalSearchInput" placeholder="카메라/렌즈 기종명을 입력하세요 (예: 라이카 주미크론, 소니 금계륵, 보이그랜더 녹톤...)"
+              oninput="handleAiModalSearchInput(this.value)"
+              onkeydown="if(event.key==='Enter') executeAiSampleSearch()"
+              class="w-full text-xs sm:text-sm pl-10 pr-36 py-2.5 rounded-xl border border-[#D4D4D4] focus:outline-none focus:border-[#171717] bg-white transition shadow-2xs">
+            <button type="button" onclick="executeAiSampleSearch()" class="absolute right-1.5 top-1/2 -translate-y-1/2 px-3.5 py-1.5 rounded-lg bg-[#171717] text-white text-xs font-bold hover:bg-black transition cursor-pointer flex items-center gap-1.5 shadow-xs">
+              <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+              <span>작례 & 미디어 탐색</span>
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-400"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Chips (실시간 반응형 연관 추천 검색어) -->
+        <div id="aiQuickChipsWrap" class="flex flex-wrap items-center gap-1.5 mt-3 text-xs">
+          <span class="text-[11px] font-semibold text-[#8A8A8A] mr-1 flex items-center gap-1">
+            <i data-lucide="sparkles" class="w-3 h-3 text-[#171717]"></i>
+            추천 인기 렌즈 & 카메라:
+          </span>
+          <button type="button" onclick="executeAiSampleSearch('라이트 렌즈 랩 35mm F2 (8매 복각)')" class="ai-chip px-2.5 py-1 rounded-full bg-white border border-[#E5E5E5] hover:border-[#171717] text-[#171717] text-[11px] font-medium transition cursor-pointer font-bold">🌟 LLL 35mm (8매 복각)</button>
+          <button type="button" onclick="executeAiSampleSearch('라이카 주마론 28mm F5.6 (중마론)')" class="ai-chip px-2.5 py-1 rounded-full bg-white border border-[#E5E5E5] hover:border-[#171717] text-[#171717] text-[11px] font-medium transition cursor-pointer font-bold">💎 라이카 주마론 28mm (중마론)</button>
+          <button type="button" onclick="executeAiSampleSearch('라이카 주미크론 50mm F2 (리지드)')" class="ai-chip px-2.5 py-1 rounded-full bg-white border border-[#E5E5E5] hover:border-[#171717] text-[#171717] text-[11px] font-medium transition cursor-pointer font-bold">👑 라이카 주미크론 50mm</button>
+          <button type="button" onclick="executeAiSampleSearch('라이카 녹티룩스 50mm F0.95')" class="ai-chip px-2.5 py-1 rounded-full bg-white border border-[#E5E5E5] hover:border-[#171717] text-[#171717] text-[11px] font-medium transition cursor-pointer font-bold">🌌 라이카 녹티룩스 50mm (F0.95)</button>
+          <button type="button" onclick="executeAiSampleSearch('보이그랜더 녹톤 40mm F1.2 Aspherical')" class="ai-chip px-2.5 py-1 rounded-full bg-white border border-[#E5E5E5] hover:border-[#171717] text-[#171717] text-[11px] font-medium transition cursor-pointer font-bold">🌙 보이그랜더 녹톤 40mm (F1.2)</button>
+          <button type="button" onclick="executeAiSampleSearch('티티아티산 50mm F0.95')" class="ai-chip px-2.5 py-1 rounded-full bg-white border border-[#E5E5E5] hover:border-[#171717] text-[#171717] text-[11px] font-medium transition cursor-pointer font-bold">🔮 티티아티산 50mm (F0.95)</button>
+          <button type="button" onclick="executeAiSampleSearch('7장인 35mm F1.2')" class="ai-chip px-2.5 py-1 rounded-full bg-white border border-[#E5E5E5] hover:border-[#171717] text-[#171717] text-[11px] font-medium transition cursor-pointer font-bold">🎨 7장인 35mm (F1.2)</button>
+          <button type="button" onclick="executeAiSampleSearch('미놀타 MC 로코르-PG 58mm F1.2')" class="ai-chip px-2.5 py-1 rounded-full bg-white border border-[#E5E5E5] hover:border-[#171717] text-[#171717] text-[11px] font-medium transition cursor-pointer font-bold">🕯️ 미놀타 로코르 58mm</button>
+          <button type="button" onclick="executeAiSampleSearch('슈퍼 타쿠마 50mm F1.4')" class="ai-chip px-2.5 py-1 rounded-full bg-white border border-[#E5E5E5] hover:border-[#171717] text-[#171717] text-[11px] font-medium transition cursor-pointer">🌈 슈퍼 타쿠마</button>
+          <button type="button" onclick="executeAiSampleSearch('헬리오스 44-2 58mm F2')" class="ai-chip px-2.5 py-1 rounded-full bg-white border border-[#E5E5E5] hover:border-[#171717] text-[#171717] text-[11px] font-medium transition cursor-pointer">🌀 헬리오스 44</button>
+          <button type="button" onclick="executeAiSampleSearch('라이카 Q2')" class="ai-chip px-2.5 py-1 rounded-full bg-white border border-[#E5E5E5] hover:border-[#171717] text-[#171717] text-[11px] font-medium transition cursor-pointer">라이카 Q2</button>
+          <button type="button" onclick="executeAiSampleSearch('리코 GR III')" class="ai-chip px-2.5 py-1 rounded-full bg-white border border-[#E5E5E5] hover:border-[#171717] text-[#171717] text-[11px] font-medium transition cursor-pointer">리코 GR3</button>
+        </div>
+      </div>
+
+      <!-- Modal Body (Scrollable Results) -->
+      <div id="aiSampleResultsArea" class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6">
+        <!-- Injected via JavaScript -->
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= LIGHTBOX MODAL FOR SAMPLE PHOTOS (작례 사진 고화질 확대 뷰) ================= -->
+  <div id="samplePhotoLightboxModal" class="fixed inset-0 z-[70] hidden bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+    <button type="button" onclick="closeSampleLightbox()" class="absolute top-4 right-4 p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition cursor-pointer z-10" title="닫기 (ESC)">
+      <i data-lucide="x" class="w-6 h-6"></i>
+    </button>
+    <div class="max-w-4xl max-h-[92vh] flex flex-col items-center justify-center text-center">
+      <img id="lightboxImage" src="" class="max-w-full max-h-[75vh] object-contain rounded-lg shadow-2xl mb-3 border border-white/10">
+      <div class="text-center text-white px-4">
+        <h4 id="lightboxTitle" class="text-sm sm:text-base font-bold mb-1 tracking-tight"></h4>
+        <p id="lightboxExif" class="text-xs text-zinc-300 font-mono"></p>
+        <p id="lightboxAuthor" class="text-[11px] text-zinc-400 mt-1"></p>
+        <div class="mt-3.5 flex items-center justify-center gap-2 flex-wrap">
+          <button type="button" onclick="openGoogleSearch(currentActiveSampleQuery || document.getElementById('lightboxTitle')?.innerText || '작례', '고화질 작례')" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shadow-md cursor-pointer">
+            <span class="w-2 h-2 rounded-full bg-white"></span>
+            <span>Google 실시간 고화질 검색 결과로 보기 ↗</span>
+          </button>
+          <div id="lightboxSourceLinkWrap" class="hidden">
+            <a id="lightboxSourceLink" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-medium transition cursor-pointer">
+              <span>출처 웹사이트 원본 열기</span>
+              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ================= REALTIME CRAWLER SERVER MODAL ================= -->
+  <div id="crawlerServerModal" class="fixed inset-0 z-[80] hidden overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+    <div class="relative bg-white border border-[#E5E5E5] rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl text-[#171717] flex flex-col my-auto">
+      
+      <!-- Header -->
+      <div class="px-6 py-4 border-b border-[#EAEAEA] flex items-center justify-between bg-white flex-shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-[#171717] text-white flex items-center justify-center font-bold text-sm shadow-xs font-mono">
+            <i data-lucide="terminal" class="w-4 h-4 text-emerald-400"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-base font-bold text-[#171717]">실시간 크롤러 서버 (방식 B)</h3>
+              <span id="crawlerModalBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600 font-mono">상태 확인 중</span>
+            </div>
+            <p class="text-xs text-[#737373]">Flickr, Lomography, YouTube, Naver Blog 실시간 크롤링 로컬 데몬</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeCrawlerServerModal()" class="p-1.5 rounded-lg text-[#8A8A8A] hover:text-[#171717] hover:bg-[#F5F5F5] transition cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="p-6 space-y-4 text-xs max-h-[75vh] overflow-y-auto">
+        <div class="p-3.5 rounded-xl bg-[#FAFAFA] border border-[#EAEAEA] text-xs text-[#171717] leading-relaxed">
+          <strong>💡 실시간 크롤링 작동 원리:</strong><br>
+          브라우저(CORS) 보안 제한을 넘기 위해 로컬 백그라운드 서버(<code>server.py</code>)가 검색 즉시 Flickr와 Lomography에서 실제 사진들을 긁어와 웹페이지로 전송합니다.
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-xs font-bold text-[#171717]">서버 실행 명령어 (터미널에서 1회 실행):</label>
+          <div class="flex items-center gap-2">
+            <input type="text" id="crawlerCommandInput" readonly value="python3 server.py" class="flex-1 px-3.5 py-2.5 rounded-xl border border-[#D4D4D4] font-mono text-xs bg-[#F5F5F5] text-[#171717] select-all">
+            <button type="button" onclick="copyCrawlerCommand()" class="px-3.5 py-2.5 rounded-xl bg-[#171717] hover:bg-black text-white font-bold text-xs transition cursor-pointer shadow-2xs">
+              복사
+            </button>
+          </div>
+          <p class="text-[11px] text-[#737373]">프로젝트 폴더 내에서 실행하면 <code>http://localhost:5000</code>에 즉시 크롤러가 대기합니다.</p>
+        </div>
+
+        <!-- Connection Test Status Box -->
+        <div id="crawlerServerTestResult" class="p-3.5 rounded-xl border border-zinc-200 bg-zinc-50 text-zinc-700 text-xs">
+          서버 상태를 확인하려면 아래 [서버 연결 테스트] 버튼을 누르세요.
+        </div>
+      </div>
+
+      <!-- Footer Buttons -->
+      <div class="px-6 py-3.5 border-t border-[#EAEAEA] bg-[#FAFAFA] flex items-center justify-between flex-shrink-0">
+        <span class="text-[11px] text-[#8A8A8A]">포트 기본값: 5000</span>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="closeCrawlerServerModal()" class="px-3.5 py-2 rounded-xl border border-[#D4D4D4] text-xs font-semibold hover:bg-[#F5F5F5] transition cursor-pointer">
+            닫기
+          </button>
+          <button type="button" onclick="checkCrawlerServerHealth(true)" class="px-4 py-2 rounded-xl bg-[#171717] hover:bg-black text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+            <span>서버 연결 테스트</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="mt-auto border-t border-[#EAEAEA] bg-white py-12 text-xs text-[#737373]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-8 border-b border-[#F0F0F0]">
+        <div>
+          <div class="flex items-center gap-2 mb-2">
+            <span class="font-extrabold text-lg tracking-brand text-[#171717] uppercase">F R A M E</span>
+          </div>
+          <p class="text-[#8A8A8A] text-xs">
+            좋은 장비는 좋은 순간을 만듭니다. (BETTER EQUIPMENT, BETTER MOMENTS)
+          </p>
+        </div>
+        <div class="flex items-center gap-6 text-xs text-[#171717] font-medium">
+          <a href="https://www.camerashuttercount.com/" target="_blank" class="hover:underline">CameraShutterCount</a>
+          <a href="#" onclick="openFraudCheckModal(); return false;" class="hover:underline">사기 이력 조회</a>
+          <a href="#" class="hover:underline">이용 가이드</a>
+        </div>
+      </div>
+      <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#8A8A8A]">
+        <div>© 2026 FRAME. CAMERA & FILM MARKETPLACE. All rights reserved.</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= FRAME TOAST NOTIFICATION CONTAINER ================= -->
+  <div id="frameToastContainer" class="fixed top-6 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center gap-2 pointer-events-none transition-all"></div>
+
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <!-- ================= MOBILE BOTTOM NAVIGATION BAR (md:hidden) ================= -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#EAEAEA] px-3 py-1.5 flex items-center justify-around text-center shadow-lg">
+    <button onclick="handleBottomNavClick('home')" class="flex flex-col items-center justify-center p-1 text-[#171717] hover:text-black transition">
+      <i data-lucide="home" class="w-5 h-5 mb-0.5"></i>
+      <span class="text-[10px] font-semibold">홈</span>
+    </button>
+    <button onclick="handleBottomNavClick('ai')" class="flex flex-col items-center justify-center p-1 text-[#737373] hover:text-[#171717] transition">
+      <i data-lucide="sparkles" class="w-5 h-5 mb-0.5 text-emerald-600"></i>
+      <span class="text-[10px] font-semibold">작례 탐색</span>
+    </button>
+    <button onclick="openRegisterModal()" class="flex flex-col items-center justify-center -mt-4 bg-[#171717] hover:bg-black text-white p-2.5 rounded-full shadow-md active:scale-95 transition" title="새 매물 등록">
+      <i data-lucide="plus" class="w-5 h-5"></i>
+    </button>
+    <button onclick="handleBottomNavClick('wishlist')" class="flex flex-col items-center justify-center p-1 text-[#737373] hover:text-red-500 transition relative">
+      <i data-lucide="heart" class="w-5 h-5 mb-0.5 text-red-500"></i>
+      <span class="text-[10px] font-semibold">관심 매물</span>
+      <span id="bottomNavWishlistBadge" class="hidden absolute top-0.5 right-1.5 w-2 h-2 rounded-full bg-red-500"></span>
+    </button>
+    <button onclick="openChatDrawer('bottomNav')" class="flex flex-col items-center justify-center p-1 text-[#737373] hover:text-[#171717] transition relative">
+      <i data-lucide="message-square" class="w-5 h-5 mb-0.5"></i>
+      <span class="text-[10px] font-semibold">채팅</span>
+      <span class="absolute top-0.5 right-2 min-w-[14px] h-[14px] px-0.5 rounded-full bg-[#171717] text-white text-[9px] font-bold flex items-center justify-center">2</span>
+    </button>
+  </nav>
+
+</body>
+</html>
