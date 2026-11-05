@@ -2031,6 +2031,36 @@ function handleProductSubmit(e) {
   SAMPLE_PRODUCTS.unshift(newProduct);
   applyFilters();
 
+  // 4. Supabase DB 동기화 (클라우드 데이터베이스 저장)
+  if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+    (async () => {
+      try {
+        const u = getCurrentUser();
+        await supabaseClient.from('products').insert([{
+          user_id: (u && u.id && u.id.length > 20 && u.id.includes('-')) ? u.id : null,
+          title: newProduct.title,
+          brand: newProduct.brand,
+          category: newProduct.category,
+          mount: newProduct.mount,
+          price: newProduct.price,
+          avg_market_price: newProduct.avgMarketPrice,
+          location: newProduct.location,
+          image_url: newProduct.imageUrl,
+          images: newProduct.images,
+          condition: newProduct.condition,
+          verified: newProduct.verified,
+          verification_type: newProduct.verificationType,
+          verification_details: newProduct.verificationDetails,
+          seller: newProduct.seller,
+          specs: newProduct.specs,
+          description: newProduct.description
+        }]);
+      } catch (err) {
+        console.warn('Supabase product upload sync:', err);
+      }
+    })();
+  }
+
   // 4. 등록된 상품 위치로 부드럽게 스크롤 & 하이라이트 애니메이션
   const grid = document.getElementById('productGrid');
   if (grid) {
@@ -2171,7 +2201,19 @@ function sendChatMessage() {
   }, 1000);
 }
 
-// ================= USER AUTHENTICATION, MULTI-STEP SIGNUP & VERIFICATION =================
+// ================= SUPABASE CLIENT & AUTHENTICATION INITIALIZATION =================
+const SUPABASE_URL = 'https://uzmgwtucqyuhoyjwzdkw.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_iD4nbmFm3Ovzbm1lQlH_NQ_zWVUCFJW';
+let supabaseClient = null;
+
+if (window.supabase && typeof window.supabase.createClient === 'function') {
+  try {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  } catch (err) {
+    console.warn('Supabase initialization error:', err);
+  }
+}
+
 function getCurrentUser() {
   const json = sessionStorage.getItem('frame_current_user');
   if (!json) return null;
@@ -2192,10 +2234,37 @@ function setCurrentUser(user) {
   syncVerificationUI();
 }
 
-function initUserState() {
+async function initUserState() {
+  // 1. Supabase 세션 자동 복원
+  if (supabaseClient) {
+    try {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session && session.user) {
+        let profile = null;
+        try {
+          const { data: prof } = await supabaseClient.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+          profile = prof;
+        } catch (e) {}
+
+        const isAdmin = session.user.email === 'admin@frame.com' || profile?.role === 'admin';
+        const restoredUser = {
+          id: session.user.id,
+          email: session.user.email,
+          name: profile?.nickname || session.user.user_metadata?.nickname || (isAdmin ? '마스터 관리자' : session.user.email.split('@')[0]),
+          role: isAdmin ? 'admin' : (profile?.role || 'user'),
+          level: isAdmin ? 99 : (profile?.level || 1),
+          loginAt: session.user.last_sign_in_at || new Date().toISOString()
+        };
+        sessionStorage.setItem('frame_current_user', JSON.stringify(restoredUser));
+      }
+    } catch (e) {
+      console.warn('Supabase session restore warning:', e);
+    }
+  }
+
   updateHeaderUserState();
 
-  // Check saved ID for login form
+  // 2. 로그인 폼 저장된 ID 채우기
   const savedId = localStorage.getItem('frame_saved_id');
   if (savedId) {
     const loginIdInput = document.getElementById('loginId');
@@ -2204,8 +2273,53 @@ function initUserState() {
     if (saveCheck) saveCheck.checked = true;
   }
 
-  // Init terms checkbox synchronization
+  // 3. 약관 동의 리스너 초기화
   initTermsListeners();
+
+  // 4. Supabase DB에서 원격 매물 목록 불러오기
+  loadSupabaseProducts();
+}
+
+// Supabase 원격 매물 불러오기 및 그리드 렌더링
+async function loadSupabaseProducts() {
+  if (!supabaseClient) return;
+  try {
+    const { data, error } = await supabaseClient.from('products').select('*').order('created_at', { ascending: false });
+    if (!error && data && data.length > 0) {
+      const remoteProducts = data.map(row => ({
+        id: row.id,
+        category: row.category,
+        brand: row.brand,
+        mount: row.mount,
+        title: row.title,
+        price: Number(row.price),
+        avgMarketPrice: Number(row.avg_market_price || row.price),
+        location: row.location,
+        createdAt: new Date(row.created_at).toLocaleDateString('ko-KR'),
+        imageUrl: row.image_url,
+        images: row.images || [row.image_url],
+        condition: row.condition || 'A+급',
+        verified: row.verified,
+        verificationType: row.verification_type,
+        verificationDetails: row.verification_details || {},
+        seller: row.seller || { name: '판매자', level: 2 },
+        specs: row.specs || {},
+        description: row.description || '',
+        priceHistory: {
+          labels: ['5월', '6월', '7월', '8월', '9월', '10월'],
+          prices: [Number(row.price) * 1.05, Number(row.price) * 1.04, Number(row.price) * 1.02, Number(row.price) * 1.01, Number(row.price) * 1.01, Number(row.price)]
+        }
+      }));
+      const existingIds = new Set(SAMPLE_PRODUCTS.map(p => p.id));
+      const newItems = remoteProducts.filter(p => !existingIds.has(p.id));
+      if (newItems.length > 0) {
+        SAMPLE_PRODUCTS = [...newItems, ...SAMPLE_PRODUCTS];
+        applyFilters();
+      }
+    }
+  } catch (e) {
+    console.warn('Supabase products fetch warning:', e);
+  }
 }
 
 function initTermsListeners() {
@@ -2228,7 +2342,7 @@ function toggleAllTerms(checked) {
   });
 }
 
-function checkEmailDuplicate() {
+async function checkEmailDuplicate() {
   const emailInput = document.getElementById('signupEmail');
   if (!emailInput) return;
   const email = emailInput.value.trim();
@@ -2238,6 +2352,20 @@ function checkEmailDuplicate() {
     emailInput.focus();
     return;
   }
+
+  // Supabase profiles 조회
+  if (supabaseClient) {
+    try {
+      const { data, error } = await supabaseClient.from('profiles').select('id').eq('email', email).maybeSingle();
+      if (data) {
+        showToast(`'${email}' 은(는) 이미 등록된 이메일입니다.`, 'error');
+        return;
+      }
+    } catch (e) {
+      console.warn('Email check error:', e);
+    }
+  }
+
   if (email === 'admin@frame.kr' || email === 'seller@camera.com') {
     showToast(`'${email}' 은(는) 이미 등록된 이메일입니다.`, 'error');
     return;
@@ -2245,7 +2373,7 @@ function checkEmailDuplicate() {
   showToast(`'${email}' 은(는) 사용 가능한 이메일입니다.`, 'success');
 }
 
-function checkNicknameDuplicate() {
+async function checkNicknameDuplicate() {
   const nicknameInput = document.getElementById('signupNickname');
   if (!nicknameInput) return;
   const nickname = nicknameInput.value.trim();
@@ -2254,6 +2382,20 @@ function checkNicknameDuplicate() {
     nicknameInput.focus();
     return;
   }
+
+  // Supabase profiles 조회
+  if (supabaseClient) {
+    try {
+      const { data, error } = await supabaseClient.from('profiles').select('id').eq('nickname', nickname).maybeSingle();
+      if (data) {
+        showToast(`'${nickname}' 은(는) 이미 사용 중인 닉네임입니다.`, 'error');
+        return;
+      }
+    } catch (e) {
+      console.warn('Nickname check error:', e);
+    }
+  }
+
   if (nickname === '포토그래퍼김씨' || nickname === '관리자') {
     showToast(`'${nickname}' 은(는) 이미 사용 중인 닉네임입니다.`, 'error');
     return;
@@ -2268,7 +2410,15 @@ function updateHeaderUserState() {
   const user = getCurrentUser();
   if (user) {
     let levelBadgeHtml = '';
-    if (user.level === 3) {
+    const isAdmin = user.role === 'admin' || user.level === 99 || user.email === 'admin@frame.com';
+
+    if (isAdmin) {
+      levelBadgeHtml = `
+        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[10px] font-bold shadow-sm" title="👑 마스터 관리자 (시스템 최고 권한)">
+          <span>👑 마스터 관리자</span>
+        </span>
+      `;
+    } else if (user.level === 3) {
       levelBadgeHtml = `
         <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#171717] text-white text-[10px] font-bold shadow-sm" title="Lv.3 안심 인증 판매자 (계좌+신분증+셀피 검증완료)">
           <i data-lucide="shield-check" class="w-3 h-3 text-emerald-400"></i>
@@ -2284,7 +2434,7 @@ function updateHeaderUserState() {
       `;
     } else {
       levelBadgeHtml = `
-        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600 border border-zinc-200 text-[10px] font-semibold" title="Lv.1 기본가입 (둘러보기)">
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600 border border-zinc-200 text-[10px] font-semibold" title="Lv.1 일반">
           <span>Lv.1 일반</span>
         </span>
       `;
@@ -2296,9 +2446,15 @@ function updateHeaderUserState() {
           <span class="font-bold text-[#171717] max-w-[80px] sm:max-w-[100px] truncate">${user.name || user.id}</span>
           ${levelBadgeHtml}
         </div>
-        <button onclick="openVerificationCenterModal()" class="hidden sm:inline-flex text-[11px] font-semibold px-2.5 py-1 rounded-full border border-[#171717] bg-white text-[#171717] hover:bg-[#171717] hover:text-white transition cursor-pointer" title="본인 인증 센터 열기">
-          인증센터
-        </button>
+        ${isAdmin ? `
+          <span class="hidden sm:inline-flex text-[11px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300">
+            관리자 모드
+          </span>
+        ` : `
+          <button onclick="openVerificationCenterModal()" class="hidden sm:inline-flex text-[11px] font-semibold px-2.5 py-1 rounded-full border border-[#171717] bg-white text-[#171717] hover:bg-[#171717] hover:text-white transition cursor-pointer" title="본인 인증 센터 열기">
+            인증센터
+          </button>
+        `}
         <button onclick="handleLogout()" class="text-[11px] text-[#8A8A8A] hover:text-[#171717] underline cursor-pointer ml-0.5">
           로그아웃
         </button>
@@ -2318,7 +2474,7 @@ function updateHeaderUserState() {
 function handleUserIconClick() {
   const user = getCurrentUser();
   if (user) {
-    if (confirm(`현재 [${user.name || user.id}] 계정(Lv.${user.level || 1})으로 로그인되어 있습니다.\n\n로그아웃하시겠습니까?`)) {
+    if (confirm(`현재 [${user.name || user.id}] 계정으로 로그인되어 있습니다.\n\n로그아웃하시겠습니까?`)) {
       handleLogout();
     }
   } else {
@@ -2398,8 +2554,8 @@ function togglePasswordVisibility(inputId, eyeIconId) {
   lucide.createIcons();
 }
 
-// Login Form Submit
-function handleLoginSubmit(e) {
+// Login Form Submit (Supabase Auth 연동)
+async function handleLoginSubmit(e) {
   e.preventDefault();
 
   const id = document.getElementById('loginId').value.trim();
@@ -2407,34 +2563,81 @@ function handleLoginSubmit(e) {
   const saveCheck = document.getElementById('saveIdCheck')?.checked;
 
   if (!id || !pw) {
-    showToast('아이디와 비밀번호를 모두 입력해 주세요.', 'error');
+    showToast('아이디(이메일)와 비밀번호를 모두 입력해 주세요.', 'error');
     return;
   }
 
-  // Handle "아이디 저장"
   if (saveCheck) {
     localStorage.setItem('frame_saved_id', id);
   } else {
     localStorage.removeItem('frame_saved_id');
   }
 
+  const email = id.includes('@') ? id : `${id}@frame.com`;
+
+  // 1. Supabase Auth 로그인 시도
+  if (supabaseClient) {
+    showToast('로그인 확인 중...', 'info', 1500);
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+      email: email,
+      password: pw
+    });
+
+    if (error) {
+      let msg = error.message;
+      if (msg.includes('Invalid login credentials')) {
+        msg = '이메일 또는 비밀번호가 올바르지 않습니다.';
+      } else if (msg.includes('Email not confirmed')) {
+        msg = '이메일 인증이 완료되지 않았습니다. (Supabase 대시보드에서 Confirm email을 꺼주세요)';
+      }
+      showToast(`로그인 실패: ${msg}`, 'error');
+      return;
+    }
+
+    if (data && data.user) {
+      let profile = null;
+      try {
+        const { data: prof } = await supabaseClient.from('profiles').select('*').eq('id', data.user.id).maybeSingle();
+        profile = prof;
+      } catch (err) {
+        console.warn('Profile fetch error:', err);
+      }
+
+      const isAdmin = data.user.email === 'admin@frame.com' || profile?.role === 'admin';
+      const userData = {
+        id: data.user.id,
+        email: data.user.email,
+        name: profile?.nickname || data.user.user_metadata?.nickname || (isAdmin ? '마스터 관리자' : data.user.email.split('@')[0]),
+        role: isAdmin ? 'admin' : (profile?.role || 'user'),
+        level: isAdmin ? 99 : (profile?.level || 2),
+        loginAt: new Date().toISOString()
+      };
+
+      setCurrentUser(userData);
+      closeAuthModal();
+      showToast(`${userData.name}님 환영합니다! 로그인이 완료되었습니다.`, 'success');
+      return;
+    }
+  }
+
+  // 2. 오프라인 로컬 Fallback
   const existing = getCurrentUser();
   const userData = (existing && existing.id === id) ? existing : {
     id: id,
-    email: id.includes('@') ? id : `${id}@camera.com`,
+    email: email,
     name: id.includes('@') ? id.split('@')[0] : id,
-    level: 2, // 기본 PASS 인증 완료 (상품등록 원활하게 바로 테스트 가능)
+    role: id === 'admin@frame.com' ? 'admin' : 'user',
+    level: id === 'admin@frame.com' ? 99 : 2,
     loginAt: new Date().toISOString()
   };
 
   setCurrentUser(userData);
   closeAuthModal();
-
   showToast(`${userData.name}님 환영합니다! 로그인이 완료되었습니다.`, 'success');
 }
 
-// Signup Form Submit (기본 가입 -> Lv.1 및 인증 선택 안내)
-function handleSignupSubmit(e) {
+// Signup Form Submit (Supabase Auth 회원가입 연동)
+async function handleSignupSubmit(e) {
   e.preventDefault();
 
   const email = document.getElementById('signupEmail').value.trim();
@@ -2442,13 +2645,13 @@ function handleSignupSubmit(e) {
   const pw = document.getElementById('signupPw').value;
   const pwConfirm = document.getElementById('signupPwConfirm').value;
 
-  if (pw.length < 4) {
-    alert('비밀번호는 4자 이상 입력해 주세요.');
+  if (pw.length < 6) {
+    showToast('비밀번호는 최소 6자 이상이어야 합니다. (보안 규정)', 'error');
     return;
   }
 
   if (pw !== pwConfirm) {
-    alert('비밀번호가 일치하지 않습니다. 다시 확인해 주세요.');
+    showToast('비밀번호가 일치하지 않습니다. 다시 확인해 주세요.', 'error');
     return;
   }
 
@@ -2457,16 +2660,72 @@ function handleSignupSubmit(e) {
   const termAge = document.getElementById('termAge')?.checked;
 
   if (!termService || !termPrivacy || !termAge) {
-    alert('필수 약관(이용약관, 개인정보 수집 및 만 14세 이상 확인)에 모두 동의해 주세요.');
+    showToast('필수 약관(이용약관, 개인정보 수집 및 만 14세 이상 확인)에 모두 동의해 주세요.', 'error');
     return;
   }
 
-  // Create Lv.1 user
+  // 1. Supabase Auth 회원가입
+  if (supabaseClient) {
+    showToast('회원가입 요청 중...', 'info', 1500);
+    const { data, error } = await supabaseClient.auth.signUp({
+      email: email,
+      password: pw,
+      options: {
+        data: {
+          nickname: name
+        }
+      }
+    });
+
+    if (error) {
+      showToast(`회원가입 실패: ${error.message}`, 'error');
+      return;
+    }
+
+    const isAdmin = email === 'admin@frame.com';
+    const newUser = {
+      id: data.user ? data.user.id : email,
+      email: email,
+      name: name,
+      role: isAdmin ? 'admin' : 'user',
+      level: isAdmin ? 99 : 1,
+      isEmailVerified: true,
+      isPhoneVerified: false,
+      isBankVerified: false,
+      isEkycVerified: false,
+      createdAt: new Date().toISOString(),
+      termsAgreed: {
+        service: true,
+        privacy: true,
+        age14: true,
+        marketing: document.getElementById('termMarketing')?.checked || false,
+        version: 'v1.0',
+        agreedAt: new Date().toISOString()
+      }
+    };
+
+    setCurrentUser(newUser);
+
+    const signupForm = document.getElementById('signupForm');
+    const signupSuccessPrompt = document.getElementById('signupSuccessPrompt');
+    if (signupForm && signupSuccessPrompt) {
+      signupForm.classList.add('hidden');
+      signupSuccessPrompt.classList.remove('hidden');
+      lucide.createIcons();
+    } else {
+      showToast(`${name}님 환영합니다! FRAME 회원가입이 완료되었습니다.`, 'success');
+      closeAuthModal();
+    }
+    return;
+  }
+
+  // 2. 오프라인 로컬 Fallback
   const newUser = {
     id: email,
     email: email,
     name: name,
-    level: 1,
+    role: email === 'admin@frame.com' ? 'admin' : 'user',
+    level: email === 'admin@frame.com' ? 99 : 1,
     isEmailVerified: true,
     isPhoneVerified: false,
     isBankVerified: false,
@@ -2484,7 +2743,6 @@ function handleSignupSubmit(e) {
 
   setCurrentUser(newUser);
 
-  // Transition to Lv.1 complete & promotion prompt view
   const signupForm = document.getElementById('signupForm');
   const signupSuccessPrompt = document.getElementById('signupSuccessPrompt');
   if (signupForm && signupSuccessPrompt) {
@@ -2511,8 +2769,15 @@ function handleFindSubmit(e) {
   switchAuthView('login');
 }
 
-// Logout
-function handleLogout() {
+// Logout (Supabase Auth 로그아웃 연동)
+async function handleLogout() {
+  if (supabaseClient) {
+    try {
+      await supabaseClient.auth.signOut();
+    } catch (e) {
+      console.warn('Logout warning:', e);
+    }
+  }
   sessionStorage.removeItem('frame_current_user');
   updateHeaderUserState();
   showToast('로그아웃되었습니다.', 'info');
