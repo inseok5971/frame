@@ -2253,6 +2253,12 @@ async function initUserState() {
           name: profile?.nickname || session.user.user_metadata?.nickname || (isAdmin ? '마스터 관리자' : session.user.email.split('@')[0]),
           role: isAdmin ? 'admin' : (profile?.role || 'user'),
           level: isAdmin ? 99 : (profile?.level || 1),
+          isPhoneVerified: isAdmin ? true : Boolean(profile?.is_phone_verified),
+          isBankVerified: isAdmin ? true : Boolean(profile?.is_bank_verified),
+          isEkycVerified: isAdmin ? true : Boolean(profile?.is_ekyc_verified),
+          passInfo: profile?.pass_info || null,
+          bankInfo: profile?.bank_info || null,
+          ekycInfo: profile?.ekyc_info || null,
           loginAt: session.user.last_sign_in_at || new Date().toISOString()
         };
         sessionStorage.setItem('frame_current_user', JSON.stringify(restoredUser));
@@ -2609,7 +2615,13 @@ async function handleLoginSubmit(e) {
         email: data.user.email,
         name: profile?.nickname || data.user.user_metadata?.nickname || (isAdmin ? '마스터 관리자' : data.user.email.split('@')[0]),
         role: isAdmin ? 'admin' : (profile?.role || 'user'),
-        level: isAdmin ? 99 : (profile?.level || 2),
+        level: isAdmin ? 99 : (profile?.level || 1),
+        isPhoneVerified: isAdmin ? true : Boolean(profile?.is_phone_verified),
+        isBankVerified: isAdmin ? true : Boolean(profile?.is_bank_verified),
+        isEkycVerified: isAdmin ? true : Boolean(profile?.is_ekyc_verified),
+        passInfo: profile?.pass_info || null,
+        bankInfo: profile?.bank_info || null,
+        ekycInfo: profile?.ekyc_info || null,
         loginAt: new Date().toISOString()
       };
 
@@ -2808,7 +2820,37 @@ function openVerificationCenterModal() {
   const modal = document.getElementById('verificationCenterModal');
   if (!modal) return;
 
-  const user = getCurrentUser();
+  let user = getCurrentUser();
+  const isAdmin = user && (user.role === 'admin' || user.level === 99 || user.email === 'admin@frame.com');
+
+  if (isAdmin) {
+    user.level = 99;
+    user.role = 'admin';
+    user.isPhoneVerified = true;
+    user.isBankVerified = true;
+    user.isEkycVerified = true;
+    user.passInfo = user.passInfo || {
+      name: user.name || '마스터 관리자',
+      phoneMasked: '010-****-0000',
+      carrier: 'SKT (MASTER)',
+      ciHash: 'CI_MASTER_AUTHENTICATED_PERMANENT',
+      diHash: 'DI_MASTER_SHA256_PERMANENT_KEY_9999',
+      verifiedAt: new Date().toISOString()
+    };
+    user.bankInfo = user.bankInfo || {
+      bank: '한국은행',
+      maskedAccount: '000-***-0000',
+      verifiedAt: new Date().toISOString()
+    };
+    user.ekycInfo = user.ekycInfo || {
+      livenessCheck: 'PASSED (MASTER PRIVILEGE)',
+      faceMatchRate: '100%',
+      idDiscarded: true,
+      verifiedAt: new Date().toISOString()
+    };
+    setCurrentUser(user);
+  }
+
   if (user) {
     const nameInput = document.getElementById('passName');
     if (nameInput && !nameInput.value) nameInput.value = user.name || '';
@@ -2816,7 +2858,9 @@ function openVerificationCenterModal() {
 
   syncVerificationUI();
 
-  if (user && user.level >= 2) {
+  if (isAdmin) {
+    switchVerifyStep(3);
+  } else if (user && user.level >= 2) {
     switchVerifyStep(3);
   } else {
     switchVerifyStep(user ? 2 : 1);
@@ -2960,6 +3004,17 @@ function handlePassVerifySubmit(e) {
 
   setCurrentUser(user);
 
+  // Supabase 클라우드 DB 동기화
+  if (typeof supabaseClient !== 'undefined' && supabaseClient && user.id && user.id.includes('-')) {
+    supabaseClient.from('profiles').update({
+      level: user.level,
+      is_phone_verified: true,
+      pass_info: user.passInfo
+    }).eq('id', user.id).then(() => {
+      console.log('Phone verification saved to Supabase');
+    }).catch(err => console.warn('Supabase profile update error:', err));
+  }
+
   const resultBox = document.getElementById('passSuccessResult');
   const infoText = document.getElementById('passVerifiedInfoText');
   if (resultBox) resultBox.classList.remove('hidden');
@@ -3084,9 +3139,31 @@ function startLivenessScan() {
 }
 
 function checkLv3UpgradeEligibility(user) {
+  const isAdmin = user.role === 'admin' || user.level === 99 || user.email === 'admin@frame.com';
+  if (isAdmin) {
+    user.level = 99;
+    user.isPhoneVerified = true;
+    user.isBankVerified = true;
+    user.isEkycVerified = true;
+    setCurrentUser(user);
+    return;
+  }
+
   if (user.isBankVerified && user.isEkycVerified) {
     user.level = 3;
     setCurrentUser(user);
+
+    if (typeof supabaseClient !== 'undefined' && supabaseClient && user.id && user.id.includes('-')) {
+      supabaseClient.from('profiles').update({
+        level: 3,
+        is_bank_verified: true,
+        is_ekyc_verified: true,
+        bank_info: user.bankInfo,
+        ekyc_info: user.ekycInfo
+      }).eq('id', user.id).then(() => {
+        console.log('Lv.3 upgrade saved to Supabase');
+      }).catch(err => console.warn('Supabase profile update error:', err));
+    }
 
     const banner = document.getElementById('lv3FinalSuccessBanner');
     if (banner) banner.classList.remove('hidden');
@@ -3101,6 +3178,15 @@ function checkLv3UpgradeEligibility(user) {
     alert('🎉 축하합니다!\n\n계좌 인증과 eKYC 신분증·셀피 라이브니스 교차 검증이 모두 완료되어 [Lv.3 안심 인증 판매자]로 최종 승격되었습니다!\n\n등록하신 매물에 안심 판매자 공식 배지가 노출됩니다.');
   } else {
     setCurrentUser(user);
+
+    if (typeof supabaseClient !== 'undefined' && supabaseClient && user.id && user.id.includes('-')) {
+      supabaseClient.from('profiles').update({
+        is_bank_verified: Boolean(user.isBankVerified),
+        bank_info: user.bankInfo || null,
+        is_ekyc_verified: Boolean(user.isEkycVerified),
+        ekyc_info: user.ekycInfo || null
+      }).eq('id', user.id).catch(err => console.warn('Supabase profile update error:', err));
+    }
   }
 }
 
@@ -3108,10 +3194,51 @@ function syncVerificationUI() {
   const user = getCurrentUser();
   if (!user) return;
 
+  const isAdmin = user.role === 'admin' || user.level === 99 || user.email === 'admin@frame.com';
+
   const step2Badge = document.getElementById('step2StatusBadge');
   const step3Badge = document.getElementById('step3StatusBadge');
   const bankBadge = document.getElementById('bankVerifiedBadge');
   const ekycBadge = document.getElementById('ekycVerifiedBadge');
+
+  if (isAdmin) {
+    if (step2Badge) {
+      step2Badge.innerText = '✓ 마스터 승인';
+      step2Badge.className = 'text-[10px] text-amber-600 font-bold mt-0.5';
+    }
+    if (step3Badge) {
+      step3Badge.innerText = '✓ 최고권한 승인';
+      step3Badge.className = 'text-[10px] text-amber-600 font-bold mt-0.5';
+    }
+    if (bankBadge) {
+      bankBadge.innerText = '✓ 마스터 공인완료';
+      bankBadge.className = 'text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-700 font-bold border border-amber-500/20';
+    }
+    if (ekycBadge) {
+      ekycBadge.innerText = '✓ 마스터 프리패스';
+      ekycBadge.className = 'text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-700 font-bold border border-amber-500/20';
+    }
+    const banner = document.getElementById('lv3FinalSuccessBanner');
+    if (banner) {
+      banner.classList.remove('hidden');
+      banner.innerHTML = `
+        <div class="p-3.5 rounded-xl bg-gradient-to-r from-amber-500/15 via-yellow-500/10 to-amber-500/15 border border-amber-300 flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-500 text-white flex items-center justify-center font-bold text-lg shadow-sm flex-shrink-0">
+            👑
+          </div>
+          <div>
+            <div class="text-xs font-bold text-[#171717] flex items-center gap-1.5">
+              마스터 관리자 프리패스 적용 중 (Lv.99 최고 권한)
+            </div>
+            <p class="text-[11px] text-[#737373] mt-0.5">
+              최고 관리자 계정은 휴대폰 PASS, 1원 계좌, eKYC 3단계 실명 인증이 모두 영구 자동 승인되어 있습니다.
+            </p>
+          </div>
+        </div>
+      `;
+    }
+    return;
+  }
 
   if (user.level >= 2 || user.isPhoneVerified) {
     if (step2Badge) {
