@@ -3464,7 +3464,7 @@ function extractCoreKeywords(raw) {
 // ================= REALTIME CRAWLER SERVER STATE & INTEGRATION (방식 B) =================
 let isCrawlerServerOnline = false;
 
-// 실시간 크롤러 서버 상태 체크 (localhost:5000/api/health)
+// 실시간 크롤러 서버 상태 체크 (localhost:5050/api/health)
 async function checkCrawlerServerHealth(showToast = false) {
   const badge = document.getElementById('crawlerServerStatusBadge');
   const dot = document.getElementById('crawlerServerStatusDot');
@@ -3475,7 +3475,7 @@ async function checkCrawlerServerHealth(showToast = false) {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 1500);
-    const res = await fetch('http://localhost:5000/api/health', { signal: controller.signal });
+    const res = await fetch('http://localhost:5050/api/health', { signal: controller.signal });
     clearTimeout(timeoutId);
 
     if (res.ok) {
@@ -3487,14 +3487,14 @@ async function checkCrawlerServerHealth(showToast = false) {
       }
       if (modalBadge) {
         modalBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-mono';
-        modalBadge.innerText = '서버 가동 중 (localhost:5000)';
+        modalBadge.innerText = '서버 가동 중 (localhost:5050)';
       }
       if (testBox) {
         testBox.className = 'p-3.5 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-800 text-xs leading-relaxed';
         testBox.innerHTML = '<strong>✅ 실시간 크롤러 서버 정상 연결!</strong><br><span class="text-[11px] text-emerald-700">Flickr, Lomography, YouTube, Naver Blog 실시간 크롤링이 준비되었습니다.</span>';
       }
       if (showToast && typeof showFrameToast === 'function') {
-        showFrameToast('실시간 크롤러 서버가 정상 작동 중입니다! (포트 5000)', 'success');
+        showFrameToast('실시간 크롤러 서버가 정상 작동 중입니다! (포트 5050)', 'success');
       }
       return true;
     }
@@ -4756,12 +4756,12 @@ async function executeAiSampleSearch(customQuery) {
   `;
   if (window.lucide) lucide.createIcons();
 
-  // 1. 로컬 파이썬 서버 호출 시도 (localhost:5000)
+  // 1. 로컬 파이썬 서버 호출 시도 (localhost:5050)
   let crawlerData = null;
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3500);
-    const res = await fetch(`http://localhost:5000/api/search?q=${encodeURIComponent(query)}`, {
+    const res = await fetch(`http://localhost:5050/api/search?q=${encodeURIComponent(query)}`, {
       signal: controller.signal
     });
     clearTimeout(timeoutId);
