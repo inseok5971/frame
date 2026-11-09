@@ -2424,23 +2424,16 @@ function updateHeaderUserState() {
           <span>👑 마스터 관리자</span>
         </span>
       `;
-    } else if (user.level === 3) {
+    } else if (user.level >= 2 || user.isPhoneVerified) {
       levelBadgeHtml = `
-        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#171717] text-white text-[10px] font-bold shadow-sm" title="Lv.3 안심 인증 판매자 (계좌+신분증+셀피 검증완료)">
-          <i data-lucide="shield-check" class="w-3 h-3 text-emerald-400"></i>
-          <span>Lv.3 안심판매자</span>
-        </span>
-      `;
-    } else if (user.level === 2) {
-      levelBadgeHtml = `
-        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-300 text-[10px] font-bold" title="Lv.2 PASS 실명인증 완료 (매물등록 가능)">
-          <i data-lucide="check" class="w-2.5 h-2.5"></i>
-          <span>Lv.2 PASS</span>
+        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-300 text-[10px] font-bold" title="PASS 휴대폰 실명인증 완료 (Lv.2 정회원)">
+          <i data-lucide="shield-check" class="w-3 h-3 text-emerald-600"></i>
+          <span>실명 안심 판매자 (Lv.2)</span>
         </span>
       `;
     } else {
       levelBadgeHtml = `
-        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600 border border-zinc-200 text-[10px] font-semibold" title="Lv.1 일반">
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600 border border-zinc-200 text-[10px] font-semibold" title="Lv.1 일반 회원 (둘러보기)">
           <span>Lv.1 일반</span>
         </span>
       `;
@@ -2906,15 +2899,13 @@ function closeVerificationCenterModal() {
 function switchVerifyStep(step) {
   const tab1 = document.getElementById('verifyTabStep1');
   const tab2 = document.getElementById('verifyTabStep2');
-  const tab3 = document.getElementById('verifyTabStep3');
 
   const content1 = document.getElementById('verifyStepContent1');
   const content2 = document.getElementById('verifyStepContent2');
-  const content3 = document.getElementById('verifyStepContent3');
 
-  [tab1, tab2, tab3].forEach(t => t?.classList.remove('active', 'border-[#171717]', 'bg-white'));
-  [tab1, tab2, tab3].forEach(t => t?.classList.add('bg-[#FAFAFA]'));
-  [content1, content2, content3].forEach(c => c?.classList.add('hidden'));
+  [tab1, tab2].forEach(t => t?.classList.remove('active', 'border-[#171717]', 'bg-white'));
+  [tab1, tab2].forEach(t => t?.classList.add('bg-[#FAFAFA]'));
+  [content1, content2].forEach(c => c?.classList.add('hidden'));
 
   const activeTab = document.getElementById(`verifyTabStep${step}`);
   const activeContent = document.getElementById(`verifyStepContent${step}`);
@@ -3043,12 +3034,12 @@ function handlePassVerifySubmit(e) {
 
   const step2Badge = document.getElementById('step2StatusBadge');
   if (step2Badge) {
-    step2Badge.innerText = '✓ Lv.2 인증완료';
+    step2Badge.innerText = '✓ Lv.2 완료 (정회원)';
     step2Badge.className = 'text-[10px] text-emerald-600 font-bold mt-0.5';
   }
 
   lucide.createIcons();
-  alert(`[토스 본인인증(Toss Identity) 테스트 통과]\n\n• 성명: ${name}\n• 통신사: ${carrier}\n• 발급 DI: ${mockDi.substring(0, 24)}... (동일인 중복가입 및 사기 방지 식별값)\n\n회원 등급이 [Lv.2 PASS/토스 실명인증]으로 승격되었습니다.\n이제 상품 등록 및 직거래가 가능합니다.`);
+  alert(`🎉 [PASS 휴대폰 실명 인증 완료]\n\n• 성명: ${name}\n• 통신사: ${carrier}\n• 발급 DI: ${mockDi.substring(0, 24)}... (동일인 중복가입 및 사기 방지 식별값)\n\n회원 등급이 [Lv.2 정회원]으로 승격되었습니다.\n이제 자유롭게 카메라/렌즈 매물을 등록하고 안심 직거래를 이용하실 수 있습니다.`);
 }
 
 function sendBank1WonVerify() {
@@ -3227,43 +3218,12 @@ function syncVerificationUI() {
       step2Badge.innerText = '✓ 마스터 승인';
       step2Badge.className = 'text-[10px] text-amber-600 font-bold mt-0.5';
     }
-    if (step3Badge) {
-      step3Badge.innerText = '✓ 최고권한 승인';
-      step3Badge.className = 'text-[10px] text-amber-600 font-bold mt-0.5';
-    }
-    if (bankBadge) {
-      bankBadge.innerText = '✓ 마스터 공인완료';
-      bankBadge.className = 'text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-700 font-bold border border-amber-500/20';
-    }
-    if (ekycBadge) {
-      ekycBadge.innerText = '✓ 마스터 프리패스';
-      ekycBadge.className = 'text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-700 font-bold border border-amber-500/20';
-    }
-    const banner = document.getElementById('lv3FinalSuccessBanner');
-    if (banner) {
-      banner.classList.remove('hidden');
-      banner.innerHTML = `
-        <div class="p-3.5 rounded-xl bg-gradient-to-r from-amber-500/15 via-yellow-500/10 to-amber-500/15 border border-amber-300 flex items-center gap-3">
-          <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-500 text-white flex items-center justify-center font-bold text-lg shadow-sm flex-shrink-0">
-            👑
-          </div>
-          <div>
-            <div class="text-xs font-bold text-[#171717] flex items-center gap-1.5">
-              마스터 관리자 프리패스 적용 중 (Lv.99 최고 권한)
-            </div>
-            <p class="text-[11px] text-[#737373] mt-0.5">
-              최고 관리자 계정은 휴대폰 PASS, 1원 계좌, eKYC 3단계 실명 인증이 모두 영구 자동 승인되어 있습니다.
-            </p>
-          </div>
-        </div>
-      `;
-    }
     return;
   }
 
   if (user.level >= 2 || user.isPhoneVerified) {
     if (step2Badge) {
-      step2Badge.innerText = '✓ Lv.2 완료';
+      step2Badge.innerText = '✓ Lv.2 완료 (정회원)';
       step2Badge.className = 'text-[10px] text-emerald-600 font-bold mt-0.5';
     }
   }
@@ -5591,29 +5551,24 @@ const SUPPORT_CATEGORIES = {
     inquiryBtnText: '올드 렌즈 문제 / 건의 남기기 (캡처 첨부)'
   },
   verification: {
-    name: '3단계 본인 인증',
+    name: '실명 본인 인증',
     icon: '🛡️',
-    aiTitle: '본인 인증 체계 안내 챗봇이에요',
-    cardTitle: '본인 인증 단계별 안내 & 혜택',
-    subtitle: '안전 거래를 위한 FRAME 판매자 인증 안내입니다',
+    aiTitle: '실명 인증 시스템 안내 챗봇이에요',
+    cardTitle: '2단계 안심 본인 인증 안내 & 권한',
+    subtitle: '당근마켓·번개장터 표준 UX 기반의 간편하고 안전한 실명 거래 안내입니다',
     checklist: [
       {
-        title: 'Lv.1 휴대폰 본인확인 (매물 등록 권한)',
-        badge: 'Lv.1 기본',
-        desc: '통신사 PASS 본인확인을 거쳐 실명 확인된 사용자만 매물을 등록할 수 있습니다. 명의 도용을 방지합니다.'
+        title: 'Lv.1 이메일 간편 가입 (둘러보기 & 문의)',
+        badge: 'Lv.1 가입',
+        desc: '이메일 가입만으로 카메라 매물 탐색과 1:1 직거래 문의가 자유롭게 가능합니다. (진입 장벽 최소화)'
       },
       {
-        title: 'Lv.2 1원 실명계좌 인증 (정산 계좌 일치)',
-        badge: 'Lv.2 계좌',
-        desc: '판매자의 실명과 실제 거래 은행 계좌의 예금주가 동일한지 1원 송금 코드로 검증하여 대포통장 거래를 차단합니다.'
-      },
-      {
-        title: 'Lv.3 신분증 & 셀피 eKYC (공식 안심 배지)',
-        badge: 'Lv.3 최종',
-        desc: '주민등록증/운전면허증 OCR 및 실시간 셀피 라이브니스 교차 검증을 완료한 판매자에게만 [Lv.3 안심 공식 인증] 배지가 부여됩니다.'
+        title: 'Lv.2 PASS 휴대폰 실명 확인 (상품 등록 & 정회원)',
+        badge: 'Lv.2 필수',
+        desc: '본인 명의의 휴대폰 인증(PASS/SMS)을 거쳐 매물 등록 권한을 획득합니다. 대포폰 및 중복 사기 계정을 원천 차단합니다.'
       }
     ],
-    inquiryBtnText: '인증 오류 문의 / 예외 신청 (캡처 첨부)'
+    inquiryBtnText: '본인 인증 문의 / 오류 접수 (캡처 첨부)'
   },
   fraud: {
     name: '사기 피해 / 허위 매물 신고',
@@ -6163,10 +6118,10 @@ function generateSupportBotReply(query) {
   }
 
   if (q.includes('인증') || q.includes('본인') || q.includes('레벨') || q.includes('등급')) {
-    return `<strong>FRAME 3단계 본인 인증 안내:</strong><br><br>
-    • <strong>Lv.1 (휴대폰 인증)</strong>: 통신사 본인확인을 거쳐 매물 등록 권한 획득<br>
-    • <strong>Lv.2 (실명 계좌 인증)</strong>: 1원 송금 점유 인증으로 판매 대금 정산 계좌 일치 확인<br>
-    • <strong>Lv.3 (신분증 & 셀피 eKYC)</strong>: 신분증과 실시간 셀피 교차 검증으로 "안심 공식 인증 판매자" 배지 획득!`;
+    return `<strong>FRAME 2단계 실명 인증 안내:</strong><br><br>
+    • <strong>Lv.1 (기본 가입)</strong>: 이메일 가입으로 카메라 매물 탐색 및 1:1 직거래 문의 가능<br>
+    • <strong>Lv.2 (PASS 휴대폰 실명 확인)</strong>: 통신사 본인확인을 거쳐 매물 등록 권한 및 "실명 안심 판매자" 배지 획득!<br>
+    💡 신분증 촬영 등의 불필요한 절차를 없애 빠르고 안전하게 거래할 수 있습니다.`;
   }
 
   if (q.includes('렌즈') || q.includes('곰팡이') || q.includes('먼지') || q.includes('빛')) {

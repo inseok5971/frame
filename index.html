@@ -65,7 +65,7 @@
         <span class="text-zinc-600">|</span>
         <button onclick="openVerificationCenterModal()" class="hover:text-white transition flex items-center gap-1 font-medium text-emerald-300">
           <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
-          3단계 본인 인증 센터
+          본인 인증 센터 (실명 확인)
         </button>
         <span class="text-zinc-600">|</span>
         <button onclick="openFraudCheckModal()" class="hover:text-white transition flex items-center gap-1">
@@ -1261,7 +1261,7 @@
                 <span>🔘</span><span>필름 카메라 렌즈</span>
               </button>
               <button onclick="selectSupportCategory('verification')" class="support-pill px-4 py-2.5 rounded-full bg-[#F4F4F5] dark:bg-[#27272A] hover:bg-[#18181B] hover:text-white dark:hover:bg-white dark:hover:text-[#18181B] text-[#18181B] dark:text-[#F4F4F5] text-xs font-semibold transition active:scale-95 cursor-pointer flex items-center gap-1.5">
-                <span>🛡️</span><span>3단계 본인 인증</span>
+                <span>🛡️</span><span>실명 본인 인증</span>
               </button>
               <button onclick="selectSupportCategory('fraud')" class="support-pill px-4 py-2.5 rounded-full bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white text-xs font-semibold transition active:scale-95 cursor-pointer flex items-center gap-1.5">
                 <span>🚨</span><span>사기 피해 / 허위 매물 신고</span>
@@ -1715,18 +1715,18 @@
           <h3 class="text-base font-bold text-[#171717] mb-1">회원가입이 완료되었습니다!</h3>
           <p class="text-xs text-[#737373] leading-relaxed">
             현재 <strong>Lv.1 (둘러보기 & 문의)</strong> 등급입니다.<br>
-            장비 판매 등록과 안심 직거래를 위해 <strong>본인 인증(PASS 실명 / 계좌 / eKYC 신분증)</strong>을 진행하시겠습니까?
+            장비 판매 등록과 안심 직거래를 위해 <strong>PASS 휴대폰 실명 인증</strong>을 진행하시겠습니까?
           </p>
         </div>
 
         <div class="p-3 bg-[#FAFAFA] rounded-xl border border-[#EAEAEA] text-left text-xs space-y-1.5">
           <div class="flex items-center gap-1.5 font-bold text-[#171717]">
-            <span class="w-4 h-4 rounded-full bg-black text-white text-[10px] flex items-center justify-center">2</span>
-            <span>Lv.2: PASS 휴대폰 실명 인증 (상품 등록 권한)</span>
+            <span class="w-4 h-4 rounded-full bg-emerald-600 text-white text-[10px] flex items-center justify-center">✓</span>
+            <span class="text-emerald-700">Lv.1: 기본 가입 완료 (매물 탐색 및 1:1 문의)</span>
           </div>
           <div class="flex items-center gap-1.5 font-bold text-[#171717]">
-            <span class="w-4 h-4 rounded-full bg-black text-white text-[10px] flex items-center justify-center">3</span>
-            <span>Lv.3: 계좌 + 신분증/실시간 셀피 (안심 판매자 배지)</span>
+            <span class="w-4 h-4 rounded-full bg-black text-white text-[10px] flex items-center justify-center">2</span>
+            <span>Lv.2: PASS 휴대폰 실명 확인 (상품 등록 및 정회원 권한)</span>
           </div>
         </div>
 
@@ -1782,10 +1782,10 @@
             <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
           </div>
           <h2 class="text-lg font-bold text-[#171717]">FRAME 안심 본인 인증 센터</h2>
-          <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-300 font-semibold font-mono">Toss Sandbox Mode</span>
+          <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-300 font-semibold font-mono">Toss Identity Sandbox</span>
         </div>
         <p class="text-xs text-[#737373] leading-relaxed">
-          토스 본인인증(Toss Identity) 및 토스페이먼츠 1원 계좌 실명 대조 샌드박스 연동 가이드 기반 3단계 검증 시스템
+          토스 본인인증(Toss Identity) 및 PASS 실명 확인 기반의 2단계 안심 거래 검증 시스템
         </p>
       </div>
 
@@ -1793,28 +1793,22 @@
       <div class="mb-5 p-3 rounded-xl bg-[#F7F7F7] border border-[#E5E5E5] text-xs text-[#737373] flex items-start gap-2.5">
         <i data-lucide="info" class="w-4 h-4 text-[#171717] flex-shrink-0 mt-0.5"></i>
         <div class="text-[11px] leading-relaxed">
-          <strong class="text-[#171717]">토스 인증 테스트 환경 (가상 사용자 모드):</strong> 실제 외부 연동은 계약이 필요하므로 토스 테스트 환경(가상 사용자)과 연결하였으며, 비즈니스 로직은 <code class="text-[#171717] font-semibold font-mono bg-white px-1 py-0.5 rounded border border-[#E0E0E0]">VerificationProvider</code> 전략 패턴으로 완전 분리하여 정식 계약 시 설정값만 변경하면 즉시 상용 서비스로 전환되도록 설계되었습니다. (신분증·셀피는 보안 규정 준수를 위해 Mock으로 안전하게 시뮬레이션됩니다.)
+          <strong class="text-[#171717]">실명 인증 표준화 (UX 간소화):</strong> 중고거래 사용자의 이탈률과 피로도를 최소화하기 위해 당근마켓·번개장터 표준인 <strong>[PASS 휴대폰 실명 확인]</strong>을 채택했습니다. 불필요한 신분증 사본 제출을 없애 개인정보 유출 위험을 원천 차단하고, 암호화 DI(중복가입확인정보) 기반으로 사기 계정의 재가입을 방지합니다.
         </div>
       </div>
 
-      <!-- 3-Step Level Indicator Header -->
-      <div class="grid grid-cols-3 gap-2 mb-6 text-center select-none">
-        <button type="button" onclick="switchVerifyStep(1)" id="verifyTabStep1" class="step-tab active p-2.5 rounded-xl border border-[#E5E5E5] transition text-left cursor-pointer">
-          <div class="text-[10px] text-[#8A8A8A] font-bold">LEVEL 1</div>
-          <div class="text-xs font-bold truncate">기본 가입</div>
+      <!-- 2-Step Level Indicator Header -->
+      <div class="grid grid-cols-2 gap-3 mb-6 text-center select-none">
+        <button type="button" onclick="switchVerifyStep(1)" id="verifyTabStep1" class="step-tab active p-3 rounded-xl border border-[#E5E5E5] transition text-left cursor-pointer">
+          <div class="text-[10px] text-[#8A8A8A] font-bold">STEP 1</div>
+          <div class="text-xs font-bold truncate">이메일 기본 가입</div>
           <div class="text-[10px] text-emerald-600 font-semibold mt-0.5">✓ 완료됨</div>
         </button>
 
-        <button type="button" onclick="switchVerifyStep(2)" id="verifyTabStep2" class="step-tab p-2.5 rounded-xl border border-[#E5E5E5] bg-[#FAFAFA] transition text-left cursor-pointer">
-          <div class="text-[10px] text-[#8A8A8A] font-bold">LEVEL 2</div>
-          <div class="text-xs font-bold truncate">PASS 휴대폰</div>
-          <div id="step2StatusBadge" class="text-[10px] text-[#8A8A8A] mt-0.5">미인증 (상품등록)</div>
-        </button>
-
-        <button type="button" onclick="switchVerifyStep(3)" id="verifyTabStep3" class="step-tab p-2.5 rounded-xl border border-[#E5E5E5] bg-[#FAFAFA] transition text-left cursor-pointer">
-          <div class="text-[10px] text-[#8A8A8A] font-bold">LEVEL 3</div>
-          <div class="text-xs font-bold truncate">계좌 + eKYC</div>
-          <div id="step3StatusBadge" class="text-[10px] text-[#8A8A8A] mt-0.5">미인증 (안심배지)</div>
+        <button type="button" onclick="switchVerifyStep(2)" id="verifyTabStep2" class="step-tab p-3 rounded-xl border border-[#E5E5E5] bg-[#FAFAFA] transition text-left cursor-pointer">
+          <div class="text-[10px] text-[#8A8A8A] font-bold">STEP 2</div>
+          <div class="text-xs font-bold truncate">PASS 휴대폰 실명확인</div>
+          <div id="step2StatusBadge" class="text-[10px] text-[#8A8A8A] mt-0.5">미인증 (매물등록 권한)</div>
         </button>
       </div>
 
@@ -1922,138 +1916,28 @@
         </form>
 
         <!-- Pass Result Simulation Output -->
-        <div id="passSuccessResult" class="hidden p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/25 space-y-2">
+        <div id="passSuccessResult" class="hidden p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/25 space-y-3">
           <div class="flex items-center justify-between text-xs font-bold text-emerald-700">
             <span class="flex items-center gap-1.5">
               <i data-lucide="check-circle" class="w-4 h-4"></i>
-              PASS 본인 인증 완료 (Lv.2 승격)
+              PASS 실명 인증 완료 (Lv.2 정회원 승격)
             </span>
             <span class="text-[10px] font-mono bg-emerald-600 text-white px-2 py-0.5 rounded">STATUS: VERIFIED</span>
           </div>
           <div class="text-[11px] text-zinc-600 space-y-0.5 font-mono">
             <div>• DI 해시(중복가입차단): 7f83b165...9b8e (식별 완료)</div>
             <div>• 실명/연락처: <span id="passVerifiedInfoText">홍길동 (010-****-5678)</span></div>
-            <div>• 부여된 권한: 상품 등록, 1:1 직거래 채팅 개설 활성화</div>
+            <div>• 부여된 권한: 모든 카메라/렌즈 매물 등록, 1:1 직거래 채팅 개설 활성화</div>
           </div>
-          <div class="pt-2">
-            <button onclick="switchVerifyStep(3)" class="w-full py-2.5 rounded-full bg-[#171717] hover:bg-black text-white text-xs font-bold transition cursor-pointer">
-              다음: Lv.3 계좌 + eKYC 신분증 인증하기 →
+          <div class="flex items-center gap-2 pt-1">
+            <button type="button" onclick="closeVerificationCenterModal(); openRegisterModal();" class="flex-1 py-2.5 rounded-full bg-[#171717] hover:bg-black text-white text-xs font-bold transition cursor-pointer shadow-sm">
+              즉시 매물 등록하러 가기 →
+            </button>
+            <button type="button" onclick="closeVerificationCenterModal();" class="px-4 py-2.5 rounded-full border border-[#D4D4D8] text-xs font-semibold hover:bg-white transition cursor-pointer">
+              완료 및 닫기
             </button>
           </div>
         </div>
-      </div>
-
-      <!-- STEP 3 CONTENT: 계좌 인증 & eKYC 신분증·셀피 라이브니스 -->
-      <div id="verifyStepContent3" class="hidden space-y-5">
-        
-        <!-- Part A: 1원 계좌 실명 인증 -->
-        <div class="p-4 rounded-xl bg-[#FAFAFA] border border-[#EAEAEA] space-y-3 text-xs">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span class="w-5 h-5 rounded-full bg-black text-white text-[10px] font-bold flex items-center justify-center">A</span>
-              <h4 class="font-bold text-[#171717]">토스페이먼츠 1원 계좌 실명 인증 (가상 계좌 테스트)</h4>
-            </div>
-            <span id="bankVerifiedBadge" class="text-[10px] px-2 py-0.5 rounded bg-zinc-200 text-zinc-600 font-semibold">미인증</span>
-          </div>
-          <p class="text-[11px] text-[#737373]">
-            판매 대금을 수령할 본인 명의 계좌를 검증하며, 자체 사기 신고 DB와 대조하여 불량 계좌 여부를 사전 검증합니다.
-          </p>
-
-          <div class="grid grid-cols-3 gap-2">
-            <select id="bankNameSelect" class="bg-white border border-[#E5E5E5] rounded-lg px-2.5 py-2 text-xs text-[#171717] focus:outline-none focus:border-[#171717]">
-              <option value="KB국민은행">KB국민은행</option>
-              <option value="신한은행">신한은행</option>
-              <option value="하나은행">하나은행</option>
-              <option value="우리은행">우리은행</option>
-              <option value="토스뱅크">토스뱅크</option>
-              <option value="카카오뱅크">카카오뱅크</option>
-              <option value="NH농협">NH농협은행</option>
-            </select>
-            <input type="text" id="bankAccountNum" placeholder="계좌번호 (- 없이 입력)" class="col-span-2 bg-white border border-[#E5E5E5] rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-[#171717]">
-          </div>
-
-          <button type="button" onclick="sendBank1WonVerify()" class="w-full py-2 bg-[#171717] hover:bg-black text-white rounded-lg text-xs font-semibold transition cursor-pointer">
-            1원 입금 및 실명 확인 요청
-          </button>
-
-          <!-- 1원 입금 코드 확인 창 -->
-          <div id="bankCodeBlock" class="hidden p-3 rounded-lg bg-white border border-[#E5E5E5] space-y-2">
-            <div class="flex items-center justify-between">
-              <span class="font-semibold text-[11px] text-zinc-700">입금자명 인증코드 (예: 프레임482)</span>
-              <span class="text-[10px] text-emerald-600 font-bold">1원 입금 완료</span>
-            </div>
-            <div class="flex gap-2">
-              <input type="text" id="bankVerifyCode" placeholder="프레임 뒤 3자리 숫자" maxlength="4" class="flex-1 bg-[#FAFAFA] border border-[#E5E5E5] rounded-lg px-3 py-1.5 text-xs text-center font-mono">
-              <button type="button" onclick="confirmBank1Won()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition cursor-pointer">
-                계좌 인증
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Part B: eKYC 신분증 진위 & 실시간 셀피 라이브니스 -->
-        <div class="p-4 rounded-xl bg-[#FAFAFA] border border-[#EAEAEA] space-y-3 text-xs">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span class="w-5 h-5 rounded-full bg-black text-white text-[10px] font-bold flex items-center justify-center">B</span>
-              <h4 class="font-bold text-[#171717]">신분증 OCR & 실시간 안면 라이브니스 (보안 Mock 검증)</h4>
-            </div>
-            <span id="ekycVerifiedBadge" class="text-[10px] px-2 py-0.5 rounded bg-zinc-200 text-zinc-600 font-semibold">미인증</span>
-          </div>
-          <p class="text-[11px] text-[#737373]">
-            개인정보 비저장 원칙(주민번호 마스킹 후 즉시 파기) 준수 하에 실시간 안면 생체 반응을 대조하여 타인 도용 및 사기를 원천 차단합니다.
-          </p>
-
-          <!-- 신분증 OCR 가이드 박스 -->
-          <div class="border-2 border-dashed border-[#CCCCCC] hover:border-black rounded-xl p-3.5 text-center cursor-pointer transition bg-white" onclick="simulateOcrScan()">
-            <div class="flex items-center justify-center gap-2 mb-1">
-              <i data-lucide="credit-card" class="w-4 h-4 text-[#171717]"></i>
-              <span class="font-bold text-xs text-[#171717]">주민등록증 / 운전면허증 촬영 시뮬레이션</span>
-            </div>
-            <p class="text-[10px] text-[#737373]">클릭 시 행정안전부 진위 확인 및 OCR 자동 판독이 시뮬레이션됩니다.</p>
-          </div>
-
-          <div id="ocrResultBox" class="hidden p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-zinc-700 space-y-0.5">
-            <div class="font-bold text-emerald-800">✓ 신분증 진위 확인 성공 (행정기관 대조 일치)</div>
-            <div class="font-mono text-[10px] text-[#737373]">• 성명: 일치 | 생년월일: 일치 | 주민번호 뒷자리: 마스킹 후 즉시 폐기</div>
-          </div>
-
-          <!-- 실시간 셀피 라이브니스 뷰파인더 -->
-          <div class="p-4 rounded-xl bg-white border border-[#EAEAEA] text-center space-y-3">
-            <div class="font-bold text-xs text-[#171717]">실시간 셀피 라이브니스(Liveness) 검사</div>
-            <p class="text-[11px] text-[#737373]">사진 도용 방지를 위해 카메라 정면을 응시하고 눈을 깜빡여주세요.</p>
-
-            <div class="w-32 h-32 mx-auto rounded-full border-2 border-dashed border-[#171717] relative overflow-hidden flex items-center justify-center bg-[#F9F9F9]">
-              <div id="livenessScannerBar" class="hidden liveness-scanner"></div>
-              <div id="livenessAvatarPreview" class="text-zinc-300 flex flex-col items-center">
-                <i data-lucide="user" class="w-16 h-16"></i>
-              </div>
-            </div>
-
-            <button type="button" id="btnStartLiveness" onclick="startLivenessScan()" class="px-5 py-2 rounded-full bg-[#171717] hover:bg-black text-white text-xs font-semibold transition cursor-pointer">
-              실시간 라이브니스 검사 시작
-            </button>
-          </div>
-
-        </div>
-
-        <!-- 최종 Lv.3 승급 축하 배너 -->
-        <div id="lv3FinalSuccessBanner" class="hidden p-5 rounded-2xl bg-black text-white text-center space-y-2">
-          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[11px] font-bold">
-            <i data-lucide="badge-check" class="w-4 h-4"></i>
-            Lv.3 안심 인증 판매자 승격 완료
-          </div>
-          <h3 class="text-base font-bold">축하합니다! 모든 본인 검증이 완료되었습니다.</h3>
-          <p class="text-xs text-zinc-300 max-w-sm mx-auto leading-relaxed">
-            이제 프로필과 등록하신 모든 카메라·렌즈 매물에 <strong>'안심 인증 판매자'</strong> 공식 배지가 노출되어 구매자에게 최고의 신뢰를 제공합니다.
-          </p>
-          <div class="pt-2">
-            <button onclick="closeVerificationCenterModal()" class="px-6 py-2.5 rounded-full bg-white text-[#171717] text-xs font-bold hover:bg-zinc-100 transition cursor-pointer">
-              인증 센터 완료 및 닫기
-            </button>
-          </div>
-        </div>
-
       </div>
 
     </div>
