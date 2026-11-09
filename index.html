@@ -72,6 +72,11 @@
           <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-zinc-400"></i>
           사기 이력 조회
         </button>
+        <span class="text-zinc-600">|</span>
+        <button onclick="openSupportCenterModal()" class="hover:text-white transition flex items-center gap-1 font-medium text-amber-300">
+          <i data-lucide="headphones" class="w-3.5 h-3.5 text-amber-400"></i>
+          고객센터 & 1:1 문의
+        </button>
       </div>
     </div>
   </div>
@@ -472,7 +477,7 @@
         <!-- Sort Select & Count -->
         <div class="flex items-center justify-between sm:justify-end gap-3 pt-2 lg:pt-0 border-t lg:border-t-0 border-[#F0F0F0]">
           <div class="text-xs text-[#737373]">
-            총 <span id="itemCountDisplay" class="font-bold text-[#171717]">0</span>개 매물
+            총 <span id="itemCountDisplay" class="font-bold text-[#171717]">14</span>개 매물
           </div>
           <select id="sortSelect" onchange="applyFilters()" class="bg-[#F5F5F5] border border-[#E5E5E5] text-[#171717] text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#171717]">
             <option value="latest">최신 등록순</option>
@@ -506,6 +511,15 @@
         필터 초기화
       </button>
     </div>
+
+    <!-- ================= FLOATING SUPPORT PILL (우측 하단 고객센터 플로팅 바로가기) ================= -->
+    <aside aria-label="고객센터 빠른 실행" class="fixed bottom-20 md:bottom-8 right-6 z-40">
+      <button onclick="openSupportCenterModal()" class="group flex items-center gap-2.5 bg-[#171717] dark:bg-white text-white dark:text-[#171717] px-4 py-2.5 rounded-full shadow-2xl hover:shadow-black/20 hover:scale-105 active:scale-95 transition-all text-xs font-bold border border-white/10 dark:border-black/10 cursor-pointer">
+        <i data-lucide="headphones" class="w-4 h-4 text-emerald-400 dark:text-emerald-600 group-hover:rotate-12 transition-transform"></i>
+        <span>고객센터 & 1:1 문의</span>
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+      </button>
+    </aside>
 
   </main>
 
@@ -1186,6 +1200,251 @@
       </div>
 
       <div id="fraudResultBox" class="hidden p-3 rounded-lg text-xs"></div>
+    </div>
+  </div>
+
+  <!-- ================= SUPPORT / HELP CENTER MODAL (DANGGEUN STYLE STEP-BY-STEP) ================= -->
+  <div id="supportCenterModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+    <div class="relative bg-white dark:bg-[#18181B] border border-[#E5E5E5] dark:border-[#27272A] rounded-3xl w-full max-w-md sm:max-w-lg overflow-hidden shadow-2xl text-[#171717] dark:text-[#F4F4F5] flex flex-col h-[640px] max-h-[92vh]">
+      
+      <!-- Top Navigation Header -->
+      <div class="px-5 py-3.5 border-b border-[#F0F0F0] dark:border-[#27272A] flex items-center justify-between bg-white dark:bg-[#18181B] sticky top-0 z-20">
+        <div class="flex items-center gap-2">
+          <button id="supportNavBackBtn" onclick="handleSupportBack()" class="hidden p-1.5 -ml-1 rounded-full text-[#71717A] hover:text-[#18181B] dark:hover:text-white hover:bg-[#F4F4F5] dark:hover:bg-[#27272A] transition cursor-pointer" title="이전으로">
+            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+          </button>
+          <h3 id="supportHeaderTitle" class="text-sm font-bold text-[#18181B] dark:text-white tracking-tight">
+            고객센터
+          </h3>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="goToSupportView('history')" id="supportHistoryBtn" class="text-xs text-[#71717A] dark:text-[#A1A1AA] hover:text-[#18181B] dark:hover:text-white font-medium px-2 py-1 rounded-lg hover:bg-[#F4F4F5] dark:hover:bg-[#27272A] transition flex items-center gap-1 cursor-pointer">
+            <span>이전 대화</span>
+            <span id="supportHistoryBadge" class="hidden px-1.5 py-0.2 rounded-full text-[9px] bg-[#18181B] text-white dark:bg-white dark:text-[#18181B] font-bold">0</span>
+          </button>
+          <button onclick="closeSupportCenterModal()" class="p-1.5 rounded-full text-[#71717A] hover:text-[#18181B] dark:hover:text-white hover:bg-[#F4F4F5] dark:hover:bg-[#27272A] transition cursor-pointer" title="닫기">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Scrollable Main Viewport -->
+      <div class="flex-1 overflow-y-auto flex flex-col relative" id="supportModalScrollBody">
+
+        <!-- ================= VIEW 1: HOME (카테고리 선택) ================= -->
+        <div id="supportView_home" class="flex-1 flex flex-col p-6 items-center text-center justify-between">
+          <div class="w-full flex flex-col items-center pt-2">
+            <!-- Brand Icon -->
+            <div class="w-16 h-16 rounded-full bg-[#18181B] dark:bg-white text-white dark:text-[#18181B] flex items-center justify-center shadow-lg mb-4">
+              <i data-lucide="camera" class="w-8 h-8"></i>
+            </div>
+            <!-- Greeting -->
+            <h2 class="text-lg font-extrabold text-[#18181B] dark:text-white tracking-tight">
+              안녕하세요, <span id="supportHomeUserName">회원</span>님
+            </h2>
+            <p class="text-sm font-bold text-[#71717A] dark:text-[#A1A1AA] mt-1 mb-6">
+              무엇이 궁금하신가요?
+            </p>
+
+            <!-- 7 Category Pills (당근마켓 스타일 클러스터) -->
+            <div class="flex flex-wrap justify-center gap-2 max-w-sm">
+              <button onclick="selectSupportCategory('digital')" class="support-pill px-4 py-2.5 rounded-full bg-[#F4F4F5] dark:bg-[#27272A] hover:bg-[#18181B] hover:text-white dark:hover:bg-white dark:hover:text-[#18181B] text-[#18181B] dark:text-[#F4F4F5] text-xs font-semibold transition active:scale-95 cursor-pointer flex items-center gap-1.5">
+                <span>📷</span><span>디지털 카메라</span>
+              </button>
+              <button onclick="selectSupportCategory('lens')" class="support-pill px-4 py-2.5 rounded-full bg-[#F4F4F5] dark:bg-[#27272A] hover:bg-[#18181B] hover:text-white dark:hover:bg-white dark:hover:text-[#18181B] text-[#18181B] dark:text-[#F4F4F5] text-xs font-semibold transition active:scale-95 cursor-pointer flex items-center gap-1.5">
+                <span>🔍</span><span>렌즈</span>
+              </button>
+              <button onclick="selectSupportCategory('film_camera')" class="support-pill px-4 py-2.5 rounded-full bg-[#F4F4F5] dark:bg-[#27272A] hover:bg-[#18181B] hover:text-white dark:hover:bg-white dark:hover:text-[#18181B] text-[#18181B] dark:text-[#F4F4F5] text-xs font-semibold transition active:scale-95 cursor-pointer flex items-center gap-1.5">
+                <span>🎞️</span><span>필름 카메라</span>
+              </button>
+              <button onclick="selectSupportCategory('film_lens')" class="support-pill px-4 py-2.5 rounded-full bg-[#F4F4F5] dark:bg-[#27272A] hover:bg-[#18181B] hover:text-white dark:hover:bg-white dark:hover:text-[#18181B] text-[#18181B] dark:text-[#F4F4F5] text-xs font-semibold transition active:scale-95 cursor-pointer flex items-center gap-1.5">
+                <span>🔘</span><span>필름 카메라 렌즈</span>
+              </button>
+              <button onclick="selectSupportCategory('verification')" class="support-pill px-4 py-2.5 rounded-full bg-[#F4F4F5] dark:bg-[#27272A] hover:bg-[#18181B] hover:text-white dark:hover:bg-white dark:hover:text-[#18181B] text-[#18181B] dark:text-[#F4F4F5] text-xs font-semibold transition active:scale-95 cursor-pointer flex items-center gap-1.5">
+                <span>🛡️</span><span>3단계 본인 인증</span>
+              </button>
+              <button onclick="selectSupportCategory('fraud')" class="support-pill px-4 py-2.5 rounded-full bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/40 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white text-xs font-semibold transition active:scale-95 cursor-pointer flex items-center gap-1.5">
+                <span>🚨</span><span>사기 피해 / 허위 매물 신고</span>
+              </button>
+              <button onclick="selectSupportCategory('account')" class="support-pill px-4 py-2.5 rounded-full bg-[#F4F4F5] dark:bg-[#27272A] hover:bg-[#18181B] hover:text-white dark:hover:bg-white dark:hover:text-[#18181B] text-[#18181B] dark:text-[#F4F4F5] text-xs font-semibold transition active:scale-95 cursor-pointer flex items-center gap-1.5">
+                <span>💬</span><span>계정 및 일반 건의사항</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Bottom Search Bar -->
+          <div class="w-full pt-4">
+            <div class="relative flex items-center">
+              <input 
+                type="text" 
+                id="supportHomeInput" 
+                placeholder="궁금한 내용을 자세히 적어주세요" 
+                onkeypress="if(event.key === 'Enter') handleSupportInput('home')"
+                class="w-full bg-[#F4F4F5] dark:bg-[#27272A] border border-[#E4E4E7] dark:border-[#3F3F46] rounded-full px-4 py-3 pr-12 text-xs text-[#18181B] dark:text-white placeholder-[#71717A] focus:outline-none focus:border-[#18181B] dark:focus:border-white transition"
+              >
+              <button onclick="handleSupportInput('home')" class="absolute right-1.5 w-8 h-8 rounded-full bg-[#18181B] dark:bg-white text-white dark:text-[#18181B] flex items-center justify-center cursor-pointer transition hover:scale-105 active:scale-95">
+                <i data-lucide="arrow-up" class="w-4 h-4"></i>
+              </button>
+            </div>
+            <p class="text-[10px] text-[#A1A1AA] mt-2">AI 챗봇은 실수를 할 수 있어요. 중요한 거래 전에는 체크리스트를 꼭 확인하세요.</p>
+          </div>
+        </div>
+
+        <!-- ================= VIEW 2: CATEGORY DETAIL (거래 시 중요하게 볼 점 & 1:1 건의) ================= -->
+        <div id="supportView_category" class="hidden flex-1 flex flex-col p-5 space-y-4">
+          <!-- Category Header Greeting -->
+          <div class="flex items-center gap-3 pb-2 border-b border-[#F0F0F0] dark:border-[#27272A]">
+            <div id="supportCatIconBadge" class="w-11 h-11 rounded-2xl bg-[#F4F4F5] dark:bg-[#27272A] flex items-center justify-center text-xl flex-shrink-0 shadow-2xs">
+              📷
+            </div>
+            <div>
+              <h4 class="text-xs font-extrabold text-[#18181B] dark:text-white leading-tight">
+                안녕하세요, <span class="supportUserSubName">회원</span>님
+              </h4>
+              <p id="supportCatAiTitle" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+                디지털 카메라 안내 챗봇이에요
+              </p>
+            </div>
+          </div>
+
+          <!-- Dynamic Chat Conversation Thread (AI 답변 말풍선 추가되는 곳) -->
+          <div id="supportCategoryChatThread" class="space-y-3"></div>
+
+          <!-- Card 1: 거래 시 중요하게 볼 점 (체크리스트 카드) -->
+          <div class="bg-[#FAFAFA] dark:bg-[#202023] border border-[#E4E4E7] dark:border-[#2E2E32] rounded-2xl p-4 space-y-2.5 shadow-2xs">
+            <div class="flex items-center justify-between mb-1">
+              <h5 id="supportCatCardTitle" class="text-xs font-extrabold text-[#18181B] dark:text-white flex items-center gap-1.5">
+                <span>📌</span><span>카메라 거래 시 중요하게 볼 점</span>
+              </h5>
+              <span class="text-[10px] text-[#71717A] dark:text-[#A1A1AA]">필수 확인</span>
+            </div>
+            <p id="supportCatSubtitle" class="text-[11px] text-[#71717A] dark:text-[#A1A1AA] mb-2">
+              거래 전 아래 항목들을 꼭 점검해 보세요
+            </p>
+
+            <!-- Checklist Items Container -->
+            <div id="supportChecklistContainer" class="space-y-2"></div>
+          </div>
+
+          <!-- Card 2: 그 이외의 문제나 건의하기 (1:1 문의 이동) -->
+          <div class="bg-white dark:bg-[#18181B] border border-[#E4E4E7] dark:border-[#2E2E32] rounded-2xl p-4 shadow-2xs space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-[#18181B] dark:text-white flex items-center gap-1.5">
+                <span>✉️</span><span>그 이외의 문제나 건의하기</span>
+              </span>
+              <span class="text-[10px] text-zinc-400">사진 5장 첨부 지원</span>
+            </div>
+            <p class="text-[11px] text-[#71717A] dark:text-[#A1A1AA]">
+              거래 중 문제가 발생했거나, 문의 및 제안사항을 남겨주시면 담당자가 이메일로 답변해 드립니다.
+            </p>
+            <button onclick="goToSupportInquiry()" class="w-full py-2.5 px-3 rounded-xl bg-[#18181B] hover:bg-black dark:bg-white dark:hover:bg-zinc-200 text-white dark:text-[#18181B] text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer mt-1">
+              <span id="supportInquiryBtnText">1:1 문의 및 건의 남기기 (캡처 첨부)</span>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+
+          <!-- Category Detail Bottom Input -->
+          <div class="pt-2">
+            <div class="relative flex items-center">
+              <input 
+                type="text" 
+                id="supportCatInput" 
+                placeholder="궁금한 내용을 자세히 적어주세요" 
+                onkeypress="if(event.key === 'Enter') handleSupportInput('category')"
+                class="w-full bg-[#F4F4F5] dark:bg-[#27272A] border border-[#E4E4E7] dark:border-[#3F3F46] rounded-full px-4 py-3 pr-12 text-xs text-[#18181B] dark:text-white placeholder-[#71717A] focus:outline-none focus:border-[#18181B] dark:focus:border-white transition"
+              >
+              <button onclick="handleSupportInput('category')" class="absolute right-1.5 w-8 h-8 rounded-full bg-[#18181B] dark:bg-white text-white dark:text-[#18181B] flex items-center justify-center cursor-pointer transition hover:scale-105 active:scale-95">
+                <i data-lucide="arrow-up" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= VIEW 3: INQUIRY FORM (사진 최대 5장 첨부 1:1 문의) ================= -->
+        <div id="supportView_inquiry" class="hidden flex-1 flex flex-col p-5 space-y-4">
+          <!-- Category Indicator -->
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs font-bold text-[#71717A] dark:text-[#A1A1AA]">문의 카테고리:</span>
+              <span id="inquiryCurrentCatBadge" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-[#18181B] text-white dark:bg-white dark:text-[#18181B]">
+                📷 디지털 카메라
+              </span>
+            </div>
+            <span class="text-[11px] text-zinc-400">영업일 24시간 내 회신</span>
+          </div>
+
+          <!-- Inquiry Form -->
+          <form id="supportDirectInquiryForm" onsubmit="handleDanggeunInquirySubmit(event)" class="space-y-3.5">
+            
+            <!-- Photo Upload Area (최대 5장 첨부 지원) -->
+            <div>
+              <label class="block text-xs font-bold text-[#18181B] dark:text-white mb-1.5 flex items-center justify-between">
+                <span>증빙 사진 첨부 <span class="text-zinc-400 font-normal">(채팅 캡처, 결제 내역, 화면 오류 등)</span></span>
+                <span class="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400"><span id="inquiryPhotoCountNum">0</span> / 5장</span>
+              </label>
+
+              <!-- Hidden File Input -->
+              <input type="file" id="inquiryPhotoFiles" multiple accept="image/*" class="hidden" onchange="handleInquiryPhotoSelect(event)">
+
+              <!-- Upload Button Box -->
+              <div onclick="document.getElementById('inquiryPhotoFiles').click()" class="border-2 border-dashed border-[#E4E4E7] dark:border-[#3F3F46] hover:border-[#18181B] dark:hover:border-white rounded-2xl p-4 bg-[#FAFAFA] dark:bg-[#202023] flex flex-col items-center justify-center cursor-pointer transition">
+                <i data-lucide="image-plus" class="w-6 h-6 text-[#71717A] mb-1"></i>
+                <span class="text-xs font-bold text-[#18181B] dark:text-white">사진 추가하기 (최대 5장)</span>
+                <span class="text-[10px] text-[#A1A1AA] mt-0.5">클릭하여 사진을 선택하세요 (JPG, PNG, WebP)</span>
+              </div>
+
+              <!-- Thumbnails Container -->
+              <div id="inquiryPhotoThumbnails" class="grid grid-cols-5 gap-2 mt-2.5 empty:hidden"></div>
+            </div>
+
+            <!-- Email Field -->
+            <div>
+              <label class="block text-xs font-bold text-[#18181B] dark:text-white mb-1">답변 받을 이메일 <span class="text-red-500">*</span></label>
+              <input type="email" id="inquiryUserEmail" required placeholder="예: user@example.com" class="w-full bg-[#FAFAFA] dark:bg-[#202023] border border-[#E4E4E7] dark:border-[#3F3F46] rounded-xl px-3 py-2.5 text-xs text-[#18181B] dark:text-white focus:outline-none focus:border-[#18181B]">
+            </div>
+
+            <!-- Title Field -->
+            <div>
+              <label class="block text-xs font-bold text-[#18181B] dark:text-white mb-1">문의 / 건의 제목 <span class="text-red-500">*</span></label>
+              <input type="text" id="inquiryUserTitle" required placeholder="문의 요점을 입력해 주세요" class="w-full bg-[#FAFAFA] dark:bg-[#202023] border border-[#E4E4E7] dark:border-[#3F3F46] rounded-xl px-3 py-2.5 text-xs text-[#18181B] dark:text-white focus:outline-none focus:border-[#18181B]">
+            </div>
+
+            <!-- Content Field -->
+            <div>
+              <label class="block text-xs font-bold text-[#18181B] dark:text-white mb-1">상세 문의 내용 <span class="text-red-500">*</span></label>
+              <textarea id="inquiryUserContent" required rows="4" placeholder="상세한 내용(장비 모델명, 상대방 닉네임, 상황 등)을 적어주시면 더 빠른 확인이 가능합니다." class="w-full bg-[#FAFAFA] dark:bg-[#202023] border border-[#E4E4E7] dark:border-[#3F3F46] rounded-xl p-3 text-xs text-[#18181B] dark:text-white focus:outline-none focus:border-[#18181B] resize-none"></textarea>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="w-full py-3 rounded-xl bg-[#18181B] hover:bg-black dark:bg-white dark:hover:bg-zinc-200 text-white dark:text-[#18181B] text-xs font-bold transition shadow-sm cursor-pointer flex items-center justify-center gap-2 mt-2">
+              <i data-lucide="send" class="w-4 h-4"></i>
+              <span>문의 접수하기</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- ================= VIEW 4: HISTORY (이전 문의 내역) ================= -->
+        <div id="supportView_history" class="hidden flex-1 flex flex-col p-5 space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b border-[#F0F0F0] dark:border-[#27272A]">
+            <h4 class="text-xs font-extrabold text-[#18181B] dark:text-white">나의 문의 및 신고 접수 내역</h4>
+            <button onclick="goToSupportHome()" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline">
+              + 새 문의하기
+            </button>
+          </div>
+
+          <div id="supportHistoryEmpty" class="text-center py-16 text-[#71717A]">
+            <div class="w-12 h-12 rounded-full bg-[#F4F4F5] dark:bg-[#27272A] flex items-center justify-center mx-auto mb-2.5">
+              <i data-lucide="inbox" class="w-6 h-6 text-[#A1A1AA]"></i>
+            </div>
+            <p class="text-xs font-bold text-[#18181B] dark:text-white">접수된 문의 내역이 없습니다</p>
+            <p class="text-[11px] text-[#A1A1AA] mt-1">궁금하신 점이 있다면 언제든 문의를 남겨주세요.</p>
+          </div>
+
+          <div id="supportHistoryList" class="space-y-3 hidden"></div>
+        </div>
+
+      </div>
+
     </div>
   </div>
 
@@ -1988,7 +2247,11 @@
         <div class="flex items-center gap-6 text-xs text-[#171717] font-medium">
           <a href="https://www.camerashuttercount.com/" target="_blank" class="hover:underline">CameraShutterCount</a>
           <a href="#" onclick="openFraudCheckModal(); return false;" class="hover:underline">사기 이력 조회</a>
-          <a href="#" class="hover:underline">이용 가이드</a>
+          <a href="#" onclick="openSupportCenterModal(); return false;" class="hover:underline font-bold text-[#171717] flex items-center gap-1">
+            <i data-lucide="headphones" class="w-3.5 h-3.5 text-emerald-600"></i>
+            고객센터 & 1:1 문의
+          </a>
+          <a href="#" onclick="openSupportCenterModal('faq'); return false;" class="hover:underline">이용 가이드 (FAQ)</a>
         </div>
       </div>
       <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#8A8A8A]">

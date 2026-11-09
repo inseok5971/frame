@@ -558,8 +558,9 @@ def run_server(port=PORT):
         httpd.serve_forever()
     except OSError as e:
         if "Address already in use" in str(e):
-            print(f"[Server] Port {port} is in use, trying {port + 1}...")
-            run_server(port + 1)
+            print(f"\n[ERROR] 포트 {port}이(가) 이미 사용 중입니다.")
+            print(f"  → server.py의 PORT와 프런트(js/app.js, index.html)의 주소를 같은 번호로 바꿔 주세요.")
+            sys.exit(1)
         else:
             raise e
     except KeyboardInterrupt:

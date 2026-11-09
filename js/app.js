@@ -5480,3 +5480,702 @@ function fillSampleRegisterData() {
   if (typeof renderImagePreviews === 'function') renderImagePreviews();
   showFrameToast('테스트용 매물 데이터가 자동 입력되었습니다. [매물 등록 완료]를 눌러보세요!', 'info');
 }
+
+// ================= CUSTOMER SUPPORT & STEP-BY-STEP HELP CENTER (DANGGEUN STYLE) =================
+const SUPPORT_INQUIRIES_KEY = 'frame_support_inquiries';
+
+let currentSupportView = 'home'; // 'home' | 'category' | 'inquiry' | 'history'
+let currentSupportCategoryKey = 'digital';
+let inquiryUploadedPhotos = []; // array of base64 strings (max 5)
+let activeChecklistIndex = null;
+
+const SUPPORT_CATEGORIES = {
+  digital: {
+    name: '디지털 카메라',
+    icon: '📷',
+    aiTitle: '디지털 카메라 안내 챗봇이에요',
+    cardTitle: '카메라 거래 시 중요하게 볼 점',
+    subtitle: '디지털 카메라 거래 전 아래 항목들을 꼭 점검해 보세요',
+    checklist: [
+      {
+        title: 'CameraShutterCount 셔터 횟수 원본 검증',
+        badge: '필수 검증',
+        desc: '판매자의 주관적인 말만 믿지 마세요! 촬영된 무보정 원본 RAW/JPG 파일을 camerashuttercount.com에 업로드하여 EXIF 기계식 셔터 구동 횟수를 직접 확인해야 합니다.'
+      },
+      {
+        title: '센서 먼지 및 핫픽셀(불량화소) 확인법',
+        badge: '센서 점검',
+        desc: '조리개를 F16 이상으로 조이고 흰 벽이나 맑은 하늘을 촬영해 보세요. 사진에 점이나 얼룩이 보인다면 센서 클리닝이나 손상 여부를 확인해야 합니다.'
+      },
+      {
+        title: '외관 찍힘 및 단자부/마운트 체결부 점검',
+        badge: '외관 및 단자',
+        desc: '바디 모서리 찍힘은 내부 충격 이력을 의미합니다. 배터리실 누액, SD카드 슬롯 핀 휨, 렌즈 마운트 유격을 손으로 만져 확인하세요.'
+      }
+    ],
+    inquiryBtnText: '카메라 거래 문제 / 건의 남기기 (캡처 첨부)'
+  },
+  lens: {
+    name: '렌즈',
+    icon: '🔍',
+    aiTitle: '렌즈 광학 상태 안내 챗봇이에요',
+    cardTitle: '렌즈 거래 시 중요하게 볼 점',
+    subtitle: '렌즈 광학계와 모터 상태를 거래 전 꼼꼼히 점검하세요',
+    checklist: [
+      {
+        title: '조명 비춰서 내부 곰팡이 / 발삼 분리 확인법',
+        badge: '광학 검수',
+        desc: '스마트폰 플래시를 렌즈 뒤쪽에서 비추며 앞면을 들여다보세요. 거미줄 모양의 곰팡이나 뿌옇게 안개 낀 듯한 발삼 분리는 수리비가 많이 발생합니다.'
+      },
+      {
+        title: '조리개 링 구동 및 조리개 날 기름 누유 점검',
+        badge: '조리개 날',
+        desc: '조리개 날에 기름(오일)이 묻어 있으면 조리개가 제때 닫히지 않아 노출 오류가 납니다. 조리개 링을 돌릴 때 부드럽고 정확하게 조여지는지 점검하세요.'
+      },
+      {
+        title: 'AF/MF 모터 구동음 및 핀 초점 확인',
+        badge: '모터 & 초점',
+        desc: 'AF 작동 시 비정상적인 끽끽거림이나 덜컹거림이 없는지, 초점이 정확한 위치에 칼같이 맞는지 카메라에 마운트하여 테스트하세요.'
+      }
+    ],
+    inquiryBtnText: '렌즈 거래 문제 / 건의 남기기 (캡처 첨부)'
+  },
+  film_camera: {
+    name: '필름 카메라',
+    icon: '🎞️',
+    aiTitle: '필름 카메라 기계식 작동 챗봇이에요',
+    cardTitle: '필름 카메라 거래 시 중요하게 볼 점',
+    subtitle: '오래된 필름 바디는 기계적 작동 상태 확인이 필수입니다',
+    checklist: [
+      {
+        title: '1초 저속 셔터 끈적임(지연) & 고속 셔터막 구동',
+        badge: '셔터막 필수',
+        desc: '뒷면을 열고 1초 셔터를 눌러 정확히 1초 동안 열려 있다 닫히는지 확인하세요. 윤활유가 굳으면 셔터가 멈추거나 늦게 닫히는 하자가 흔합니다.'
+      },
+      {
+        title: '차광 스펀지(모ルト) 삭음 및 빛샘 확인법',
+        badge: '차광 스펀지',
+        desc: '필름실 덮개 틈새의 검은 스펀지가 가루처럼 바스러지거나 끈적거린다면 차광이 깨져 사진에 빛샘이 발생하므로 교체 이력을 확인해야 합니다.'
+      },
+      {
+        title: '와인딩 레버 텐션 및 필름실 카운터 작동 여부',
+        badge: '와인딩 텐션',
+        desc: '레버를 감을 때 부드러운 래칫 텐션이 느껴지는지, 셔터를 누를 때마다 카운터 숫자가 1씩 정상적으로 올라가는지 점검하세요.'
+      }
+    ],
+    inquiryBtnText: '필름 카메라 문제 / 건의 남기기 (캡처 첨부)'
+  },
+  film_lens: {
+    name: '필름 카메라 렌즈',
+    icon: '🔘',
+    aiTitle: '올드 렌즈 상태 안내 챗봇이에요',
+    cardTitle: '올드 렌즈 거래 시 중요하게 볼 점',
+    subtitle: '빈티지 올드 렌즈 특유의 광학 노후화를 확인하세요',
+    checklist: [
+      {
+        title: '올드 렌즈 특유의 헤이즈(연무) 및 코팅 스크래치',
+        badge: '헤이즈 검수',
+        desc: '수십 년 된 렌즈는 렌즈알 표면 코팅이 닦이면서 흠집이 생기거나 내부 안개(Haze)가 낄 수 있습니다. 역광 촬영 시 화질 저하의 주원인입니다.'
+      },
+      {
+        title: '수동 초점 링(헬리코이드) 회전 유격과 그리스 굳음',
+        badge: '헬리코이드',
+        desc: '포커스 링을 돌릴 때 너무 뻑뻑하거나 헛돌지 않는지 확인하세요. 내부 그리스가 말라붙으면 미세 초점 조절이 불가능합니다.'
+      },
+      {
+        title: '마운트 규격(M42, L39, M마운트 등) 호환성 체크',
+        badge: '어댑터 규격',
+        desc: '사용하시는 미러리스 바디나 필름 바디에 알맞은 변환 어댑터가 있는지, 마운트 나사선이 마모되지 않았는지 체결 상태를 점검하세요.'
+      }
+    ],
+    inquiryBtnText: '올드 렌즈 문제 / 건의 남기기 (캡처 첨부)'
+  },
+  verification: {
+    name: '3단계 본인 인증',
+    icon: '🛡️',
+    aiTitle: '본인 인증 체계 안내 챗봇이에요',
+    cardTitle: '본인 인증 단계별 안내 & 혜택',
+    subtitle: '안전 거래를 위한 FRAME 판매자 인증 안내입니다',
+    checklist: [
+      {
+        title: 'Lv.1 휴대폰 본인확인 (매물 등록 권한)',
+        badge: 'Lv.1 기본',
+        desc: '통신사 PASS 본인확인을 거쳐 실명 확인된 사용자만 매물을 등록할 수 있습니다. 명의 도용을 방지합니다.'
+      },
+      {
+        title: 'Lv.2 1원 실명계좌 인증 (정산 계좌 일치)',
+        badge: 'Lv.2 계좌',
+        desc: '판매자의 실명과 실제 거래 은행 계좌의 예금주가 동일한지 1원 송금 코드로 검증하여 대포통장 거래를 차단합니다.'
+      },
+      {
+        title: 'Lv.3 신분증 & 셀피 eKYC (공식 안심 배지)',
+        badge: 'Lv.3 최종',
+        desc: '주민등록증/운전면허증 OCR 및 실시간 셀피 라이브니스 교차 검증을 완료한 판매자에게만 [Lv.3 안심 공식 인증] 배지가 부여됩니다.'
+      }
+    ],
+    inquiryBtnText: '인증 오류 문의 / 예외 신청 (캡처 첨부)'
+  },
+  fraud: {
+    name: '사기 피해 / 허위 매물 신고',
+    icon: '🚨',
+    aiTitle: '사기 예방 & 긴급 접수 챗봇이에요',
+    cardTitle: '즉시 안전 조치 & 긴급 신고',
+    subtitle: '사기 의심 정황이 있다면 즉시 거래를 멈추고 확인하세요',
+    checklist: [
+      {
+        title: '판매자 계좌·전화번호 사기 이력 바로 조회하기 ↗',
+        badge: '사기 DB 조회',
+        desc: '더치트 및 FRAME 사기 DB를 통해 상대방의 전화번호와 계좌번호 신고 이력을 바로 확인하실 수 있습니다. (상단 바 사기 이력 조회 활용)'
+      },
+      {
+        title: '외부 메신저(카카오톡 오픈채팅) 유도 매물 즉시 차단',
+        badge: '피싱 주의',
+        desc: '안전결제 가짜 링크(피싱 사이트)를 보내거나 카카오톡으로만 대화하자는 판매자는 99.9% 사기입니다. 절대 링크를 누르지 마세요.'
+      },
+      {
+        title: '사이버수사대(경찰청 ECMS) 피해 접수 안내',
+        badge: '경찰 신고',
+        desc: '피해가 발생한 경우 즉시 입금 확인증과 상대방과의 채팅 캡처본을 지참하여 가까운 경찰서 민원실 또는 사이버수사대에 신고하세요.'
+      }
+    ],
+    inquiryBtnText: '🚨 사기 의심 / 대화 캡처 첨부하여 긴급 신고'
+  },
+  account: {
+    name: '계정 및 일반 건의사항',
+    icon: '💬',
+    aiTitle: '계정 및 서비스 안내 챗봇이에요',
+    cardTitle: '자주 묻는 계정 안내 및 제안',
+    subtitle: 'FRAME 이용 중 불편한 점이나 제안을 남겨주세요',
+    checklist: [
+      {
+        title: '로그인 및 비밀번호 재설정 안내',
+        badge: '로그인 문제',
+        desc: '비밀번호를 분실하신 경우 로그인 모달의 [PW 찾기] 메뉴에서 가입하신 이메일로 임시 재설정 코드를 발송받으실 수 있습니다.'
+      },
+      {
+        title: '회원 탈퇴 및 개인정보 처리 방침',
+        badge: '회원 탈퇴',
+        desc: '회원 탈퇴 시 진행 중인 거래가 없어야 하며, 전자상거래법에 따라 거래 기록은 법정 보관 기간 동안 안전하게 분리 보관됩니다.'
+      },
+      {
+        title: 'FRAME 플랫폼 기능 개선 및 건의사항',
+        badge: '서비스 제안',
+        desc: '새로운 카메라 기종 추가 요청, 검색 필터 개선, UI 건의 등 다양한 아이디어를 남겨주시면 개발팀에서 적극 검토합니다.'
+      }
+    ],
+    inquiryBtnText: '서비스 제안 및 일반 문의 남기기 (캡처 첨부)'
+  }
+};
+
+function openSupportCenterModal(targetView = 'home', categoryKey = null) {
+  const modal = document.getElementById('supportCenterModal');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+
+  // Update User Name
+  const user = getCurrentUser();
+  const userName = user?.name || (user?.email ? user.email.split('@')[0] : '회원');
+  const homeUserSpan = document.getElementById('supportHomeUserName');
+  if (homeUserSpan) homeUserSpan.innerText = userName;
+  document.querySelectorAll('.supportUserSubName').forEach(el => el.innerText = userName);
+
+  // Update history count badge
+  updateSupportHistoryBadge();
+
+  if (categoryKey && SUPPORT_CATEGORIES[categoryKey]) {
+    selectSupportCategory(categoryKey);
+  } else {
+    goToSupportView(targetView);
+  }
+
+  if (window.lucide) lucide.createIcons();
+}
+
+function closeSupportCenterModal() {
+  const modal = document.getElementById('supportCenterModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function updateSupportHistoryBadge() {
+  let list = [];
+  try {
+    list = JSON.parse(localStorage.getItem(SUPPORT_INQUIRIES_KEY) || '[]');
+  } catch (e) {
+    list = [];
+  }
+  const badge = document.getElementById('supportHistoryBadge');
+  if (badge) {
+    badge.innerText = list.length;
+    badge.classList.toggle('hidden', list.length === 0);
+  }
+}
+
+function goToSupportView(viewName) {
+  currentSupportView = viewName;
+  const views = ['home', 'category', 'inquiry', 'history'];
+
+  views.forEach(v => {
+    const el = document.getElementById(`supportView_${v}`);
+    if (el) el.classList.toggle('hidden', v !== viewName);
+  });
+
+  const backBtn = document.getElementById('supportNavBackBtn');
+  const titleEl = document.getElementById('supportHeaderTitle');
+
+  if (viewName === 'home') {
+    if (backBtn) backBtn.classList.add('hidden');
+    if (titleEl) titleEl.innerText = '고객센터';
+  } else if (viewName === 'category') {
+    if (backBtn) backBtn.classList.remove('hidden');
+    const cat = SUPPORT_CATEGORIES[currentSupportCategoryKey];
+    if (titleEl) titleEl.innerText = cat ? cat.name : '고객센터';
+  } else if (viewName === 'inquiry') {
+    if (backBtn) backBtn.classList.remove('hidden');
+    if (titleEl) titleEl.innerText = '1:1 문의 및 건의 작성';
+  } else if (viewName === 'history') {
+    if (backBtn) backBtn.classList.remove('hidden');
+    if (titleEl) titleEl.innerText = '이전 문의 내역';
+    renderSupportHistory();
+  }
+
+  // Scroll to top of modal
+  const scrollBody = document.getElementById('supportModalScrollBody');
+  if (scrollBody) scrollBody.scrollTop = 0;
+
+  if (window.lucide) lucide.createIcons();
+}
+
+function handleSupportBack() {
+  if (currentSupportView === 'inquiry') {
+    goToSupportView('category');
+  } else if (currentSupportView === 'category') {
+    goToSupportView('home');
+  } else if (currentSupportView === 'history') {
+    goToSupportView('home');
+  } else {
+    goToSupportView('home');
+  }
+}
+
+function goToSupportHome() {
+  goToSupportView('home');
+}
+
+function selectSupportCategory(catKey) {
+  if (!SUPPORT_CATEGORIES[catKey]) return;
+  currentSupportCategoryKey = catKey;
+  const cat = SUPPORT_CATEGORIES[catKey];
+
+  // Set category detail elements
+  const iconBadge = document.getElementById('supportCatIconBadge');
+  if (iconBadge) iconBadge.innerText = cat.icon;
+
+  const aiTitle = document.getElementById('supportCatAiTitle');
+  if (aiTitle) aiTitle.innerText = cat.aiTitle;
+
+  const cardTitle = document.getElementById('supportCatCardTitle');
+  if (cardTitle) {
+    cardTitle.innerHTML = `<span>📌</span><span>${escapeHtml(cat.cardTitle)}</span>`;
+  }
+
+  const subtitle = document.getElementById('supportCatSubtitle');
+  if (subtitle) subtitle.innerText = cat.subtitle;
+
+  const inqBtnText = document.getElementById('supportInquiryBtnText');
+  if (inqBtnText) inqBtnText.innerText = cat.inquiryBtnText;
+
+  // Render Checklist
+  const checklistContainer = document.getElementById('supportChecklistContainer');
+  activeChecklistIndex = null;
+  if (checklistContainer) {
+    checklistContainer.innerHTML = cat.checklist.map((item, idx) => `
+      <div class="border border-[#E4E4E7] dark:border-[#2E2E32] rounded-xl overflow-hidden bg-white dark:bg-[#18181B] transition">
+        <button type="button" onclick="toggleSupportChecklist(${idx})" class="w-full p-3 text-left flex items-center justify-between hover:bg-[#F4F4F5] dark:hover:bg-[#27272A] transition cursor-pointer">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#F4F4F5] dark:bg-[#27272A] text-[#18181B] dark:text-[#F4F4F5] border border-[#E4E4E7] dark:border-[#3F3F46]">
+              ${escapeHtml(item.badge)}
+            </span>
+            <span class="text-xs font-bold text-[#18181B] dark:text-white">${escapeHtml(item.title)}</span>
+          </div>
+          <i id="chkArrow_${idx}" data-lucide="chevron-down" class="w-4 h-4 text-[#71717A] transition-transform"></i>
+        </button>
+        <div id="chkBody_${idx}" class="hidden p-3.5 pt-0 text-xs text-[#525252] dark:text-[#D4D4D8] border-t border-[#F0F0F0] dark:border-[#27272A] leading-relaxed bg-[#FAFAFA] dark:bg-[#202023]/60">
+          ${item.desc}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Clear chat thread
+  const chatThread = document.getElementById('supportCategoryChatThread');
+  if (chatThread) chatThread.innerHTML = '';
+
+  goToSupportView('category');
+}
+
+function toggleSupportChecklist(idx) {
+  const body = document.getElementById(`chkBody_${idx}`);
+  const arrow = document.getElementById(`chkArrow_${idx}`);
+  if (!body) return;
+
+  const isHidden = body.classList.contains('hidden');
+  body.classList.toggle('hidden', !isHidden);
+  if (arrow) {
+    arrow.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+  }
+}
+
+// ================= 1:1 INQUIRY WITH UP TO 5 PHOTOS =================
+function goToSupportInquiry() {
+  const cat = SUPPORT_CATEGORIES[currentSupportCategoryKey];
+  const catBadge = document.getElementById('inquiryCurrentCatBadge');
+  if (catBadge && cat) {
+    catBadge.innerText = `${cat.icon} ${cat.name}`;
+  }
+
+  // Pre-fill user email
+  const user = getCurrentUser();
+  const emailInput = document.getElementById('inquiryUserEmail');
+  if (emailInput && user?.email) {
+    emailInput.value = user.email;
+  }
+
+  // Reset photos
+  inquiryUploadedPhotos = [];
+  renderInquiryPhotoThumbnails();
+
+  goToSupportView('inquiry');
+}
+
+function handleInquiryPhotoSelect(event) {
+  const files = Array.from(event.target.files || []);
+  if (!files.length) return;
+
+  const remaining = 5 - inquiryUploadedPhotos.length;
+  if (remaining <= 0) {
+    showFrameToast('증빙 사진은 최대 5장까지 첨부 가능합니다.', 'warning');
+    return;
+  }
+
+  const toAdd = files.slice(0, remaining);
+
+  toAdd.forEach(file => {
+    if (!file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (inquiryUploadedPhotos.length < 5) {
+        inquiryUploadedPhotos.push({
+          name: file.name,
+          dataUrl: e.target.result
+        });
+        renderInquiryPhotoThumbnails();
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Reset file input value so same files can be re-selected if needed
+  event.target.value = '';
+}
+
+function removeInquiryPhoto(idx) {
+  inquiryUploadedPhotos.splice(idx, 1);
+  renderInquiryPhotoThumbnails();
+}
+
+function renderInquiryPhotoThumbnails() {
+  const container = document.getElementById('inquiryPhotoThumbnails');
+  const countNum = document.getElementById('inquiryPhotoCountNum');
+  if (countNum) countNum.innerText = inquiryUploadedPhotos.length;
+  if (!container) return;
+
+  if (inquiryUploadedPhotos.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+
+  container.innerHTML = inquiryUploadedPhotos.map((photo, idx) => `
+    <div class="relative aspect-square rounded-xl overflow-hidden border border-[#E4E4E7] dark:border-[#3F3F46] bg-black/5 dark:bg-white/5 group">
+      <img src="${photo.dataUrl}" alt="증빙 첨부 ${idx + 1}" class="w-full h-full object-cover">
+      <button type="button" onclick="removeInquiryPhoto(${idx})" class="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/75 hover:bg-red-600 text-white flex items-center justify-center transition cursor-pointer shadow-xs" title="삭제">
+        <i data-lucide="x" class="w-3 h-3"></i>
+      </button>
+      <span class="absolute bottom-1 left-1 text-[9px] font-mono font-bold bg-black/60 text-white px-1 rounded">
+        ${idx + 1}
+      </span>
+    </div>
+  `).join('');
+
+  if (window.lucide) lucide.createIcons();
+}
+
+function handleDanggeunInquirySubmit(e) {
+  e.preventDefault();
+  const cat = SUPPORT_CATEGORIES[currentSupportCategoryKey];
+  const email = document.getElementById('inquiryUserEmail')?.value.trim();
+  const title = document.getElementById('inquiryUserTitle')?.value.trim();
+  const content = document.getElementById('inquiryUserContent')?.value.trim();
+
+  if (!email || !title || !content) {
+    showFrameToast('모든 필수 항목을 입력해 주세요.', 'error');
+    return;
+  }
+
+  const ticketId = 'INQ-' + Date.now().toString(36).toUpperCase();
+  const newTicket = {
+    id: ticketId,
+    categoryKey: currentSupportCategoryKey,
+    categoryName: cat ? `${cat.icon} ${cat.name}` : '기타 문의',
+    email,
+    title,
+    content,
+    photos: [...inquiryUploadedPhotos],
+    createdAt: new Date().toLocaleString('ko-KR', { dateStyle: 'medium', timeStyle: 'short' }),
+    status: '답변 대기중',
+    estimatedTime: '영업일 24시간 이내 회신 예정'
+  };
+
+  // 1. Save to local storage (즉시 브라우저 로컬 저장)
+  let list = [];
+  try {
+    list = JSON.parse(localStorage.getItem(SUPPORT_INQUIRIES_KEY) || '[]');
+  } catch (err) {
+    list = [];
+  }
+  list.unshift(newTicket);
+  localStorage.setItem(SUPPORT_INQUIRIES_KEY, JSON.stringify(list));
+
+  // 2. Save to Supabase Cloud Database (수파베이스 원격 DB 저장 연동)
+  if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+    (async () => {
+      try {
+        const u = getCurrentUser();
+        const photoData = inquiryUploadedPhotos.map((p, idx) => ({
+          name: p.name || `photo_${idx + 1}.jpg`,
+          dataUrl: p.dataUrl
+        }));
+
+        await supabaseClient.from('inquiries').insert([{
+          id: ticketId,
+          user_id: (u && u.id && u.id.includes('-')) ? u.id : null,
+          category: cat ? cat.name : '일반 문의',
+          email: email,
+          title: title,
+          content: content,
+          photos: photoData,
+          status: '답변 대기중',
+          created_at: new Date().toISOString()
+        }]);
+        console.log('[Supabase] Inquiry successfully saved to cloud database:', ticketId);
+      } catch (dbErr) {
+        console.warn('[Supabase] Inquiry cloud save skipped (table might not exist yet):', dbErr);
+      }
+    })();
+  }
+
+  // Reset Form
+  document.getElementById('supportDirectInquiryForm')?.reset();
+  inquiryUploadedPhotos = [];
+  renderInquiryPhotoThumbnails();
+
+  updateSupportHistoryBadge();
+  showFrameToast(`문의가 접수되었습니다! (접수번호: ${ticketId})`, 'success', 3500);
+
+  // Transition to History View
+  goToSupportView('history');
+}
+
+// ================= RENDER HISTORY =================
+async function renderSupportHistory() {
+  const emptyBox = document.getElementById('supportHistoryEmpty');
+  const listBox = document.getElementById('supportHistoryList');
+  if (!listBox) return;
+
+  let list = [];
+  try {
+    list = JSON.parse(localStorage.getItem(SUPPORT_INQUIRIES_KEY) || '[]');
+  } catch (e) {
+    list = [];
+  }
+
+  // Supabase 원격 DB와 동기화 (클라우드에 저장된 문의 함께 조회)
+  if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+    try {
+      const u = getCurrentUser();
+      let query = supabaseClient.from('inquiries').select('*').order('created_at', { ascending: false });
+      if (u && u.id && u.id.includes('-')) {
+        query = query.or(`user_id.eq.${u.id},email.eq.${u.email || ''}`);
+      }
+      const { data: remoteInquiries } = await query;
+      if (remoteInquiries && remoteInquiries.length > 0) {
+        const localIds = new Set(list.map(item => item.id));
+        remoteInquiries.forEach(row => {
+          if (!localIds.has(row.id)) {
+            list.push({
+              id: row.id,
+              categoryName: row.category || '일반 문의',
+              email: row.email,
+              title: row.title,
+              content: row.content,
+              photos: row.photos || [],
+              createdAt: new Date(row.created_at).toLocaleString('ko-KR', { dateStyle: 'medium', timeStyle: 'short' }),
+              status: row.status || '답변 대기중'
+            });
+          }
+        });
+        localStorage.setItem(SUPPORT_INQUIRIES_KEY, JSON.stringify(list));
+      }
+    } catch (e) {
+      // Offline fallback
+    }
+  }
+
+  const badge = document.getElementById('supportHistoryBadge');
+  if (badge) {
+    badge.innerText = list.length;
+    badge.classList.toggle('hidden', list.length === 0);
+  }
+
+  if (list.length === 0) {
+    if (emptyBox) emptyBox.classList.remove('hidden');
+    listBox.classList.add('hidden');
+    return;
+  }
+
+  if (emptyBox) emptyBox.classList.add('hidden');
+  listBox.classList.remove('hidden');
+
+  listBox.innerHTML = list.map(item => `
+    <div class="border border-[#E4E4E7] dark:border-[#2E2E32] rounded-2xl p-4 bg-white dark:bg-[#202023] shadow-2xs space-y-2.5">
+      <div class="flex items-center justify-between">
+        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#F4F4F5] dark:bg-[#27272A] text-[#18181B] dark:text-[#F4F4F5]">
+          ${escapeHtml(item.categoryName)}
+        </span>
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] text-[#71717A] font-mono">${escapeHtml(item.createdAt)}</span>
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+            ● ${escapeHtml(item.status)}
+          </span>
+        </div>
+      </div>
+
+      <div>
+        <h5 class="text-xs font-bold text-[#18181B] dark:text-white mb-1">${escapeHtml(item.title)}</h5>
+        <p class="text-xs text-[#525252] dark:text-[#D4D4D8] whitespace-pre-wrap leading-relaxed">${escapeHtml(item.content)}</p>
+      </div>
+
+      ${item.photos && item.photos.length > 0 ? `
+        <div class="pt-1">
+          <span class="text-[10px] text-[#71717A] dark:text-[#A1A1AA] block mb-1">첨부된 증빙 사진 (${item.photos.length}장):</span>
+          <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+            ${item.photos.map(p => `
+              <img src="${p.dataUrl}" alt="${escapeHtml(p.name || '증빙')}" class="w-14 h-14 rounded-lg object-cover border border-[#E4E4E7] dark:border-[#3F3F46] flex-shrink-0">
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
+
+      <div class="pt-2 border-t border-[#F0F0F0] dark:border-[#27272A] text-[11px] text-[#71717A] flex items-center justify-between">
+        <span>접수 번호: <strong class="font-mono text-[#18181B] dark:text-white">${escapeHtml(item.id)}</strong></span>
+        <span>회신 이메일: ${escapeHtml(item.email)}</span>
+      </div>
+    </div>
+  `).join('');
+
+  if (window.lucide) lucide.createIcons();
+}
+
+// ================= AI CHATBOT INPUT HANDLER =================
+function handleSupportInput(source) {
+  const input = source === 'home'
+    ? document.getElementById('supportHomeInput')
+    : document.getElementById('supportCatInput');
+
+  if (!input) return;
+  const query = input.value.trim();
+  if (!query) return;
+  input.value = '';
+
+  // If asked from home, find most relevant category or use digital
+  if (source === 'home') {
+    let matchedKey = 'digital';
+    const qLower = query.toLowerCase();
+    if (qLower.includes('렌즈') && (qLower.includes('필름') || qLower.includes('올드') || qLower.includes('수동'))) matchedKey = 'film_lens';
+    else if (qLower.includes('렌즈') || qLower.includes('조리개') || qLower.includes('곰팡이')) matchedKey = 'lens';
+    else if (qLower.includes('필름') || qLower.includes('셔터막') || qLower.includes('와인딩')) matchedKey = 'film_camera';
+    else if (qLower.includes('인증') || qLower.includes('본인') || qLower.includes('레벨') || qLower.includes('계좌')) matchedKey = 'verification';
+    else if (qLower.includes('사기') || qLower.includes('신고') || qLower.includes('피싱') || qLower.includes('더치트')) matchedKey = 'fraud';
+    else if (qLower.includes('계정') || qLower.includes('로그인') || qLower.includes('탈퇴') || qLower.includes('건의')) matchedKey = 'account';
+
+    selectSupportCategory(matchedKey);
+  }
+
+  // Append User message and Bot response in Category Chat thread
+  const chatThread = document.getElementById('supportCategoryChatThread');
+  if (!chatThread) return;
+
+  const userBubble = `
+    <div class="flex items-start justify-end gap-2">
+      <div class="bg-[#18181B] dark:bg-white text-white dark:text-[#18181B] rounded-2xl rounded-tr-none px-3.5 py-2 text-xs leading-relaxed max-w-[85%] shadow-2xs">
+        ${escapeHtml(query)}
+      </div>
+    </div>
+  `;
+  chatThread.insertAdjacentHTML('beforeend', userBubble);
+
+  setTimeout(() => {
+    const botReply = generateSupportBotReply(query);
+    const botBubble = `
+      <div class="flex items-start gap-2.5">
+        <div class="w-7 h-7 rounded-full bg-[#18181B] dark:bg-white text-white dark:text-[#18181B] flex items-center justify-center text-xs flex-shrink-0 shadow-2xs">
+          🤖
+        </div>
+        <div class="bg-white dark:bg-[#202023] border border-[#E4E4E7] dark:border-[#2E2E32] rounded-2xl rounded-tl-none p-3 text-xs leading-relaxed max-w-[88%] text-[#18181B] dark:text-[#F4F4F5] shadow-2xs">
+          ${botReply}
+        </div>
+      </div>
+    `;
+    chatThread.insertAdjacentHTML('beforeend', botBubble);
+    chatThread.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    if (window.lucide) lucide.createIcons();
+  }, 350);
+}
+
+function generateSupportBotReply(query) {
+  const q = query.toLowerCase();
+
+  if (q.includes('셔터') || q.includes('shutter') || q.includes('컷수')) {
+    return `<strong>디지털 카메라 셔터 횟수 검증 안내:</strong><br><br>
+    • 디지털 카메라는 <strong>무보정 원본 사진(RAW 또는 JPG)</strong>을 <a href="https://www.camerashuttercount.com/" target="_blank" class="underline font-bold text-emerald-600 dark:text-emerald-400">camerashuttercount.com</a>에 업로드하면 메타데이터(EXIF)에서 기계식 셔터 구동 횟수가 자동으로 산출됩니다.<br>
+    • 매물 등록 시 해당 결과 링크나 캡처를 첨부하면 구매자에게 <strong>"셔터 횟수 검증 완료"</strong> 배지가 부여됩니다.`;
+  }
+
+  if (q.includes('필름') || q.includes('영상') || q.includes('셔터막')) {
+    return `<strong>필름 카메라 영상 증빙 안내:</strong><br><br>
+    • 필름 카메라는 셔터막 지연·늘어짐이나 끈적임 하자가 흔히 발생합니다.<br>
+    • 뒷면을 연 채 <strong>1초 저속 셔터 구동 영상</strong>과 <strong>1/1000초 고속 셔터 구동 영상</strong>을 확인하시면 기계적 결함을 사전에 예방할 수 있습니다.`;
+  }
+
+  if (q.includes('사기') || q.includes('신고') || q.includes('조회') || q.includes('피싱')) {
+    return `<strong>사기 의심 및 허위 매물 예방 안내:</strong><br><br>
+    • 상단 바의 <strong>[사기 이력 조회]</strong> 메뉴에서 판매자의 전화번호나 계좌번호를 즉시 조회할 수 있습니다.<br>
+    • 카카오톡 오픈채팅 등 외부 메신저 유도나 안전결제 가짜 링크는 99% 사기이므로 즉시 거래를 중단하고 아래 <strong>[긴급 신고 접수]</strong>를 이용해 주세요.`;
+  }
+
+  if (q.includes('인증') || q.includes('본인') || q.includes('레벨') || q.includes('등급')) {
+    return `<strong>FRAME 3단계 본인 인증 안내:</strong><br><br>
+    • <strong>Lv.1 (휴대폰 인증)</strong>: 통신사 본인확인을 거쳐 매물 등록 권한 획득<br>
+    • <strong>Lv.2 (실명 계좌 인증)</strong>: 1원 송금 점유 인증으로 판매 대금 정산 계좌 일치 확인<br>
+    • <strong>Lv.3 (신분증 & 셀피 eKYC)</strong>: 신분증과 실시간 셀피 교차 검증으로 "안심 공식 인증 판매자" 배지 획득!`;
+  }
+
+  if (q.includes('렌즈') || q.includes('곰팡이') || q.includes('먼지') || q.includes('빛')) {
+    return `<strong>렌즈 광학 상태 점검 안내:</strong><br><br>
+    • 스마트폰 플래시를 렌즈 뒤쪽에서 비추면 내부에 서식하는 곰팡이 거미줄이나 발삼 분리(뿌연 안개 현상)를 육안으로 확실히 식별할 수 있습니다.<br>
+    • 조리개 링을 돌릴 때 조리개 날에 기름이 묻어있지 않은지 반드시 점검하세요.`;
+  }
+
+  return `질문해 주신 내용에 대해 안내드립니다.<br><br>
+  FRAME 플랫폼은 고가의 카메라 및 렌즈 거래 시 발생하는 상태 불일치와 사기 불안을 해소하기 위해 <strong>카테고리별 필수 체크리스트</strong>와 <strong>증빙 사진 첨부 1:1 접수 창구</strong>를 운영하고 있습니다.<br><br>
+  상세한 확인이나 운영진 검수가 필요하시면 아래 <strong>[1:1 문의 및 건의 남기기]</strong> 버튼을 통해 캡처 사진과 함께 접수해 주세요!`;
+}

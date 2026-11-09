@@ -1,5 +1,5 @@
 // FRAME Mock Dataset - 카메라 및 필름 전문 장비 데이터 (Black/White/Gray 테마)
-const SAMPLE_PRODUCTS = [
+let SAMPLE_PRODUCTS = [
   {
     id: 1,
     category: 'camera',

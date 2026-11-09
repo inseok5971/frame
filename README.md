@@ -65,8 +65,8 @@ Supabase(PostgreSQL)를 연동하여 실제 회원가입, 로그인 세션 관�
 
 ## 현재 상태와 계획
 
-- ✅ 완료: 화면 설계, 프론트엔드 인터랙션, Supabase 연동 (PostgreSQL, Auth, Row Level Security)
-- 🔜 예정: 실시간 1:1 문의, 실제 본인 인증 연동, 셔터 횟수 서버 파싱, 실거래 기반 시세 계산
+- ✅ 완료: 화면 설계, 프론트엔드 인터랙션, Supabase 연동 (PostgreSQL, Auth, Row Level Security), 단계별 고객센터 & 1:1 문의·사진 증빙 시스템 (v1.1)
+- 🔜 예정: 실제 본인 인증(PG사) 연동, 셔터 횟수 서버 파싱, 실거래 기반 시세 계산
 
 ## 기술 스택
 
@@ -78,7 +78,11 @@ Supabase(PostgreSQL)를 연동하여 실제 회원가입, 로그인 세션 관�
 | 작례 수집 | Python (`server.py`) |
 | 배포 | GitHub Pages |
 
+> **회원가입 안내**: 시연 편의를 위해 별도의 이메일 인증 없이 가입 즉시 로그인할 수 있습니다. 실서비스에서는 이메일 인증을 활성화할 예정입니다.
+
 ## 실행 방법
+
+- **Supabase 설정 SQL**: `backend/schema.sql` (회원 자동 승인 트리거 및 1:1 문의 DB 스키마)
 
 ### 1. 기본 웹 데모 실행
 ```bash
