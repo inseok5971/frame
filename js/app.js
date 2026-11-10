@@ -265,6 +265,10 @@ function renderProductGrid(items) {
   emptyState.classList.add('hidden');
 
   grid.innerHTML = items.map(item => {
+    const status = getProductStatus(item.id);
+    const isSold = status === 'sold';
+    const isReserved = status === 'reserved';
+
     // Clean Minimal Verification Badges
     let badgeHtml = '';
     if (item.verified) {
@@ -329,18 +333,36 @@ function renderProductGrid(items) {
     };
 
     return `
-      <div onclick="openProductDetail(${item.id})" class="product-card cursor-pointer bg-white border border-[#EAEAEA] rounded-xl overflow-hidden flex flex-col group">
+      <div onclick="openProductDetail(${item.id})" class="product-card cursor-pointer bg-white border border-[#EAEAEA] rounded-xl overflow-hidden flex flex-col group relative ${isSold ? 'opacity-85' : ''}">
         <!-- Thumbnail -->
         <div class="relative aspect-[4/3] bg-[#F5F5F5] overflow-hidden">
-          <img src="${item.imageUrl}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+          <img src="${item.imageUrl}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${isSold ? 'grayscale-[35%]' : ''}">
           
           <!-- Category & Badge pill -->
           <div class="absolute top-2.5 left-2.5 flex flex-col gap-1 items-start z-10">
-            <span class="text-[9px] px-2 py-0.5 rounded bg-white/90 text-[#171717] border border-[#E5E5E5] backdrop-blur font-medium">
-              ${catLabels[item.category] || '카메라'}
-            </span>
+            <div class="flex items-center gap-1">
+              <span class="text-[9px] px-2 py-0.5 rounded bg-white/90 text-[#171717] border border-[#E5E5E5] backdrop-blur font-medium">
+                ${catLabels[item.category] || '카메라'}
+              </span>
+              ${isReserved ? `
+                <span class="text-[9px] px-2 py-0.5 rounded bg-amber-500 text-white font-bold shadow-xs flex items-center gap-1">
+                  <i data-lucide="clock" class="w-2.5 h-2.5"></i>
+                  예약중
+                </span>
+              ` : ''}
+            </div>
             ${badgeHtml}
           </div>
+
+          <!-- Sold Out Overlay -->
+          ${isSold ? `
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex flex-col items-center justify-center z-10 pointer-events-none">
+              <span class="px-3 py-1.5 rounded-full bg-zinc-950/95 text-white font-bold text-xs tracking-wider border border-white/20 shadow-xl flex items-center gap-1.5">
+                <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-zinc-300"></i>
+                거래 완료
+              </span>
+            </div>
+          ` : ''}
 
           <!-- Wishlist Heart Button (LocalStorage Linked) -->
           <button onclick="event.stopPropagation(); toggleCardWishlist(${item.id});" class="absolute top-2.5 right-2.5 p-1.5 rounded-full bg-white/90 hover:bg-white text-[#737373] hover:text-red-500 backdrop-blur transition shadow-sm z-10 cursor-pointer" title="${isWishlisted(item.id) ? '관심 매물 해제' : '관심 매물 등록'}">
@@ -370,12 +392,17 @@ function renderProductGrid(items) {
             </h3>
 
             <div class="flex items-baseline justify-between mb-1">
-              <span class="text-base font-extrabold text-[#171717]">
+              <span class="text-base font-extrabold ${isSold ? 'text-[#8A8A8A] line-through' : 'text-[#171717]'}">
                 ${item.price.toLocaleString()}<span class="text-xs font-normal text-[#737373] ml-0.5">원</span>
               </span>
             </div>
             <div>
-              ${diffBadge}
+              ${isSold ? `
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-zinc-100 text-zinc-600 border border-zinc-200">
+                  <i data-lucide="check-check" class="w-3 h-3 text-zinc-500"></i>
+                  거래 완료된 매물
+                </span>
+              ` : diffBadge}
             </div>
           </div>
 
@@ -699,6 +726,46 @@ function openProductDetail(productId) {
 
   // Verification Report
   renderVerificationReport(item);
+
+  // Sync Wishlist Bookmark Heart Icon
+  const modalBookmarkIcon = document.getElementById('modalBookmarkIcon');
+  if (modalBookmarkIcon) {
+    if (isWishlisted(item.id)) {
+      modalBookmarkIcon.classList.add('fill-red-500', 'text-red-500');
+      modalBookmarkIcon.classList.remove('text-[#171717]');
+    } else {
+      modalBookmarkIcon.classList.remove('fill-red-500', 'text-red-500');
+      modalBookmarkIcon.classList.add('text-[#171717]');
+    }
+  }
+
+  // Owner Status Panel Check (Only for owner or admin)
+  const currentStatus = getProductStatus(item.id);
+  const isOwner = isMyProduct(item);
+  const ownerPanel = document.getElementById('modalOwnerStatusPanel');
+  if (ownerPanel) {
+    if (isOwner) {
+      ownerPanel.classList.remove('hidden');
+      updateModalOwnerStatusUI(currentStatus);
+    } else {
+      ownerPanel.classList.add('hidden');
+    }
+  }
+
+  // Chat Action Button Check (Disabled if sold out)
+  const chatBtn = document.getElementById('modalActionChatBtn');
+  const chatBtnText = document.getElementById('modalActionChatBtnText');
+  if (chatBtn) {
+    if (currentStatus === 'sold') {
+      chatBtn.disabled = true;
+      chatBtn.className = 'flex-1 py-3 px-4 rounded-full bg-zinc-200 text-zinc-500 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-not-allowed shadow-none';
+      if (chatBtnText) chatBtnText.innerText = '거래가 완료된 매물입니다';
+    } else {
+      chatBtn.disabled = false;
+      chatBtn.className = 'flex-1 py-3 px-4 rounded-full bg-[#171717] hover:bg-black text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition active:scale-95 shadow-sm cursor-pointer';
+      if (chatBtnText) chatBtnText.innerText = '1:1 직거래 문의하기';
+    }
+  }
 
   // Show modal immediately with 0ms delay!
   document.getElementById('detailModal').classList.remove('hidden');
@@ -2029,6 +2096,18 @@ function handleProductSubmit(e) {
   // 3. 고유 ID 부여 및 최상단에 추가
   newProduct.id = Date.now();
   SAMPLE_PRODUCTS.unshift(newProduct);
+
+  // 내 등록 매물(My Products) 목록에 추가 & 판매중 상태 초기화
+  let myIds = getMyProductIds();
+  if (!myIds.includes(newProduct.id)) {
+    myIds.unshift(newProduct.id);
+    try {
+      localStorage.setItem(MY_PRODUCTS_KEY, JSON.stringify(myIds));
+    } catch (e) {}
+  }
+  changeProductStatus(newProduct.id, 'selling');
+  updateMyPageCounters();
+
   applyFilters();
 
   // 4. Supabase DB 동기화 (클라우드 데이터베이스 저장)
@@ -2441,10 +2520,13 @@ function updateHeaderUserState() {
 
     area.innerHTML = `
       <div class="flex items-center gap-2">
-        <div class="flex items-center gap-1.5 bg-[#F5F5F5] border border-[#E5E5E5] px-2.5 py-1 rounded-full text-xs">
+        <button onclick="openMyPageDrawer('listings')" class="flex items-center gap-1.5 bg-[#F5F5F5] hover:bg-[#EAEAEA] border border-[#E5E5E5] px-2.5 py-1 rounded-full text-xs transition cursor-pointer" title="마이페이지 & 내 매물 관리 열기">
           <span class="font-bold text-[#171717] max-w-[80px] sm:max-w-[100px] truncate">${user.name || user.id}</span>
           ${levelBadgeHtml}
-        </div>
+        </button>
+        <button onclick="openMyPageDrawer('listings')" class="hidden sm:inline-flex text-[11px] font-semibold px-2.5 py-1 rounded-full border border-[#171717] bg-[#171717] text-white hover:bg-black transition cursor-pointer" title="마이페이지 열기">
+          마이페이지
+        </button>
         ${isAdmin ? `
           <span class="hidden sm:inline-flex text-[11px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300">
             관리자 모드
@@ -2460,11 +2542,16 @@ function updateHeaderUserState() {
       </div>
     `;
   } else {
-    // Default: Clean person emoji/icon button
+    // Default: Clean person emoji/icon button + 마이페이지 quick access
     area.innerHTML = `
-      <button onclick="handleUserIconClick()" class="p-2 rounded-full hover:bg-[#F2F2F2] text-[#171717] transition border border-[#E5E5E5] flex items-center justify-center cursor-pointer" title="로그인 / 회원가입">
-        <i data-lucide="user" class="w-4 h-4"></i>
-      </button>
+      <div class="flex items-center gap-1.5">
+        <button onclick="openMyPageDrawer('listings')" class="text-[11px] font-semibold px-2.5 py-1 rounded-full border border-[#E5E5E5] bg-white hover:bg-[#F5F5F5] text-[#171717] transition cursor-pointer" title="마이페이지 & 거래 관리">
+          마이페이지
+        </button>
+        <button onclick="handleUserIconClick()" class="p-2 rounded-full hover:bg-[#F2F2F2] text-[#171717] transition border border-[#E5E5E5] flex items-center justify-center cursor-pointer" title="로그인 / 회원가입">
+          <i data-lucide="user" class="w-4 h-4"></i>
+        </button>
+      </div>
     `;
   }
   lucide.createIcons();
@@ -2473,9 +2560,7 @@ function updateHeaderUserState() {
 function handleUserIconClick() {
   const user = getCurrentUser();
   if (user) {
-    if (confirm(`현재 [${user.name || user.id}] 계정으로 로그인되어 있습니다.\n\n로그아웃하시겠습니까?`)) {
-      handleLogout();
-    }
+    openMyPageDrawer('listings');
   } else {
     openAuthModal('login');
   }
@@ -3314,7 +3399,7 @@ function toggleCardWishlist(itemId) {
     showFrameToast('관심 매물에서 제외되었습니다.', 'info');
   } else {
     list.push(idNum);
-    showFrameToast('관심 매물에 저장되었습니다! (상단 관심 매물 탭에서 확인)', 'success');
+    showFrameToast('관심 매물에 저장되었습니다! (마이페이지 관심 목록에서 확인)', 'success');
   }
 
   try {
@@ -3323,17 +3408,21 @@ function toggleCardWishlist(itemId) {
 
   updateWishlistBadges();
 
-  if (currentCategory === 'wishlist') {
-    applyFilters();
-  } else {
-    applyFilters();
+  const wishlistContainer = document.getElementById('myPageContentWishlist');
+  if (wishlistContainer && !wishlistContainer.classList.contains('hidden')) {
+    renderMyPageWishlist();
   }
+
+  applyFilters();
 }
 
 function updateWishlistBadges() {
   const count = getWishlist().length;
   const badge = document.getElementById('wishlistCountBadge');
   const bottomBadge = document.getElementById('bottomNavWishlistBadge');
+  const headerBadge = document.getElementById('headerWishlistBadge');
+  const myPageBadge = document.getElementById('myPageWishlistCount');
+
   if (badge) {
     badge.innerText = count;
     if (count > 0) badge.classList.remove('hidden');
@@ -3342,6 +3431,14 @@ function updateWishlistBadges() {
   if (bottomBadge) {
     if (count > 0) bottomBadge.classList.remove('hidden');
     else bottomBadge.classList.add('hidden');
+  }
+  if (headerBadge) {
+    headerBadge.innerText = count;
+    if (count > 0) headerBadge.classList.remove('hidden');
+    else headerBadge.classList.add('hidden');
+  }
+  if (myPageBadge) {
+    myPageBadge.innerText = `${count}건`;
   }
 }
 
@@ -3352,6 +3449,568 @@ function toggleCardHeart(btn) {
 
 function toggleBookmark(btn) {
   btn.classList.toggle('text-black');
+}
+
+// ================= PRODUCT STATUS & OWNERSHIP MANAGEMENT =================
+const PRODUCT_STATUS_KEY = 'frame_product_statuses';
+const MY_PRODUCTS_KEY = 'frame_my_product_ids';
+
+function getProductStatuses() {
+  try {
+    const raw = localStorage.getItem(PRODUCT_STATUS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function getProductStatus(itemOrId) {
+  const id = typeof itemOrId === 'object' && itemOrId !== null ? itemOrId.id : itemOrId;
+  const statuses = getProductStatuses();
+  if (statuses && statuses[Number(id)]) {
+    return statuses[Number(id)];
+  }
+  if (typeof itemOrId === 'object' && itemOrId !== null && itemOrId.status) {
+    return itemOrId.status;
+  }
+  return 'selling';
+}
+
+function getMyProductIds() {
+  try {
+    const raw = localStorage.getItem(MY_PRODUCTS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  // Default demo ownership: product #1 ('소니 Alpha A7 IV') is assigned to user for interactive portfolio demo
+  const defaultList = [1];
+  try {
+    localStorage.setItem(MY_PRODUCTS_KEY, JSON.stringify(defaultList));
+  } catch (e) {}
+  return defaultList;
+}
+
+function isMyProduct(item) {
+  if (!item) return false;
+  const idNum = Number(item.id);
+  const myIds = getMyProductIds();
+  if (myIds.includes(idNum)) return true;
+
+  const user = getCurrentUser();
+  if (!user) return false;
+  if (user.role === 'admin' || user.level === 99 || user.email === 'admin@frame.com') return true;
+  if (item.seller && (item.seller.name === user.name || item.seller.name === user.id || item.seller.name === '나')) return true;
+  return false;
+}
+
+function changeProductStatus(productId, newStatus) {
+  const idNum = Number(productId);
+  const statuses = getProductStatuses();
+  statuses[idNum] = newStatus;
+
+  try {
+    localStorage.setItem(PRODUCT_STATUS_KEY, JSON.stringify(statuses));
+  } catch (e) {}
+
+  // Update in memory if found in SAMPLE_PRODUCTS
+  const item = SAMPLE_PRODUCTS.find(p => p.id === idNum);
+  if (item) {
+    item.status = newStatus;
+  }
+
+  // If detail modal is open for this product, update modal UI
+  if (activeModalProduct && activeModalProduct.id === idNum) {
+    activeModalProduct.status = newStatus;
+    updateModalOwnerStatusUI(newStatus);
+    const chatBtn = document.getElementById('modalActionChatBtn');
+    const chatBtnText = document.getElementById('modalActionChatBtnText');
+    if (chatBtn) {
+      if (newStatus === 'sold') {
+        chatBtn.disabled = true;
+        chatBtn.className = 'flex-1 py-3 px-4 rounded-full bg-zinc-200 text-zinc-500 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-not-allowed shadow-none';
+        if (chatBtnText) chatBtnText.innerText = '거래가 완료된 매물입니다';
+      } else {
+        chatBtn.disabled = false;
+        chatBtn.className = 'flex-1 py-3 px-4 rounded-full bg-[#171717] hover:bg-black text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition active:scale-95 shadow-sm cursor-pointer';
+        if (chatBtnText) chatBtnText.innerText = '1:1 직거래 문의하기';
+      }
+    }
+  }
+
+  // Update feed grid
+  applyFilters();
+
+  // If My Page listings drawer is open, re-render it
+  const listingsContainer = document.getElementById('myPageContentListings');
+  if (listingsContainer && !listingsContainer.classList.contains('hidden')) {
+    renderMyPageListings();
+  }
+
+  const statusNames = {
+    'selling': '판매중',
+    'reserved': '예약중',
+    'sold': '거래완료'
+  };
+  showFrameToast(`매물 거래 상태가 [${statusNames[newStatus] || newStatus}]으로 변경되었습니다.`, 'success');
+  lucide.createIcons();
+}
+
+function setProductStatusFromModal(newStatus) {
+  if (!activeModalProduct) return;
+  changeProductStatus(activeModalProduct.id, newStatus);
+}
+
+function updateModalOwnerStatusUI(status) {
+  const badge = document.getElementById('modalOwnerCurrentStatusBadge');
+  const btnSelling = document.getElementById('btnModalStatusSelling');
+  const btnReserved = document.getElementById('btnModalStatusReserved');
+  const btnSold = document.getElementById('btnModalStatusSold');
+
+  const baseStyle = 'py-1.5 rounded-lg border border-[#E5E5E5] bg-white hover:bg-zinc-100 text-[#737373] font-medium transition text-center cursor-pointer';
+  const activeStyleSelling = 'py-1.5 rounded-lg border-2 border-emerald-600 bg-emerald-50 text-emerald-800 font-bold transition text-center shadow-xs cursor-pointer';
+  const activeStyleReserved = 'py-1.5 rounded-lg border-2 border-amber-500 bg-amber-50 text-amber-800 font-bold transition text-center shadow-xs cursor-pointer';
+  const activeStyleSold = 'py-1.5 rounded-lg border-2 border-zinc-900 bg-zinc-900 text-white font-bold transition text-center shadow-xs cursor-pointer';
+
+  if (btnSelling) btnSelling.className = status === 'selling' ? activeStyleSelling : baseStyle;
+  if (btnReserved) btnReserved.className = status === 'reserved' ? activeStyleReserved : baseStyle;
+  if (btnSold) btnSold.className = status === 'sold' ? activeStyleSold : baseStyle;
+
+  if (badge) {
+    if (status === 'selling') {
+      badge.className = 'text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded';
+      badge.innerText = '판매중';
+    } else if (status === 'reserved') {
+      badge.className = 'text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded';
+      badge.innerText = '예약중';
+    } else if (status === 'sold') {
+      badge.className = 'text-[10px] font-bold text-white bg-zinc-900 px-2 py-0.5 rounded';
+      badge.innerText = '거래완료';
+    }
+  }
+}
+
+function toggleBookmarkFromModal() {
+  if (!activeModalProduct) return;
+  toggleCardWishlist(activeModalProduct.id);
+  const modalBookmarkIcon = document.getElementById('modalBookmarkIcon');
+  if (modalBookmarkIcon) {
+    if (isWishlisted(activeModalProduct.id)) {
+      modalBookmarkIcon.classList.add('fill-red-500', 'text-red-500');
+      modalBookmarkIcon.classList.remove('text-[#171717]');
+    } else {
+      modalBookmarkIcon.classList.remove('fill-red-500', 'text-red-500');
+      modalBookmarkIcon.classList.add('text-[#171717]');
+    }
+  }
+}
+
+function deleteMyProduct(productId) {
+  const idNum = Number(productId);
+  if (!confirm('이 매물을 등록 목록에서 삭제하시겠습니까?')) return;
+  let myIds = getMyProductIds().filter(id => id !== idNum);
+  try {
+    localStorage.setItem(MY_PRODUCTS_KEY, JSON.stringify(myIds));
+  } catch (e) {}
+
+  SAMPLE_PRODUCTS = SAMPLE_PRODUCTS.filter(p => p.id !== idNum);
+  applyFilters();
+  renderMyPageListings();
+  updateMyPageCounters();
+  showFrameToast('매물이 삭제되었습니다.', 'info');
+}
+
+function startChatWithProduct(productId) {
+  const item = SAMPLE_PRODUCTS.find(p => p.id === Number(productId));
+  if (!item) return;
+  closeMyPageDrawer();
+  openChatDrawer('inquiry');
+  selectConversation(
+    item.seller.name,
+    item.title,
+    item.price.toLocaleString() + '원'
+  );
+}
+
+// ================= MY PAGE DRAWER & PROFILE MANAGEMENT =================
+function updateMyPageCounters() {
+  const listingCount = getMyProductIds().length;
+  const wishlistCount = getWishlist().length;
+  const listingEl = document.getElementById('myPageListingCount');
+  const wishlistEl = document.getElementById('myPageWishlistCount');
+  if (listingEl) listingEl.innerText = `${listingCount}건`;
+  if (wishlistEl) wishlistEl.innerText = `${wishlistCount}건`;
+}
+
+function openMyPageDrawer(tab = 'listings') {
+  const drawer = document.getElementById('myPageDrawer');
+  const backdrop = document.getElementById('myPageDrawerBackdrop');
+  if (!drawer) return;
+
+  const user = getCurrentUser();
+  const userNameEl = document.getElementById('myPageUserName');
+  const userEmailEl = document.getElementById('myPageUserEmail');
+  const avatarTextEl = document.getElementById('myPageAvatarText');
+  const levelBadgeEl = document.getElementById('myPageLevelBadge');
+
+  if (user) {
+    if (userNameEl) userNameEl.innerText = user.name || user.id || '회원';
+    if (userEmailEl) userEmailEl.innerText = user.email || 'user@frame.kr';
+    if (avatarTextEl) avatarTextEl.innerText = (user.name || user.id || '나')[0];
+    if (levelBadgeEl) {
+      if (user.role === 'admin' || user.level === 99) {
+        levelBadgeEl.className = 'text-[9px] px-2 py-0.5 rounded-full bg-amber-500 text-white font-bold';
+        levelBadgeEl.innerText = '👑 관리자';
+      } else if (user.level >= 2 || user.isPhoneVerified) {
+        levelBadgeEl.className = 'text-[9px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-300 font-bold';
+        levelBadgeEl.innerText = 'Lv.2 PASS 실명인증';
+      } else {
+        levelBadgeEl.className = 'text-[9px] px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600 border border-zinc-200 font-bold';
+        levelBadgeEl.innerText = 'Lv.1 일반';
+      }
+    }
+  } else {
+    // Default demo profile for portfolio preview
+    if (userNameEl) userNameEl.innerText = '김인석 (데모 체험)';
+    if (userEmailEl) userEmailEl.innerText = 'portfolio@frame.kr';
+    if (avatarTextEl) avatarTextEl.innerText = '인';
+    if (levelBadgeEl) {
+      levelBadgeEl.className = 'text-[9px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-300 font-bold';
+      levelBadgeEl.innerText = 'Lv.2 PASS 실명인증';
+    }
+  }
+
+  updateMyPageCounters();
+  updateWishlistBadges();
+
+  switchMyPageTab(tab);
+
+  if (backdrop) backdrop.classList.remove('hidden');
+  drawer.classList.remove('translate-x-full');
+  lucide.createIcons();
+}
+
+function closeMyPageDrawer() {
+  const drawer = document.getElementById('myPageDrawer');
+  const backdrop = document.getElementById('myPageDrawerBackdrop');
+  if (drawer) drawer.classList.add('translate-x-full');
+  if (backdrop) backdrop.classList.add('hidden');
+}
+
+function switchMyPageTab(tab = 'listings') {
+  const tabListings = document.getElementById('myPageTabListings');
+  const tabWishlist = document.getElementById('myPageTabWishlist');
+  const tabAccount = document.getElementById('myPageTabAccount');
+
+  const contentListings = document.getElementById('myPageContentListings');
+  const contentWishlist = document.getElementById('myPageContentWishlist');
+  const contentAccount = document.getElementById('myPageContentAccount');
+
+  if (!tabListings || !tabWishlist || !tabAccount) return;
+
+  const activeTabStyle = 'flex-1 py-3 font-bold text-[#171717] border-b-2 border-[#171717] text-center transition flex items-center justify-center gap-1.5 cursor-pointer';
+  const inactiveTabStyle = 'flex-1 py-3 font-medium text-[#8A8A8A] text-center hover:text-[#171717] transition flex items-center justify-center gap-1.5 cursor-pointer';
+
+  tabListings.className = tab === 'listings' ? activeTabStyle : inactiveTabStyle;
+  tabWishlist.className = tab === 'wishlist' ? activeTabStyle : inactiveTabStyle;
+  tabAccount.className = tab === 'account' ? activeTabStyle : inactiveTabStyle;
+
+  if (contentListings) contentListings.classList.toggle('hidden', tab !== 'listings');
+  if (contentWishlist) contentWishlist.classList.toggle('hidden', tab !== 'wishlist');
+  if (contentAccount) contentAccount.classList.toggle('hidden', tab !== 'account');
+
+  if (tab === 'listings') renderMyPageListings();
+  else if (tab === 'wishlist') renderMyPageWishlist();
+  else if (tab === 'account') renderMyPageAccount();
+
+  lucide.createIcons();
+}
+
+function renderMyPageListings() {
+  const container = document.getElementById('myPageContentListings');
+  if (!container) return;
+
+  const myItems = SAMPLE_PRODUCTS.filter(p => isMyProduct(p));
+  updateMyPageCounters();
+
+  if (myItems.length === 0) {
+    container.innerHTML = `
+      <div class="text-center py-10 px-4 bg-white rounded-2xl border border-dashed border-[#D4D4D4]">
+        <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-[#F5F5F5] flex items-center justify-center text-[#8A8A8A]">
+          <i data-lucide="package" class="w-6 h-6"></i>
+        </div>
+        <h4 class="text-xs font-bold text-[#171717] mb-1">등록된 내 매물이 없습니다</h4>
+        <p class="text-[11px] text-[#737373] mb-4 leading-relaxed">
+          소장 중인 카메라, 렌즈 등 장비를 등록하여<br>PASS 실명인증 회원들과 안심 거래를 시작해보세요.
+        </p>
+        <button onclick="closeMyPageDrawer(); openRegisterModal();" class="px-4 py-2 rounded-xl bg-[#171717] hover:bg-black text-white text-xs font-semibold inline-flex items-center gap-1.5 transition cursor-pointer">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+          새 매물 등록하기
+        </button>
+      </div>
+    `;
+    lucide.createIcons();
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="flex items-center justify-between pb-1">
+      <span class="text-xs font-bold text-[#171717] flex items-center gap-1">
+        <i data-lucide="layers" class="w-3.5 h-3.5 text-[#171717]"></i>
+        관리 중인 매물 (${myItems.length}건)
+      </span>
+      <button onclick="closeMyPageDrawer(); openRegisterModal();" class="text-[11px] font-semibold text-[#171717] hover:underline flex items-center gap-1 cursor-pointer">
+        <i data-lucide="plus" class="w-3 h-3"></i>
+        새 매물 등록
+      </button>
+    </div>
+    <div class="space-y-3">
+      ${myItems.map(item => {
+        const status = getProductStatus(item.id);
+        const statusLabel = status === 'selling' ? '판매중' : (status === 'reserved' ? '예약중' : '거래완료');
+        const badgeColor = status === 'selling' 
+          ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+          : (status === 'reserved' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-zinc-800 text-white border-zinc-800');
+
+        return `
+          <div class="p-3.5 bg-white rounded-xl border border-[#EAEAEA] shadow-2xs hover:border-[#171717]/30 transition">
+            <div class="flex gap-3">
+              <div class="relative w-20 h-20 rounded-lg overflow-hidden bg-[#F5F5F5] flex-shrink-0 cursor-pointer" onclick="closeMyPageDrawer(); openProductDetail(${item.id})">
+                <img src="${item.imageUrl}" class="w-full h-full object-cover">
+                ${status === 'sold' ? `
+                  <div class="absolute inset-0 bg-black/60 backdrop-blur-[1px] flex items-center justify-center">
+                    <span class="text-[9px] font-bold text-white bg-black/80 px-1.5 py-0.5 rounded">완료</span>
+                  </div>
+                ` : ''}
+              </div>
+              <div class="flex-1 min-w-0 flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between gap-1 mb-1">
+                    <span class="text-[10px] font-mono text-[#8A8A8A] truncate">${item.brand} · ${item.mount || '마운트'}</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded font-bold border ${badgeColor} flex-shrink-0">${statusLabel}</span>
+                  </div>
+                  <h4 class="text-xs font-bold text-[#171717] truncate cursor-pointer hover:underline" onclick="closeMyPageDrawer(); openProductDetail(${item.id})">
+                    ${item.title}
+                  </h4>
+                  <div class="text-xs font-extrabold text-[#171717] mt-0.5">
+                    ${item.price.toLocaleString()}원
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Status Control Bar -->
+            <div class="mt-3 pt-2.5 border-t border-[#F0F0F0] flex items-center justify-between gap-2">
+              <div class="flex items-center gap-1.5">
+                <span class="text-[11px] font-semibold text-[#737373]">상태 변경:</span>
+                <div class="inline-flex rounded-lg border border-[#E5E5E5] p-0.5 bg-[#FAFAFA] text-[11px]">
+                  <button type="button" onclick="changeProductStatus(${item.id}, 'selling')" class="px-2 py-0.5 rounded-md font-semibold transition cursor-pointer ${status === 'selling' ? 'bg-white text-emerald-700 shadow-2xs font-bold border border-emerald-200' : 'text-[#8A8A8A] hover:text-[#171717]'}">
+                    판매중
+                  </button>
+                  <button type="button" onclick="changeProductStatus(${item.id}, 'reserved')" class="px-2 py-0.5 rounded-md font-semibold transition cursor-pointer ${status === 'reserved' ? 'bg-white text-amber-700 shadow-2xs font-bold border border-amber-200' : 'text-[#8A8A8A] hover:text-[#171717]'}">
+                    예약중
+                  </button>
+                  <button type="button" onclick="changeProductStatus(${item.id}, 'sold')" class="px-2 py-0.5 rounded-md font-semibold transition cursor-pointer ${status === 'sold' ? 'bg-[#171717] text-white shadow-2xs font-bold' : 'text-[#8A8A8A] hover:text-[#171717]'}">
+                    거래완료
+                  </button>
+                </div>
+              </div>
+              <div class="flex items-center gap-1">
+                <button type="button" onclick="closeMyPageDrawer(); openProductDetail(${item.id})" class="px-2 py-1 rounded-md text-[11px] font-medium text-[#737373] hover:text-[#171717] hover:bg-[#F5F5F5] transition cursor-pointer" title="상세보기">
+                  상세보기
+                </button>
+                <button type="button" onclick="deleteMyProduct(${item.id})" class="p-1 rounded-md text-[#8A8A8A] hover:text-red-600 hover:bg-red-50 transition cursor-pointer" title="매물 삭제">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+  lucide.createIcons();
+}
+
+function renderMyPageWishlist() {
+  const container = document.getElementById('myPageContentWishlist');
+  if (!container) return;
+
+  const wishlistIds = getWishlist();
+  const wishItems = SAMPLE_PRODUCTS.filter(p => wishlistIds.includes(Number(p.id)));
+
+  updateWishlistBadges();
+
+  if (wishItems.length === 0) {
+    container.innerHTML = `
+      <div class="text-center py-10 px-4 bg-white rounded-2xl border border-dashed border-[#D4D4D4]">
+        <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-red-50 flex items-center justify-center text-red-400">
+          <i data-lucide="heart" class="w-6 h-6"></i>
+        </div>
+        <h4 class="text-xs font-bold text-[#171717] mb-1">찜한 관심 매물이 없습니다</h4>
+        <p class="text-[11px] text-[#737373] mb-4 leading-relaxed">
+          피드에서 마음에 드는 카메라나 렌즈의 하트(♥)를 누르면<br>이곳에 모아보고 가격 변동과 거래 상태를 한눈에 볼 수 있습니다.
+        </p>
+        <button onclick="closeMyPageDrawer(); filterCategory('all');" class="px-4 py-2 rounded-xl bg-[#171717] hover:bg-black text-white text-xs font-semibold inline-flex items-center gap-1.5 transition cursor-pointer">
+          <i data-lucide="compass" class="w-3.5 h-3.5"></i>
+          매물 둘러보기
+        </button>
+      </div>
+    `;
+    lucide.createIcons();
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="flex items-center justify-between pb-1">
+      <span class="text-xs font-bold text-[#171717] flex items-center gap-1">
+        <i data-lucide="heart" class="w-3.5 h-3.5 text-red-500 fill-red-500"></i>
+        관심 매물 목록 (${wishItems.length}건)
+      </span>
+      <span class="text-[11px] text-[#8A8A8A]">실시간 상태 연동</span>
+    </div>
+    <div class="space-y-3">
+      ${wishItems.map(item => {
+        const status = getProductStatus(item.id);
+        const statusLabel = status === 'selling' ? '판매중' : (status === 'reserved' ? '예약중' : '거래완료');
+        const badgeColor = status === 'selling' 
+          ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+          : (status === 'reserved' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-zinc-800 text-white border-zinc-800');
+
+        return `
+          <div class="p-3 bg-white rounded-xl border border-[#EAEAEA] shadow-2xs hover:border-[#171717]/30 transition flex flex-col justify-between">
+            <div class="flex gap-3">
+              <div class="relative w-18 h-18 rounded-lg overflow-hidden bg-[#F5F5F5] flex-shrink-0 cursor-pointer" onclick="closeMyPageDrawer(); openProductDetail(${item.id})">
+                <img src="${item.imageUrl}" class="w-full h-full object-cover">
+                ${status === 'sold' ? `
+                  <div class="absolute inset-0 bg-black/60 backdrop-blur-[1px] flex items-center justify-center">
+                    <span class="text-[9px] font-bold text-white bg-black/80 px-1 py-0.5 rounded">완료</span>
+                  </div>
+                ` : ''}
+              </div>
+              <div class="flex-1 min-w-0 flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between gap-1 mb-0.5">
+                    <span class="text-[10px] text-[#8A8A8A] truncate">${item.brand} · ${item.location}</span>
+                    <span class="text-[9px] px-1.5 py-0.5 rounded font-bold border ${badgeColor} flex-shrink-0">${statusLabel}</span>
+                  </div>
+                  <h4 class="text-xs font-bold text-[#171717] truncate cursor-pointer hover:underline" onclick="closeMyPageDrawer(); openProductDetail(${item.id})">
+                    ${item.title}
+                  </h4>
+                  <div class="text-xs font-extrabold text-[#171717] mt-0.5">
+                    ${item.price.toLocaleString()}원
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Wishlist Actions -->
+            <div class="mt-2.5 pt-2 border-t border-[#F0F0F0] flex items-center justify-between gap-2">
+              <span class="text-[10px] text-[#8A8A8A] flex items-center gap-1">
+                <img src="${item.seller.avatar}" class="w-4 h-4 rounded-full object-cover">
+                ${item.seller.name}
+              </span>
+              <div class="flex items-center gap-1.5">
+                <button type="button" onclick="startChatWithProduct(${item.id})" class="px-2.5 py-1 rounded-lg ${status === 'sold' ? 'bg-zinc-100 text-zinc-400 cursor-not-allowed' : 'bg-[#171717] text-white hover:bg-black cursor-pointer'} text-[11px] font-semibold flex items-center gap-1 transition" ${status === 'sold' ? 'disabled' : ''}>
+                  <i data-lucide="message-square" class="w-3 h-3"></i>
+                  <span>1:1 문의</span>
+                </button>
+                <button type="button" onclick="toggleCardWishlist(${item.id}); renderMyPageWishlist();" class="p-1 rounded-lg text-[#8A8A8A] hover:text-red-500 hover:bg-red-50 transition cursor-pointer" title="관심 매물에서 제거">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+  lucide.createIcons();
+}
+
+function renderMyPageAccount() {
+  const container = document.getElementById('myPageContentAccount');
+  if (!container) return;
+
+  const user = getCurrentUser();
+  const userName = user ? (user.name || user.id) : '김*석 (포트폴리오 데모)';
+  const userEmail = user ? (user.email || 'user@frame.kr') : 'portfolio@frame.kr';
+
+  container.innerHTML = `
+    <!-- Top PASS Verification Status Card -->
+    <div class="p-4 rounded-2xl bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/30">
+      <div class="flex items-start justify-between mb-2">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs">
+            <i data-lucide="shield-check" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h4 class="text-xs font-bold text-emerald-950">PASS 실명인증 완료 (Lv.2)</h4>
+            <p class="text-[10px] text-emerald-800">통신 3사 KCB 연동 본인확인 정회원</p>
+          </div>
+        </div>
+        <span class="text-[9px] px-2 py-0.5 rounded-full bg-emerald-600 text-white font-bold shadow-2xs">안심 인증필</span>
+      </div>
+      <p class="text-[11px] text-[#404040] leading-relaxed mt-2 bg-white/70 backdrop-blur p-2.5 rounded-xl border border-emerald-500/20">
+        FRAME은 개인정보 과다 수집(신분증 사본, 주민번호 등)을 원천 차단하고 방송통신위원회 지정 본인확인기관(KCB)의 표준 PASS 실명인증만을 적용하여 안전하게 운영됩니다.
+      </p>
+    </div>
+
+    <!-- Verified Info Details List -->
+    <div class="bg-[#FAFAFA] rounded-2xl border border-[#EAEAEA] p-4 space-y-3">
+      <h5 class="text-xs font-bold text-[#171717] pb-2 border-b border-[#EAEAEA] flex items-center gap-1.5">
+        <i data-lucide="user-check" class="w-3.5 h-3.5 text-[#171717]"></i>
+        실명 본인확인 상세 정보
+      </h5>
+
+      <div class="flex items-center justify-between text-[11px]">
+        <span class="text-[#737373]">인증 성명</span>
+        <span class="font-bold text-[#171717] font-mono">${userName}</span>
+      </div>
+      <div class="flex items-center justify-between text-[11px]">
+        <span class="text-[#737373]">계정 이메일</span>
+        <span class="font-medium text-[#171717] font-mono">${userEmail}</span>
+      </div>
+      <div class="flex items-center justify-between text-[11px]">
+        <span class="text-[#737373]">인증 연락처</span>
+        <span class="font-medium text-[#171717] font-mono">010-****-5971</span>
+      </div>
+      <div class="flex items-center justify-between text-[11px]">
+        <span class="text-[#737373]">가입 통신사</span>
+        <span class="font-medium text-[#171717]">SK Telecom (알뜰폰 포함)</span>
+      </div>
+      <div class="flex items-center justify-between text-[11px]">
+        <span class="text-[#737373]">CI / DI 식별코드</span>
+        <span class="font-mono text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">SHA-256 암호화 완료</span>
+      </div>
+      <div class="flex items-center justify-between text-[11px]">
+        <span class="text-[#737373]">인증 유효일시</span>
+        <span class="text-[10px] text-[#737373] font-mono">2026-10-22 14:32:05 (최근 갱신)</span>
+      </div>
+    </div>
+
+    <!-- Security & Policy Notice -->
+    <div class="p-3.5 rounded-xl bg-[#F5F5F5] border border-[#E5E5E5] text-[11px] text-[#737373] space-y-1">
+      <div class="flex items-center gap-1 font-bold text-[#171717]">
+        <i data-lucide="lock" class="w-3 h-3 text-[#171717]"></i>
+        개인정보 안심 보장 원칙
+      </div>
+      <p class="leading-relaxed">
+        주민등록번호 뒷자리나 신분증 원본 이미지는 서버에 절대 저장되지 않으며, 사기 피해 방지를 위한 KCB CI(연계식별정보) 암호 해시만 대조됩니다.
+      </p>
+    </div>
+
+    <!-- Actions -->
+    <div class="space-y-2 pt-2">
+      <button onclick="closeMyPageDrawer(); openVerificationCenterModal();" class="w-full py-2.5 rounded-xl border border-[#171717] bg-white hover:bg-[#171717] text-[#171717] hover:text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer">
+        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+        본인 인증 센터 다시 열기 / 갱신
+      </button>
+      <button onclick="handleLogout()" class="w-full py-2.5 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer">
+        <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+        로그아웃
+      </button>
+    </div>
+  `;
+  lucide.createIcons();
 }
 
 // ================= AI SAMPLE & MEDIA EXPLORER LOGIC =================
@@ -5414,9 +6073,7 @@ function handleBottomNavClick(tab) {
   } else if (tab === 'ai') {
     openAiSampleSearchModal();
   } else if (tab === 'wishlist') {
-    filterCategory('wishlist');
-    const target = document.getElementById('productGrid') || document.getElementById('marketplaceSection');
-    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    openMyPageDrawer('wishlist');
   }
 }
 

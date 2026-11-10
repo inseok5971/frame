@@ -154,6 +154,14 @@
             <i id="themeToggleIcon" data-lucide="moon" class="w-4 h-4"></i>
           </button>
 
+          <!-- Wishlist Quick Header Button -->
+          <button onclick="openMyPageDrawer('wishlist')" class="p-2.5 rounded-full hover:bg-[#F2F2F2] text-[#171717] transition relative cursor-pointer" title="관심 매물 목록 (찜)">
+            <i data-lucide="heart" class="w-5 h-5"></i>
+            <span id="headerWishlistBadge" class="hidden absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center leading-none border-2 border-white shadow-xs">
+              0
+            </span>
+          </button>
+
           <button onclick="openChatDrawer('header')" class="p-2.5 rounded-full hover:bg-[#F2F2F2] text-[#171717] transition relative" title="채팅 (안 읽은 메시지 2건)">
             <i data-lucide="message-square" class="w-5 h-5"></i>
             <span id="headerChatBadge" class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-[#171717] text-white text-[10px] font-bold flex items-center justify-center leading-none border-2 border-white shadow-xs">
@@ -167,7 +175,7 @@
             <span class="sm:hidden">등록</span>
           </button>
 
-          <!-- User Profile / Login Area (사람 모양 아이콘 기본 노출) -->
+          <!-- User Profile / Login Area -->
           <div id="userHeaderArea" class="flex items-center gap-2 pl-2 border-l border-[#E5E5E5]">
             <button onclick="handleUserIconClick()" class="p-2 rounded-full hover:bg-[#F2F2F2] text-[#171717] transition border border-[#E5E5E5] flex items-center justify-center cursor-pointer" title="로그인 / 회원가입">
               <i data-lucide="user" class="w-4 h-4"></i>
@@ -609,18 +617,40 @@
                 </div>
               </div>
 
-              <p id="modalDescription" class="text-xs text-[#737373] leading-relaxed bg-[#FAFAFA] p-3 rounded-lg border border-[#EAEAEA] mb-4">
+              <p id="modalDescription" class="text-xs text-[#737373] leading-relaxed bg-[#FAFAFA] p-3 rounded-lg border border-[#EAEAEA] mb-3">
                 서브 바디로 조심스럽게 사용했습니다.
               </p>
+
+              <!-- Owner Status Management Banner (Only for owner or admin) -->
+              <div id="modalOwnerStatusPanel" class="hidden mb-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-bold text-[#171717] flex items-center gap-1.5">
+                    <i data-lucide="sliders" class="w-3.5 h-3.5 text-amber-600"></i>
+                    내 매물 거래 상태 관리
+                  </span>
+                  <span id="modalOwnerCurrentStatusBadge" class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">판매중</span>
+                </div>
+                <div class="grid grid-cols-3 gap-1.5 text-xs">
+                  <button type="button" onclick="setProductStatusFromModal('selling')" id="btnModalStatusSelling" class="py-1.5 rounded-lg border border-[#E5E5E5] bg-white hover:bg-zinc-100 text-[#171717] font-semibold transition text-center cursor-pointer">
+                    판매중
+                  </button>
+                  <button type="button" onclick="setProductStatusFromModal('reserved')" id="btnModalStatusReserved" class="py-1.5 rounded-lg border border-[#E5E5E5] bg-white hover:bg-zinc-100 text-[#171717] font-semibold transition text-center cursor-pointer">
+                    예약중
+                  </button>
+                  <button type="button" onclick="setProductStatusFromModal('sold')" id="btnModalStatusSold" class="py-1.5 rounded-lg border border-[#E5E5E5] bg-white hover:bg-zinc-100 text-[#171717] font-semibold transition text-center cursor-pointer">
+                    거래완료
+                  </button>
+                </div>
+              </div>
             </div>
 
             <div class="flex items-center gap-3 pt-2">
-              <button onclick="startChatFromModal()" class="flex-1 py-3 px-4 rounded-full bg-[#171717] hover:bg-black text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition active:scale-95 shadow-sm">
+              <button id="modalActionChatBtn" onclick="startChatFromModal()" class="flex-1 py-3 px-4 rounded-full bg-[#171717] hover:bg-black text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition active:scale-95 shadow-sm">
                 <i data-lucide="message-square" class="w-4 h-4"></i>
-                1:1 직거래 문의하기
+                <span id="modalActionChatBtnText">1:1 직거래 문의하기</span>
               </button>
-              <button onclick="toggleBookmark(this)" class="p-3 rounded-full border border-[#E5E5E5] hover:bg-[#F5F5F5] text-[#171717] transition">
-                <i data-lucide="heart" class="w-5 h-5"></i>
+              <button id="modalBookmarkBtn" onclick="toggleBookmarkFromModal()" class="p-3 rounded-full border border-[#E5E5E5] hover:bg-[#F5F5F5] text-[#171717] transition cursor-pointer" title="관심 매물(찜)">
+                <i id="modalBookmarkIcon" data-lucide="heart" class="w-5 h-5"></i>
               </button>
             </div>
 
@@ -1523,6 +1553,85 @@
         </button>
       </div>
     </div>
+  </div>
+
+  <!-- ================= MY PAGE DRAWER (내 활동 & 거래 관리 허브) ================= -->
+  <div id="myPageDrawerBackdrop" onclick="closeMyPageDrawer()" class="fixed inset-0 bg-black/40 backdrop-blur-xs z-40 hidden transition-opacity duration-300"></div>
+  <div id="myPageDrawer" class="fixed inset-y-0 right-0 z-50 w-full sm:w-[460px] bg-white border-l border-[#EAEAEA] shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+    <!-- Drawer Header -->
+    <div class="p-4 border-b border-[#EAEAEA] flex items-center justify-between bg-white">
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-lg bg-[#171717] text-white flex items-center justify-center">
+          <i data-lucide="user" class="w-4 h-4"></i>
+        </div>
+        <h3 class="text-xs font-bold text-[#171717] tracking-tight">마이페이지 · 거래 관리</h3>
+      </div>
+      <button onclick="closeMyPageDrawer()" class="p-1 rounded-lg text-[#8A8A8A] hover:text-[#171717] hover:bg-[#F5F5F5] transition cursor-pointer">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <!-- User Profile Summary Card -->
+    <div class="p-4 bg-[#FAFAFA] border-b border-[#EAEAEA]">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-full bg-[#171717] text-white flex items-center justify-center font-bold text-base shadow-sm">
+            <span id="myPageAvatarText">나</span>
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <h4 id="myPageUserName" class="text-xs font-bold text-[#171717]">로그인 필요</h4>
+              <span id="myPageLevelBadge" class="text-[9px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-300 font-bold">Lv.2 실명인증</span>
+            </div>
+            <p id="myPageUserEmail" class="text-[11px] text-[#737373] mt-0.5 font-mono">user@frame.kr</p>
+          </div>
+        </div>
+        <button onclick="handleLogout()" class="text-[11px] text-[#8A8A8A] hover:text-red-600 font-medium px-2.5 py-1 rounded-lg border border-[#E5E5E5] bg-white transition hover:border-red-200 cursor-pointer">
+          로그아웃
+        </button>
+      </div>
+
+      <!-- Quick 3 Stat Counters -->
+      <div class="grid grid-cols-3 gap-2 text-center text-xs">
+        <button onclick="switchMyPageTab('listings')" class="p-2 rounded-xl bg-white border border-[#E5E5E5] hover:border-[#171717] transition cursor-pointer">
+          <span class="block text-[10px] text-[#8A8A8A]">내 등록 매물</span>
+          <span id="myPageListingCount" class="font-bold text-[#171717] text-xs sm:text-sm">0건</span>
+        </button>
+        <button onclick="switchMyPageTab('wishlist')" class="p-2 rounded-xl bg-white border border-[#E5E5E5] hover:border-[#171717] transition cursor-pointer">
+          <span class="block text-[10px] text-[#8A8A8A]">관심 매물(찜)</span>
+          <span id="myPageWishlistCount" class="font-bold text-red-500 text-xs sm:text-sm">0건</span>
+        </button>
+        <button onclick="switchMyPageTab('account')" class="p-2 rounded-xl bg-white border border-[#E5E5E5] hover:border-[#171717] transition cursor-pointer">
+          <span class="block text-[10px] text-[#8A8A8A]">인증 상태</span>
+          <span id="myPageVerifyStatusText" class="font-bold text-emerald-600 text-[11px]">Lv.2 PASS</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs (3 Tabs) -->
+    <div class="flex border-b border-[#EAEAEA] bg-white text-xs">
+      <button onclick="switchMyPageTab('listings')" id="myPageTabListings" class="flex-1 py-3 font-bold text-[#171717] border-b-2 border-[#171717] text-center transition flex items-center justify-center gap-1.5 cursor-pointer">
+        <i data-lucide="package" class="w-3.5 h-3.5"></i>
+        <span>내 매물 관리</span>
+      </button>
+      <button onclick="switchMyPageTab('wishlist')" id="myPageTabWishlist" class="flex-1 py-3 font-medium text-[#8A8A8A] text-center hover:text-[#171717] transition flex items-center justify-center gap-1.5 cursor-pointer">
+        <i data-lucide="heart" class="w-3.5 h-3.5"></i>
+        <span>관심 목록 (찜)</span>
+      </button>
+      <button onclick="switchMyPageTab('account')" id="myPageTabAccount" class="flex-1 py-3 font-medium text-[#8A8A8A] text-center hover:text-[#171717] transition flex items-center justify-center gap-1.5 cursor-pointer">
+        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+        <span>인증 정보</span>
+      </button>
+    </div>
+
+    <!-- Tab 1: Listings Content -->
+    <div id="myPageContentListings" class="flex-1 overflow-y-auto p-4 space-y-3 bg-[#FAFAFA]"></div>
+
+    <!-- Tab 2: Wishlist Content -->
+    <div id="myPageContentWishlist" class="hidden flex-1 overflow-y-auto p-4 space-y-3 bg-[#FAFAFA]"></div>
+
+    <!-- Tab 3: Account & Verification Info -->
+    <div id="myPageContentAccount" class="hidden flex-1 overflow-y-auto p-4 space-y-4 bg-white text-xs"></div>
   </div>
 
   <!-- ================= AUTH MODAL (LOGIN / SIGNUP / FIND) ================= -->
