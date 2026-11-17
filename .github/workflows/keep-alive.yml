@@ -1,0 +1,22 @@
+name: Supabase 24/7 Keep-Alive
+
+on:
+  schedule:
+    # Runs every 3 days at 00:00 UTC (prevents Supabase 7-day inactivity pause)
+    - cron: '0 0 */3 * *'
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase Project
+        run: |
+          echo "Pinging Supabase FRAME project to prevent automatic pausing..."
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -H "apikey: sb_publishable_iD4nbmFm3Ovzbm1lQlH_NQ_zWVUCFJW" "https://uzmgwtucqyuhoyjwzdkw.supabase.co/auth/v1/health")
+          echo "Supabase Auth Health Response Code: $HTTP_STATUS"
+          if [ "$HTTP_STATUS" -eq 200 ]; then
+            echo "Supabase project is active and healthy!"
+          else
+            echo "Pinged with status: $HTTP_STATUS"
+          fi
