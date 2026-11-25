@@ -2,21 +2,26 @@ name: Supabase 24/7 Keep-Alive
 
 on:
   schedule:
-    # Runs every 3 days at 00:00 UTC (prevents Supabase 7-day inactivity pause)
-    - cron: '0 0 */3 * *'
+    # Runs every 2 days at 00:00 UTC (well within the 7-day inactivity window)
+    - cron: '0 0 */2 * *'
   workflow_dispatch: # Allows manual trigger from GitHub Actions tab
 
 jobs:
   keep-alive:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase Project
+      - name: Query Supabase Database to reset inactivity timer
         run: |
-          echo "Pinging Supabase FRAME project to prevent automatic pausing..."
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -H "apikey: sb_publishable_iD4nbmFm3Ovzbm1lQlH_NQ_zWVUCFJW" "https://uzmgwtucqyuhoyjwzdkw.supabase.co/auth/v1/health")
-          echo "Supabase Auth Health Response Code: $HTTP_STATUS"
-          if [ "$HTTP_STATUS" -eq 200 ]; then
-            echo "Supabase project is active and healthy!"
-          else
-            echo "Pinged with status: $HTTP_STATUS"
-          fi
+          echo "Sending real database query to Supabase PostgREST to reset 7-day inactivity timer..."
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
+            -H "apikey: sb_publishable_iD4nbmFm3Ovzbm1lQlH_NQ_zWVUCFJW" \
+            -H "Authorization: Bearer sb_publishable_iD4nbmFm3Ovzbm1lQlH_NQ_zWVUCFJW" \
+            "https://uzmgwtucqyuhoyjwzdkw.supabase.co/rest/v1/products?select=id&limit=1")
+          
+          echo "Database Query Response:"
+          echo "$RESPONSE"
+          
+          # Also ping Auth endpoint
+          curl -s -o /dev/null -w "Auth Health Code: %{http_code}\n" \
+            -H "apikey: sb_publishable_iD4nbmFm3Ovzbm1lQlH_NQ_zWVUCFJW" \
+            "https://uzmgwtucqyuhoyjwzdkw.supabase.co/auth/v1/health" || true
