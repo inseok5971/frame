@@ -6625,6 +6625,8 @@ async function renderSupportHistory() {
       if (remoteInquiries && remoteInquiries.length > 0) {
         const localMap = new Map(list.map(item => [item.id, item]));
         remoteInquiries.forEach(row => {
+          const localItem = localMap.get(row.id);
+          const isLocallyAnswered = localItem && (localItem.answer || localItem.status === '답변 완료');
           localMap.set(row.id, {
             id: row.id,
             categoryName: row.category || '일반 문의',
@@ -6633,9 +6635,9 @@ async function renderSupportHistory() {
             content: row.content,
             photos: row.photos || [],
             createdAt: new Date(row.created_at).toLocaleString('ko-KR', { dateStyle: 'medium', timeStyle: 'short' }),
-            status: row.status || (row.answer ? '답변 완료' : '답변 대기중'),
-            answer: row.answer || null,
-            answeredAt: row.answered_at ? new Date(row.answered_at).toLocaleString('ko-KR', { dateStyle: 'medium', timeStyle: 'short' }) : null
+            status: isLocallyAnswered ? '답변 완료' : (row.status || '답변 대기중'),
+            answer: isLocallyAnswered ? localItem.answer : (row.answer || null),
+            answeredAt: isLocallyAnswered ? localItem.answeredAt : (row.answered_at ? new Date(row.answered_at).toLocaleString('ko-KR', { dateStyle: 'medium', timeStyle: 'short' }) : null)
           });
         });
         list = Array.from(localMap.values());
@@ -6705,7 +6707,7 @@ async function renderSupportHistory() {
 
         <!-- Official Answer Box (If answered) -->
         ${item.answer ? `
-          <div class="mt-2.5 p-3 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-500/30 space-y-1">
+          <div class="mt-2.5 p-3 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-500/30 space-y-2">
             <div class="flex items-center justify-between text-xs">
               <span class="font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5 text-[11px]">
                 <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-600"></i>
@@ -6713,7 +6715,14 @@ async function renderSupportHistory() {
               </span>
               <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">${escapeHtml(item.answeredAt || '답변 완료')}</span>
             </div>
-            <p class="text-xs text-[#18181B] dark:text-[#E4E4E7] whitespace-pre-wrap leading-relaxed mt-1">${escapeHtml(item.answer)}</p>
+            <p class="text-xs text-[#18181B] dark:text-[#E4E4E7] whitespace-pre-wrap leading-relaxed">${escapeHtml(item.answer)}</p>
+            <div class="pt-2 border-t border-emerald-500/20 flex items-center justify-between text-[11px]">
+              <span class="text-emerald-700 dark:text-emerald-400 text-[10px]">회신 대상: ${escapeHtml(item.email)}</span>
+              <button type="button" onclick="sendEmailToUser('${escapeHtml(item.email)}', '${escapeHtml(item.title)}', '${escapeHtml(item.answer)}', '${escapeHtml(item.id)}')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-[10px] transition cursor-pointer">
+                <i data-lucide="mail" class="w-3 h-3"></i>
+                <span>✉️ 고객 이메일로 답변 발송</span>
+              </button>
+            </div>
           </div>
         ` : ''}
 
@@ -6793,6 +6802,38 @@ async function submitAdminReply(ticketId) {
 
   showFrameToast('운영팀 공식 답변이 성공적으로 등록되었습니다! (답변 완료)', 'success', 3000);
   renderSupportHistory();
+
+  if (item && item.email && item.email.includes('@')) {
+    setTimeout(() => {
+      if (confirm(`답변이 등록되었습니다!\n\n회신 대상 이메일 [${item.email}]로 실제 이메일 발송 창을 여시겠습니까?`)) {
+        sendEmailToUser(item.email, item.title, replyText, ticketId);
+      }
+    }, 400);
+  }
+}
+
+function sendEmailToUser(email, title, answerText, ticketId) {
+  const subject = encodeURIComponent(`[FRAME 고객센터] 접수하신 문의(${ticketId})에 대한 운영팀 공식 답변입니다.`);
+  const body = encodeURIComponent(`안녕하세요, FRAME 고객센터입니다.
+
+고객님께서 접수해 주신 문의에 대해 안내드립니다.
+
+--------------------------------------------------
+[접수 번호] ${ticketId}
+[문의 제목] ${title}
+--------------------------------------------------
+
+[고객센터 공식 답변]
+${answerText}
+
+--------------------------------------------------
+추가 문의사항이 있으실 경우 고객센터를 통해 언제든 편하게 문의해 주시기 바랍니다.
+감사합니다.
+
+카메라 안심 거래 플랫폼 FRAME 고객센터 드림
+https://inseok5971.github.io/frame/`);
+
+  window.open(`mailto:${email}?subject=${subject}&body=${body}`, '_blank');
 }
 
 function toggleAdminReplyForm(ticketId) {
