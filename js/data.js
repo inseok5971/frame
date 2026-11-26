@@ -540,6 +540,162 @@ let SAMPLE_PRODUCTS = [
       labels: ['6월', '7월', '8월', '9월', '10월'],
       prices: [1800000, 1750000, 1700000, 1680000, 1650000]
     }
+  },
+  {
+    id: 15,
+    category: 'film-lens',
+    brand: 'Leica',
+    mount: 'M42-Mount',
+    title: '헬리오스 HELIOS-44-2 58mm F2 (M42 빈티지 회오리 보케 렌즈)',
+    price: 120000,
+    avgMarketPrice: 135000,
+    location: '서울 마포구 연남동',
+    createdAt: '35분 전',
+    imageUrl: 'https://images.unsplash.com/photo-1617005082133-548c4dd27f35?w=800&auto=format&fit=crop&q=80',
+    condition: 'A급 (조리개 프리셋 링 부드러움, 곰팡이 없음)',
+    verified: true,
+    verificationType: 'lens_optical',
+    verificationDetails: {
+      frontLensClear: true,
+      rearLensClear: true,
+      apertureTransmissionClear: true,
+      balsamSeparation: false,
+      dustLevel: '미세 먼지 극소 (촬영 영향 전무)',
+      summary: '3대 필수 광학 투과 검증 완료 (조리개 F2 전설의 스월링 보케 정상)'
+    },
+    seller: {
+      name: '빈티지옵틱스',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
+      isVerified: true
+    },
+    specs: {
+      '마운트': 'M42 스크류 마운트 (이종교배 어댑터 호환)',
+      '초점거리': '58mm 단렌즈',
+      '최대 조리개': 'F2.0 (8매 조리개날)',
+      '광학 특징': '주변부 코마 수차를 이용한 환상적인 회오리(Swirling) 보케'
+    },
+    description: '구소련 KMZ 오리지널 헬리오스 44-2입니다. 조리개 F2 최대 개방 시 몽환적인 회오리 보케가 일품입니다. 앞/뒤 렌즈알 스크래치 없으며 조리개 기름 튐 없습니다.',
+    priceHistory: {
+      labels: ['6월', '7월', '8월', '9월', '10월'],
+      prices: [140000, 135000, 130000, 125000, 120000]
+    }
+  },
+  {
+    id: 16,
+    category: 'film-lens',
+    brand: 'Leica',
+    mount: 'M-Mount',
+    title: '라이트 렌즈 랩 LLL 35mm F2 (전설의 8매 복각 황동 블랙페인트)',
+    price: 1150000,
+    avgMarketPrice: 1250000,
+    location: '서울 용산구 한남동',
+    createdAt: '1시간 전',
+    imageUrl: 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=800&auto=format&fit=crop&q=80',
+    condition: 'S급 (미사용 신품급, 풀박스 풀구성)',
+    verified: true,
+    verificationType: 'lens_optical',
+    verificationDetails: {
+      frontLensClear: true,
+      rearLensClear: true,
+      apertureTransmissionClear: true,
+      balsamSeparation: false,
+      dustLevel: '먼지 전무 (신품 컨디션)',
+      summary: '8매 복각 광학 3대 투과 검증 통과 (황동 헬리코이드 정상)'
+    },
+    seller: {
+      name: '아날로그필름',
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80',
+      isVerified: true
+    },
+    specs: {
+      '마운트': '라이카 M 마운트',
+      '광학 구조': '6군 8매 (Eight-Element) 더블 가우스',
+      '재질': '황동 절삭 경통 (묵직한 오리지널 손맛)',
+      '조리개': 'F2.0 ~ F16'
+    },
+    description: '라이카 전설의 1세대 주미크론 35mm f/2 8매를 1:1로 완벽 복각한 라이트 렌즈 랩 렌즈입니다. 황동 경통의 묵직한 손맛과 섬세한 흑백 계조가 일품입니다.',
+    priceHistory: {
+      labels: ['6월', '7월', '8월', '9월', '10월'],
+      prices: [1300000, 1280000, 1250000, 1200000, 1150000]
+    }
+  },
+  {
+    id: 17,
+    category: 'lens',
+    brand: 'Sony',
+    mount: 'E-Mount',
+    title: '소니 FE 50mm F1.2 GM (SEL50F12GM 대구경 플래그십 단렌즈)',
+    price: 1950000,
+    avgMarketPrice: 2050000,
+    location: '서울 서초구 잠원동',
+    createdAt: '40분 전',
+    imageUrl: 'https://images.unsplash.com/photo-1617005082133-548c4dd27f35?w=800&auto=format&fit=crop&q=80',
+    condition: 'A+급 (보증기간 잔여, 렌즈알 최상)',
+    verified: true,
+    verificationType: 'lens_optical',
+    verificationDetails: {
+      frontLensClear: true,
+      rearLensClear: true,
+      apertureTransmissionClear: true,
+      balsamSeparation: false,
+      dustLevel: '먼지 없음 (광학 클리닝 완료)',
+      summary: '소니 공인 센터 점검 완료 및 3대 광학 사진 검증 통과'
+    },
+    seller: {
+      name: '포토그래퍼김씨',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
+      isVerified: true
+    },
+    specs: {
+      '마운트': '소니 E-마운트 (풀프레임)',
+      '조리개': 'F1.2 대구경 (11매 원형 조리개)',
+      '모터': 'XD 리니어 모터 4개 탑재 (초고속 AF)',
+      '무게': '778g (동급 최경량)'
+    },
+    description: '스튜디오 인물 전용으로 사용하던 소니 최고봉 50mm F1.2 GM입니다. F1.2 최대 개방에서도 칼같은 선예도와 부드러운 배경 흐림을 보여줍니다.',
+    priceHistory: {
+      labels: ['6월', '7월', '8월', '9월', '10월'],
+      prices: [2200000, 2150000, 2100000, 2000000, 1950000]
+    }
+  },
+  {
+    id: 18,
+    category: 'lens',
+    brand: 'Canon',
+    mount: 'RF-Mount',
+    title: '캐논 RF 50mm F1.2 L USM (오이만두 미러리스 끝판왕 단렌즈)',
+    price: 2100000,
+    avgMarketPrice: 2200000,
+    location: '서울 송파구 잠실동',
+    createdAt: '1시간 전',
+    imageUrl: 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=800&auto=format&fit=crop&q=80',
+    condition: 'A+급 (정품 등록 해지 완료, 풀박스)',
+    verified: true,
+    verificationType: 'lens_optical',
+    verificationDetails: {
+      frontLensClear: true,
+      rearLensClear: true,
+      apertureTransmissionClear: true,
+      balsamSeparation: false,
+      dustLevel: '먼지 전무 (소장용 관리)',
+      summary: '캐논 L렌즈 3대 광학 투과 검증 통과'
+    },
+    seller: {
+      name: '캐논매니아',
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80',
+      isVerified: true
+    },
+    specs: {
+      '마운트': '캐논 RF 마운트 (풀프레임)',
+      '조리개': 'F1.2 최대 개방 (10매 조리개날)',
+      '특수 렌즈': 'UD 렌즈 1매, 비구면 렌즈 3매',
+      '특징': '컨트롤 링 탑재 (조리개/ISO 직관 제어)'
+    },
+    description: '캐논 RF 렌즈군의 플래그십 50mm F1.2 L입니다. 캐논 특유의 화사한 인물 발색과 F1.2의 압도적인 입체감이 매력적입니다. 풀박스 풀구성입니다.',
+    priceHistory: {
+      labels: ['6월', '7월', '8월', '9월', '10월'],
+      prices: [2350000, 2300000, 2250000, 2180000, 2100000]
+    }
   }
 ];
 
