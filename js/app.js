@@ -6610,31 +6610,35 @@ async function renderSupportHistory() {
     list = [];
   }
 
+  const u = getCurrentUser();
+  const isAdmin = Boolean(u && (u.role === 'admin' || u.level === 99 || u.email === 'admin@frame.com'));
+
   // Supabase 원격 DB와 동기화 (클라우드에 저장된 문의 함께 조회)
   if (typeof supabaseClient !== 'undefined' && supabaseClient) {
     try {
-      const u = getCurrentUser();
       let query = supabaseClient.from('inquiries').select('*').order('created_at', { ascending: false });
-      if (u && u.id && u.id.includes('-')) {
+      // 일반 사용자는 본인 문의만, 관리자는 전체 문의를 조회하여 답변 가능
+      if (u && u.id && u.id.includes('-') && !isAdmin) {
         query = query.or(`user_id.eq.${u.id},email.eq.${u.email || ''}`);
       }
       const { data: remoteInquiries } = await query;
       if (remoteInquiries && remoteInquiries.length > 0) {
-        const localIds = new Set(list.map(item => item.id));
+        const localMap = new Map(list.map(item => [item.id, item]));
         remoteInquiries.forEach(row => {
-          if (!localIds.has(row.id)) {
-            list.push({
-              id: row.id,
-              categoryName: row.category || '일반 문의',
-              email: row.email,
-              title: row.title,
-              content: row.content,
-              photos: row.photos || [],
-              createdAt: new Date(row.created_at).toLocaleString('ko-KR', { dateStyle: 'medium', timeStyle: 'short' }),
-              status: row.status || '답변 대기중'
-            });
-          }
+          localMap.set(row.id, {
+            id: row.id,
+            categoryName: row.category || '일반 문의',
+            email: row.email,
+            title: row.title,
+            content: row.content,
+            photos: row.photos || [],
+            createdAt: new Date(row.created_at).toLocaleString('ko-KR', { dateStyle: 'medium', timeStyle: 'short' }),
+            status: row.status || (row.answer ? '답변 완료' : '답변 대기중'),
+            answer: row.answer || null,
+            answeredAt: row.answered_at ? new Date(row.answered_at).toLocaleString('ko-KR', { dateStyle: 'medium', timeStyle: 'short' }) : null
+          });
         });
+        list = Array.from(localMap.values());
         localStorage.setItem(SUPPORT_INQUIRIES_KEY, JSON.stringify(list));
       }
     } catch (e) {
@@ -6657,44 +6661,162 @@ async function renderSupportHistory() {
   if (emptyBox) emptyBox.classList.add('hidden');
   listBox.classList.remove('hidden');
 
-  listBox.innerHTML = list.map(item => `
-    <div class="border border-[#E4E4E7] dark:border-[#2E2E32] rounded-2xl p-4 bg-white dark:bg-[#202023] shadow-2xs space-y-2.5">
-      <div class="flex items-center justify-between">
-        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#F4F4F5] dark:bg-[#27272A] text-[#18181B] dark:text-[#F4F4F5]">
-          ${escapeHtml(item.categoryName)}
-        </span>
-        <div class="flex items-center gap-2">
-          <span class="text-[10px] text-[#71717A] font-mono">${escapeHtml(item.createdAt)}</span>
-          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-            ● ${escapeHtml(item.status)}
+  listBox.innerHTML = list.map(item => {
+    const isAnswered = Boolean(item.answer || item.status === '답변 완료');
+    const statusText = isAnswered ? '답변 완료' : '답변 대기중';
+    const statusBadgeClass = isAnswered
+      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+      : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20';
+
+    return `
+      <div class="border border-[#E4E4E7] dark:border-[#2E2E32] rounded-2xl p-4 bg-white dark:bg-[#202023] shadow-2xs space-y-2.5">
+        <div class="flex items-center justify-between">
+          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#F4F4F5] dark:bg-[#27272A] text-[#18181B] dark:text-[#F4F4F5]">
+            ${escapeHtml(item.categoryName)}
           </span>
-        </div>
-      </div>
-
-      <div>
-        <h5 class="text-xs font-bold text-[#18181B] dark:text-white mb-1">${escapeHtml(item.title)}</h5>
-        <p class="text-xs text-[#525252] dark:text-[#D4D4D8] whitespace-pre-wrap leading-relaxed">${escapeHtml(item.content)}</p>
-      </div>
-
-      ${item.photos && item.photos.length > 0 ? `
-        <div class="pt-1">
-          <span class="text-[10px] text-[#71717A] dark:text-[#A1A1AA] block mb-1">첨부된 증빙 사진 (${item.photos.length}장):</span>
-          <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-            ${item.photos.map(p => `
-              <img src="${p.dataUrl}" alt="${escapeHtml(p.name || '증빙')}" class="w-14 h-14 rounded-lg object-cover border border-[#E4E4E7] dark:border-[#3F3F46] flex-shrink-0">
-            `).join('')}
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] text-[#71717A] font-mono">${escapeHtml(item.createdAt)}</span>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${statusBadgeClass}">
+              ● ${statusText}
+            </span>
+            ${isAdmin ? `
+              <button onclick="deleteInquiry('${item.id}')" class="p-1 rounded text-[#A1A1AA] hover:text-red-500 transition cursor-pointer" title="문의 내역 삭제">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            ` : ''}
           </div>
         </div>
-      ` : ''}
 
-      <div class="pt-2 border-t border-[#F0F0F0] dark:border-[#27272A] text-[11px] text-[#71717A] flex items-center justify-between">
-        <span>접수 번호: <strong class="font-mono text-[#18181B] dark:text-white">${escapeHtml(item.id)}</strong></span>
-        <span>회신 이메일: ${escapeHtml(item.email)}</span>
+        <div>
+          <h5 class="text-xs font-bold text-[#18181B] dark:text-white mb-1">${escapeHtml(item.title)}</h5>
+          <p class="text-xs text-[#525252] dark:text-[#D4D4D8] whitespace-pre-wrap leading-relaxed">${escapeHtml(item.content)}</p>
+        </div>
+
+        ${item.photos && item.photos.length > 0 ? `
+          <div class="pt-1">
+            <span class="text-[10px] text-[#71717A] dark:text-[#A1A1AA] block mb-1">첨부된 증빙 사진 (${item.photos.length}장):</span>
+            <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+              ${item.photos.map(p => `
+                <img src="${p.dataUrl}" alt="${escapeHtml(p.name || '증빙')}" class="w-14 h-14 rounded-lg object-cover border border-[#E4E4E7] dark:border-[#3F3F46] flex-shrink-0">
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- Official Answer Box (If answered) -->
+        ${item.answer ? `
+          <div class="mt-2.5 p-3 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-500/30 space-y-1">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5 text-[11px]">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-600"></i>
+                FRAME 안심 고객센터 운영팀 공식 답변
+              </span>
+              <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">${escapeHtml(item.answeredAt || '답변 완료')}</span>
+            </div>
+            <p class="text-xs text-[#18181B] dark:text-[#E4E4E7] whitespace-pre-wrap leading-relaxed mt-1">${escapeHtml(item.answer)}</p>
+          </div>
+        ` : ''}
+
+        <!-- Admin Direct Reply Box (Only visible for admin) -->
+        ${isAdmin ? `
+          <div class="pt-2 border-t border-[#F0F0F0] dark:border-[#27272A] mt-2">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-[11px] font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1">
+                <i data-lucide="edit-3" class="w-3 h-3"></i>
+                👑 관리자 전용 답변 작성
+              </span>
+              ${item.answer ? `
+                <button type="button" onclick="toggleAdminReplyForm('${item.id}')" class="text-[10px] font-semibold text-[#71717A] hover:underline cursor-pointer">
+                  답변 수정하기
+                </button>
+              ` : ''}
+            </div>
+            <div id="replyForm_${item.id}" class="${item.answer ? 'hidden' : ''} space-y-2 mt-1">
+              <textarea id="replyInput_${item.id}" rows="2" placeholder="고객님께 전달할 공식 답변을 입력하세요..." class="w-full text-xs p-2.5 rounded-lg border border-[#E4E4E7] dark:border-[#3F3F46] bg-[#FAFAFA] dark:bg-[#18181B] text-[#18181B] dark:text-white focus:outline-none focus:border-[#18181B] dark:focus:border-white leading-relaxed">${escapeHtml(item.answer || '')}</textarea>
+              <div class="flex justify-end gap-1.5">
+                <button type="button" onclick="submitAdminReply('${item.id}')" class="px-3 py-1.5 rounded-lg bg-[#18181B] hover:bg-black text-white dark:bg-white dark:text-black dark:hover:bg-zinc-200 text-xs font-bold transition flex items-center gap-1 cursor-pointer shadow-xs">
+                  <i data-lucide="send" class="w-3 h-3"></i>
+                  답변 등록 완료
+                </button>
+              </div>
+            </div>
+          </div>
+        ` : ''}
+
+        <div class="pt-2 border-t border-[#F0F0F0] dark:border-[#27272A] text-[11px] text-[#71717A] flex items-center justify-between">
+          <span>접수 번호: <strong class="font-mono text-[#18181B] dark:text-white">${escapeHtml(item.id)}</strong></span>
+          <span>회신 이메일: ${escapeHtml(item.email)}</span>
+        </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 
   if (window.lucide) lucide.createIcons();
+}
+
+// Admin Reply Handler
+async function submitAdminReply(ticketId) {
+  const textarea = document.getElementById(`replyInput_${ticketId}`);
+  if (!textarea) return;
+  const replyText = textarea.value.trim();
+  if (!replyText) {
+    showFrameToast('답변 내용을 입력해 주세요.', 'error');
+    return;
+  }
+
+  let list = [];
+  try {
+    list = JSON.parse(localStorage.getItem(SUPPORT_INQUIRIES_KEY) || '[]');
+  } catch (e) {
+    list = [];
+  }
+
+  const nowStr = new Date().toLocaleString('ko-KR', { dateStyle: 'medium', timeStyle: 'short' });
+  const item = list.find(it => it.id === ticketId);
+  if (item) {
+    item.status = '답변 완료';
+    item.answer = replyText;
+    item.answeredAt = nowStr;
+    localStorage.setItem(SUPPORT_INQUIRIES_KEY, JSON.stringify(list));
+  }
+
+  // Supabase Cloud Sync
+  if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+    try {
+      await supabaseClient.from('inquiries').update({
+        status: '답변 완료',
+        answer: replyText,
+        answered_at: new Date().toISOString()
+      }).eq('id', ticketId);
+    } catch (e) {}
+  }
+
+  showFrameToast('운영팀 공식 답변이 성공적으로 등록되었습니다! (답변 완료)', 'success', 3000);
+  renderSupportHistory();
+}
+
+function toggleAdminReplyForm(ticketId) {
+  const form = document.getElementById(`replyForm_${ticketId}`);
+  if (form) form.classList.toggle('hidden');
+}
+
+async function deleteInquiry(ticketId) {
+  if (!confirm('이 문의 내역을 영구히 삭제하시겠습니까?')) return;
+  let list = [];
+  try {
+    list = JSON.parse(localStorage.getItem(SUPPORT_INQUIRIES_KEY) || '[]');
+    list = list.filter(it => it.id !== ticketId);
+    localStorage.setItem(SUPPORT_INQUIRIES_KEY, JSON.stringify(list));
+  } catch (e) {}
+
+  if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+    try {
+      await supabaseClient.from('inquiries').delete().eq('id', ticketId);
+    } catch (e) {}
+  }
+
+  showFrameToast('문의 내역이 삭제되었습니다.', 'info');
+  renderSupportHistory();
 }
 
 // ================= AI CHATBOT INPUT HANDLER =================
