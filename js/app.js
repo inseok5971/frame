@@ -2853,8 +2853,14 @@ function updateHeaderUserState() {
   }
   const headerChatBadge = document.getElementById('headerChatBadge');
   const bottomChatBadge = document.getElementById('bottomNavChatBadge');
-  if (headerChatBadge) headerChatBadge.classList.toggle('hidden', !user);
-  if (bottomChatBadge) bottomChatBadge.classList.toggle('hidden', !user);
+  if (headerChatBadge) {
+    headerChatBadge.innerText = user ? '2' : '';
+    headerChatBadge.classList.toggle('hidden', !user);
+  }
+  if (bottomChatBadge) {
+    bottomChatBadge.innerText = user ? '2' : '';
+    bottomChatBadge.classList.toggle('hidden', !user);
+  }
   syncMyPageUserUI();
   lucide.createIcons();
 }
@@ -3123,6 +3129,7 @@ async function handleSignupSubmit(e) {
     const signupSuccessPrompt = document.getElementById('signupSuccessPrompt');
     if (signupForm && signupSuccessPrompt) {
       signupForm.classList.add('hidden');
+      renderSignupSuccessPrompt(signupSuccessPrompt);
       signupSuccessPrompt.classList.remove('hidden');
       lucide.createIcons();
     } else {
@@ -3160,12 +3167,47 @@ async function handleSignupSubmit(e) {
   const signupSuccessPrompt = document.getElementById('signupSuccessPrompt');
   if (signupForm && signupSuccessPrompt) {
     signupForm.classList.add('hidden');
+    renderSignupSuccessPrompt(signupSuccessPrompt);
     signupSuccessPrompt.classList.remove('hidden');
     lucide.createIcons();
   } else {
     alert(`${name}님 환영합니다! FRAME Lv.1 회원가입이 완료되었습니다.`);
     closeAuthModal();
   }
+}
+
+function renderSignupSuccessPrompt(container) {
+  if (!container) return;
+  container.innerHTML = `
+    <div class="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center mx-auto">
+      <i data-lucide="check" class="w-6 h-6"></i>
+    </div>
+    <div>
+      <h3 class="text-base font-bold text-[#171717] mb-1">회원가입이 완료되었습니다!</h3>
+      <p class="text-xs text-[#737373] leading-relaxed">
+        현재 <strong>Lv.1 (둘러보기 & 문의)</strong> 등급입니다.<br>
+        장비 판매 등록과 안심 직거래를 위해 <strong>PASS 휴대폰 실명 인증</strong>을 진행하시겠습니까?
+      </p>
+    </div>
+    <div class="p-3 bg-[#FAFAFA] rounded-xl border border-[#EAEAEA] text-left text-xs space-y-1.5">
+      <div class="flex items-center gap-1.5 font-bold text-[#171717]">
+        <span class="w-4 h-4 rounded-full bg-emerald-600 text-white text-[10px] flex items-center justify-center">✓</span>
+        <span class="text-emerald-700">Lv.1: 기본 가입 완료 (매물 탐색 및 1:1 문의)</span>
+      </div>
+      <div class="flex items-center gap-1.5 font-bold text-[#171717]">
+        <span class="w-4 h-4 rounded-full bg-black text-white text-[10px] flex items-center justify-center">2</span>
+        <span>Lv.2: PASS 휴대폰 실명 확인 (상품 등록 및 정회원 권한)</span>
+      </div>
+    </div>
+    <div class="space-y-2 pt-1">
+      <button onclick="startVerificationFlowFromSignup()" class="w-full py-2.5 rounded-full bg-[#171717] hover:bg-black text-white text-xs font-semibold shadow-sm cursor-pointer">
+        본인 인증 진행하기 (추천)
+      </button>
+      <button onclick="closeAuthModal()" class="w-full py-2 rounded-full border border-[#E5E5E5] text-xs font-medium text-[#737373] hover:bg-[#F5F5F5] cursor-pointer">
+        나중에 하기 (둘러보기)
+      </button>
+    </div>
+  `;
 }
 
 function startVerificationFlowFromSignup() {

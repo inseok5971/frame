@@ -164,9 +164,7 @@
 
           <button onclick="openChatDrawer('header')" class="p-2.5 rounded-full hover:bg-[#F2F2F2] text-[#171717] transition relative" title="1:1 채팅">
             <i data-lucide="message-square" class="w-5 h-5"></i>
-            <span id="headerChatBadge" class="hidden absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-[#171717] text-white text-[10px] font-bold flex items-center justify-center leading-none border-2 border-white shadow-xs">
-              2
-            </span>
+            <span id="headerChatBadge" class="hidden absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-[#171717] text-white text-[10px] font-bold flex items-center justify-center leading-none border-2 border-white shadow-xs"></span>
           </button>
 
           <button onclick="openRegisterModal()" class="flex items-center gap-1.5 sm:gap-2 bg-[#171717] hover:bg-black text-white text-xs sm:text-sm font-semibold px-3 sm:px-4 py-2 sm:py-2.5 rounded-full transition active:scale-95 shadow-sm">
@@ -2118,39 +2116,8 @@
         </form>
       </div>
 
-      <!-- VIEW 2-1: SIGNUP COMPLETE PROMPT (Lv.1 -> Lv.2/3 인증 유도) -->
-      <div id="signupSuccessPrompt" class="hidden text-center space-y-4">
-        <div class="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center mx-auto">
-          <i data-lucide="check" class="w-6 h-6"></i>
-        </div>
-        <div>
-          <h3 class="text-base font-bold text-[#171717] mb-1">회원가입이 완료되었습니다!</h3>
-          <p class="text-xs text-[#737373] leading-relaxed">
-            현재 <strong>Lv.1 (둘러보기 & 문의)</strong> 등급입니다.<br>
-            장비 판매 등록과 안심 직거래를 위해 <strong>PASS 휴대폰 실명 인증</strong>을 진행하시겠습니까?
-          </p>
-        </div>
-
-        <div class="p-3 bg-[#FAFAFA] rounded-xl border border-[#EAEAEA] text-left text-xs space-y-1.5">
-          <div class="flex items-center gap-1.5 font-bold text-[#171717]">
-            <span class="w-4 h-4 rounded-full bg-emerald-600 text-white text-[10px] flex items-center justify-center">✓</span>
-            <span class="text-emerald-700">Lv.1: 기본 가입 완료 (매물 탐색 및 1:1 문의)</span>
-          </div>
-          <div class="flex items-center gap-1.5 font-bold text-[#171717]">
-            <span class="w-4 h-4 rounded-full bg-black text-white text-[10px] flex items-center justify-center">2</span>
-            <span>Lv.2: PASS 휴대폰 실명 확인 (상품 등록 및 정회원 권한)</span>
-          </div>
-        </div>
-
-        <div class="space-y-2 pt-1">
-          <button onclick="startVerificationFlowFromSignup()" class="w-full py-2.5 rounded-full bg-[#171717] hover:bg-black text-white text-xs font-semibold shadow-sm cursor-pointer">
-            본인 인증 진행하기 (추천)
-          </button>
-          <button onclick="closeAuthModal()" class="w-full py-2 rounded-full border border-[#E5E5E5] text-xs font-medium text-[#737373] hover:bg-[#F5F5F5] cursor-pointer">
-            나중에 하기 (둘러보기)
-          </button>
-        </div>
-      </div>
+      <!-- VIEW 2-1: SIGNUP COMPLETE PROMPT (가입 완료 시 JS로 동적 렌더링) -->
+      <div id="signupSuccessPrompt" class="hidden text-center space-y-4"></div>
 
       <!-- VIEW 3: FIND ACCOUNT VIEW -->
       <div id="findView" class="hidden">
@@ -2546,7 +2513,7 @@
     <button onclick="openChatDrawer('bottomNav')" class="flex flex-col items-center justify-center p-1 text-[#737373] hover:text-[#171717] transition relative">
       <i data-lucide="message-square" class="w-5 h-5 mb-0.5"></i>
       <span class="text-[10px] font-semibold">채팅</span>
-      <span id="bottomNavChatBadge" class="hidden absolute top-0.5 right-2 min-w-[14px] h-[14px] px-0.5 rounded-full bg-[#171717] text-white text-[9px] font-bold flex items-center justify-center">2</span>
+      <span id="bottomNavChatBadge" class="hidden absolute top-0.5 right-2 min-w-[14px] h-[14px] px-0.5 rounded-full bg-[#171717] text-white text-[9px] font-bold flex items-center justify-center"></span>
     </button>
   </nav>
 
