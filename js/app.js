@@ -739,16 +739,37 @@ function openProductDetail(productId) {
     }
   }
 
-  // Owner Status Panel Check (Only for owner or admin)
+  // Owner Status Panel Check (Only for owner or admin - dynamically populated)
   const currentStatus = getProductStatus(item.id);
   const isOwner = isMyProduct(item);
   const ownerPanel = document.getElementById('modalOwnerStatusPanel');
   if (ownerPanel) {
     if (isOwner) {
-      ownerPanel.classList.remove('hidden');
+      ownerPanel.className = 'mb-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30';
+      ownerPanel.innerHTML = `
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-bold text-[#171717] flex items-center gap-1.5">
+            <i data-lucide="sliders" class="w-3.5 h-3.5 text-amber-600"></i>
+            내 매물 거래 상태 관리
+          </span>
+          <span id="modalOwnerCurrentStatusBadge" class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">판매중</span>
+        </div>
+        <div class="grid grid-cols-3 gap-1.5 text-xs">
+          <button type="button" onclick="setProductStatusFromModal('selling')" id="btnModalStatusSelling" class="py-1.5 rounded-lg border border-[#E5E5E5] bg-white hover:bg-zinc-100 text-[#171717] font-semibold transition text-center cursor-pointer">
+            판매중
+          </button>
+          <button type="button" onclick="setProductStatusFromModal('reserved')" id="btnModalStatusReserved" class="py-1.5 rounded-lg border border-[#E5E5E5] bg-white hover:bg-zinc-100 text-[#171717] font-semibold transition text-center cursor-pointer">
+            예약중
+          </button>
+          <button type="button" onclick="setProductStatusFromModal('sold')" id="btnModalStatusSold" class="py-1.5 rounded-lg border border-[#E5E5E5] bg-white hover:bg-zinc-100 text-[#171717] font-semibold transition text-center cursor-pointer">
+            거래완료
+          </button>
+        </div>
+      `;
       updateModalOwnerStatusUI(currentStatus);
     } else {
-      ownerPanel.classList.add('hidden');
+      ownerPanel.className = 'hidden';
+      ownerPanel.innerHTML = '';
     }
   }
 
@@ -2270,10 +2291,59 @@ function handleProductSubmit(e) {
 }
 
 // ================= CHAT LOGIC (HEADER: "채팅" / MODAL: "1:1 직거래 문의") =================
+function renderChatConversationsList() {
+  const convList = document.getElementById('chatConversationsList');
+  const tabConv = document.getElementById('chatTabConversations');
+  if (!convList) return;
+
+  const user = getCurrentUser();
+  if (!user) {
+    if (tabConv) tabConv.innerText = '대화 목록';
+    convList.innerHTML = `
+      <div class="p-8 text-center space-y-2.5">
+        <p class="text-xs font-semibold text-[#171717]">로그인이 필요한 서비스입니다</p>
+        <p class="text-[11px] text-[#737373]">1:1 안심 직거래 대화 내역을 확인하려면 로그인해 주세요.</p>
+        <button type="button" onclick="closeChatDrawer(); openAuthModal('login');" class="px-4 py-2 rounded-lg bg-[#171717] text-white text-xs font-bold cursor-pointer">
+          로그인하기
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  if (tabConv) tabConv.innerText = '대화 목록 (2)';
+  convList.innerHTML = `
+    <div onclick="selectConversation('포토그래퍼김씨', '소니 Alpha A7 IV', '2,150,000원')" class="p-3.5 hover:bg-[#F9F9F9] cursor-pointer transition flex items-center gap-3">
+      <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" class="w-9 h-9 rounded-full object-cover border border-[#EAEAEA]">
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center justify-between mb-0.5">
+          <span class="text-xs font-bold text-[#171717] truncate">포토그래퍼김씨</span>
+          <span class="text-[10px] text-[#8A8A8A]">방금</span>
+        </div>
+        <p class="text-[11px] text-[#737373] truncate">네, 정품 배터리 2개 완충하고 원박스 풀셋 챙겨 나가겠습니다.</p>
+        <span class="inline-block text-[10px] text-[#8A8A8A] font-mono mt-0.5">소니 Alpha A7 IV · 2,150,000원</span>
+      </div>
+    </div>
+    <div onclick="selectConversation('아날로그필름', '라이카 M6 클래식', '3,850,000원')" class="p-3.5 hover:bg-[#F9F9F9] cursor-pointer transition flex items-center gap-3">
+      <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100" class="w-9 h-9 rounded-full object-cover border border-[#EAEAEA]">
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center justify-between mb-0.5">
+          <span class="text-xs font-bold text-[#171717] truncate">아날로그필름</span>
+          <span class="text-[10px] text-[#8A8A8A]">어제</span>
+        </div>
+        <p class="text-[11px] text-[#737373] truncate">네 물론입니다. 평일 저녁 7시 이후 합정역 인근 카페에서 뵙죠.</p>
+        <span class="inline-block text-[10px] text-[#8A8A8A] font-mono mt-0.5">라이카 M6 클래식 · 3,850,000원</span>
+      </div>
+    </div>
+  `;
+}
+
 function openChatDrawer(mode = 'header') {
   const drawer = document.getElementById('chatDrawer');
   const title = document.getElementById('chatDrawerTitle');
   if (!drawer) return;
+
+  renderChatConversationsList();
 
   // 채팅창 열람 시 안 읽은 메시지 뱃지 처리
   const chatBadge = document.getElementById('headerChatBadge');
