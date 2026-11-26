@@ -2294,7 +2294,7 @@ if (window.supabase && typeof window.supabase.createClient === 'function') {
 }
 
 function getCurrentUser() {
-  const json = sessionStorage.getItem('frame_current_user');
+  const json = localStorage.getItem('frame_current_user') || sessionStorage.getItem('frame_current_user');
   if (!json) return null;
   try {
     return JSON.parse(json);
@@ -2305,8 +2305,10 @@ function getCurrentUser() {
 
 function setCurrentUser(user) {
   if (user) {
+    localStorage.setItem('frame_current_user', JSON.stringify(user));
     sessionStorage.setItem('frame_current_user', JSON.stringify(user));
   } else {
+    localStorage.removeItem('frame_current_user');
     sessionStorage.removeItem('frame_current_user');
   }
   updateHeaderUserState();
@@ -2889,9 +2891,9 @@ async function handleLogout() {
       console.warn('Logout warning:', e);
     }
   }
-  sessionStorage.removeItem('frame_current_user');
-  updateHeaderUserState();
+  setCurrentUser(null);
   showToast('로그아웃되었습니다.', 'info');
+  renderSupportHistory();
 }
 
 // ================= 3단계 본인 인증 센터 (토스 본인인증 / 1원 계좌 / eKYC) =================
@@ -6663,102 +6665,150 @@ async function renderSupportHistory() {
   if (emptyBox) emptyBox.classList.add('hidden');
   listBox.classList.remove('hidden');
 
-  listBox.innerHTML = list.map(item => {
-    const isAnswered = Boolean(item.answer || item.status === '답변 완료');
-    const statusText = isAnswered ? '답변 완료' : '답변 대기중';
-    const statusBadgeClass = isAnswered
-      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
-      : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20';
-
-    return `
-      <div class="border border-[#E4E4E7] dark:border-[#2E2E32] rounded-2xl p-4 bg-white dark:bg-[#202023] shadow-2xs space-y-2.5">
-        <div class="flex items-center justify-between">
-          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#F4F4F5] dark:bg-[#27272A] text-[#18181B] dark:text-[#F4F4F5]">
-            ${escapeHtml(item.categoryName)}
-          </span>
-          <div class="flex items-center gap-2">
-            <span class="text-[10px] text-[#71717A] font-mono">${escapeHtml(item.createdAt)}</span>
-            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${statusBadgeClass}">
-              ● ${statusText}
-            </span>
-            ${isAdmin ? `
-              <button onclick="deleteInquiry('${item.id}')" class="p-1 rounded text-[#A1A1AA] hover:text-red-500 transition cursor-pointer" title="문의 내역 삭제">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-              </button>
-            ` : ''}
+  listBox.innerHTML = `
+    <!-- Admin Status Banner -->
+    ${isAdmin ? `
+      <div class="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between text-xs mb-3 shadow-2xs">
+        <div class="flex items-center gap-2">
+          <span class="text-base">👑</span>
+          <div>
+            <p class="font-bold text-amber-900 dark:text-amber-200 text-xs flex items-center gap-1.5">
+              마스터 관리자(admin@frame.com) 로그인 상태
+              <span class="px-1.5 py-0.5 rounded bg-amber-500 text-white text-[9px] font-bold">운영자 모드</span>
+            </p>
+            <p class="text-[10px] text-amber-700/90 dark:text-amber-400">문의 하단의 [👑 관리자 답변 작성]에서 답변을 입력하고 이메일로 회신할 수 있습니다.</p>
           </div>
         </div>
-
-        <div>
-          <h5 class="text-xs font-bold text-[#18181B] dark:text-white mb-1">${escapeHtml(item.title)}</h5>
-          <p class="text-xs text-[#525252] dark:text-[#D4D4D8] whitespace-pre-wrap leading-relaxed">${escapeHtml(item.content)}</p>
+        <button type="button" onclick="quickSwitchGuestMode()" class="px-2.5 py-1 rounded-lg bg-white dark:bg-[#202023] border border-[#E4E4E7] dark:border-[#3F3F46] hover:bg-neutral-100 text-[#18181B] dark:text-white text-[10px] font-bold transition cursor-pointer">
+          일반 모드로 보기
+        </button>
+      </div>
+    ` : `
+      <div class="p-3 rounded-2xl bg-[#F4F4F5] dark:bg-[#27272A] border border-[#E4E4E7] dark:border-[#3F3F46] flex items-center justify-between text-xs mb-3 shadow-2xs">
+        <div class="flex items-center gap-2.5">
+          <span class="text-base">🔒</span>
+          <div>
+            <p class="font-bold text-[#18181B] dark:text-white text-xs">문의에 관리자 답변을 남기시겠습니까?</p>
+            <p class="text-[10px] text-[#71717A] dark:text-[#A1A1AA]">현재 일반 방문자 모드입니다. 관리자로 전환하면 답변 작성창이 즉시 열립니다.</p>
+          </div>
         </div>
+        <button type="button" onclick="quickAdminLoginAndOpenHistory()" class="px-3 py-1.5 rounded-lg bg-[#18181B] hover:bg-black text-white dark:bg-white dark:text-black dark:hover:bg-zinc-200 text-[11px] font-bold transition flex items-center gap-1 cursor-pointer shadow-xs whitespace-nowrap">
+          👑 관리자 1초 전환
+        </button>
+      </div>
+    `}
 
-        ${item.photos && item.photos.length > 0 ? `
-          <div class="pt-1">
-            <span class="text-[10px] text-[#71717A] dark:text-[#A1A1AA] block mb-1">첨부된 증빙 사진 (${item.photos.length}장):</span>
-            <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-              ${item.photos.map(p => `
-                <img src="${p.dataUrl}" alt="${escapeHtml(p.name || '증빙')}" class="w-14 h-14 rounded-lg object-cover border border-[#E4E4E7] dark:border-[#3F3F46] flex-shrink-0">
-              `).join('')}
-            </div>
-          </div>
-        ` : ''}
+    <div class="space-y-3">
+      ${list.map(item => {
+        const isAnswered = Boolean(item.answer || item.status === '답변 완료');
+        const statusText = isAnswered ? '답변 완료' : '답변 대기중';
+        const statusBadgeClass = isAnswered
+          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+          : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20';
 
-        <!-- Official Answer Box (If answered) -->
-        ${item.answer ? `
-          <div class="mt-2.5 p-3 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-500/30 space-y-2">
-            <div class="flex items-center justify-between text-xs">
-              <span class="font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5 text-[11px]">
-                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-600"></i>
-                FRAME 안심 고객센터 운영팀 공식 답변
+        return `
+          <div class="border border-[#E4E4E7] dark:border-[#2E2E32] rounded-2xl p-4 bg-white dark:bg-[#202023] shadow-2xs space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#F4F4F5] dark:bg-[#27272A] text-[#18181B] dark:text-[#F4F4F5]">
+                ${escapeHtml(item.categoryName)}
               </span>
-              <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">${escapeHtml(item.answeredAt || '답변 완료')}</span>
-            </div>
-            <p class="text-xs text-[#18181B] dark:text-[#E4E4E7] whitespace-pre-wrap leading-relaxed">${escapeHtml(item.answer)}</p>
-            <div class="pt-2 border-t border-emerald-500/20 flex items-center justify-between text-[11px]">
-              <span class="text-emerald-700 dark:text-emerald-400 text-[10px]">회신 대상: ${escapeHtml(item.email)}</span>
-              <button type="button" onclick="sendEmailToUser('${escapeHtml(item.email)}', '${escapeHtml(item.title)}', '${escapeHtml(item.answer)}', '${escapeHtml(item.id)}')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-[10px] transition cursor-pointer">
-                <i data-lucide="mail" class="w-3 h-3"></i>
-                <span>✉️ 고객 이메일로 답변 발송</span>
-              </button>
-            </div>
-          </div>
-        ` : ''}
-
-        <!-- Admin Direct Reply Box (Only visible for admin) -->
-        ${isAdmin ? `
-          <div class="pt-2 border-t border-[#F0F0F0] dark:border-[#27272A] mt-2">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="text-[11px] font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1">
-                <i data-lucide="edit-3" class="w-3 h-3"></i>
-                👑 관리자 전용 답변 작성
-              </span>
-              ${item.answer ? `
-                <button type="button" onclick="toggleAdminReplyForm('${item.id}')" class="text-[10px] font-semibold text-[#71717A] hover:underline cursor-pointer">
-                  답변 수정하기
-                </button>
-              ` : ''}
-            </div>
-            <div id="replyForm_${item.id}" class="${item.answer ? 'hidden' : ''} space-y-2 mt-1">
-              <textarea id="replyInput_${item.id}" rows="2" placeholder="고객님께 전달할 공식 답변을 입력하세요..." class="w-full text-xs p-2.5 rounded-lg border border-[#E4E4E7] dark:border-[#3F3F46] bg-[#FAFAFA] dark:bg-[#18181B] text-[#18181B] dark:text-white focus:outline-none focus:border-[#18181B] dark:focus:border-white leading-relaxed">${escapeHtml(item.answer || '')}</textarea>
-              <div class="flex justify-end gap-1.5">
-                <button type="button" onclick="submitAdminReply('${item.id}')" class="px-3 py-1.5 rounded-lg bg-[#18181B] hover:bg-black text-white dark:bg-white dark:text-black dark:hover:bg-zinc-200 text-xs font-bold transition flex items-center gap-1 cursor-pointer shadow-xs">
-                  <i data-lucide="send" class="w-3 h-3"></i>
-                  답변 등록 완료
-                </button>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] text-[#71717A] font-mono">${escapeHtml(item.createdAt)}</span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${statusBadgeClass}">
+                  ● ${statusText}
+                </span>
+                ${isAdmin ? `
+                  <button onclick="deleteInquiry('${item.id}')" class="p-1 rounded text-[#A1A1AA] hover:text-red-500 transition cursor-pointer" title="문의 내역 삭제">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  </button>
+                ` : ''}
               </div>
             </div>
-          </div>
-        ` : ''}
 
-        <div class="pt-2 border-t border-[#F0F0F0] dark:border-[#27272A] text-[11px] text-[#71717A] flex items-center justify-between">
-          <span>접수 번호: <strong class="font-mono text-[#18181B] dark:text-white">${escapeHtml(item.id)}</strong></span>
-          <span>회신 이메일: ${escapeHtml(item.email)}</span>
-        </div>
-      </div>
-    `;
-  }).join('');
+            <div>
+              <h5 class="text-xs font-bold text-[#18181B] dark:text-white mb-1">${escapeHtml(item.title)}</h5>
+              <p class="text-xs text-[#525252] dark:text-[#D4D4D8] whitespace-pre-wrap leading-relaxed">${escapeHtml(item.content)}</p>
+            </div>
+
+            ${item.photos && item.photos.length > 0 ? `
+              <div class="pt-1">
+                <span class="text-[10px] text-[#71717A] dark:text-[#A1A1AA] block mb-1">첨부된 증빙 사진 (${item.photos.length}장):</span>
+                <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+                  ${item.photos.map(p => `
+                    <img src="${p.dataUrl}" alt="${escapeHtml(p.name || '증빙')}" class="w-14 h-14 rounded-lg object-cover border border-[#E4E4E7] dark:border-[#3F3F46] flex-shrink-0">
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+
+            <!-- Official Answer Box (If answered) -->
+            ${item.answer ? `
+              <div class="mt-2.5 p-3 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-500/30 space-y-2">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5 text-[11px]">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-600"></i>
+                    FRAME 안심 고객센터 운영팀 공식 답변
+                  </span>
+                  <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">${escapeHtml(item.answeredAt || '답변 완료')}</span>
+                </div>
+                <p class="text-xs text-[#18181B] dark:text-[#E4E4E7] whitespace-pre-wrap leading-relaxed">${escapeHtml(item.answer)}</p>
+                <div class="pt-2 border-t border-emerald-500/20 flex flex-wrap items-center justify-between gap-1.5 text-[11px]">
+                  <span class="text-emerald-700 dark:text-emerald-400 text-[10px]">회신 대상: <strong>${escapeHtml(item.email)}</strong></span>
+                  <div class="flex items-center gap-1.5">
+                    <button type="button" onclick="copyInquiryEmailDraft('${escapeHtml(item.email)}', '${escapeHtml(item.title)}', '${escapeHtml(item.answer)}', '${escapeHtml(item.id)}')" class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white dark:bg-[#18181B] border border-emerald-500/30 hover:bg-emerald-50 text-emerald-800 dark:text-emerald-300 font-semibold text-[10px] transition cursor-pointer" title="메일 답변 양식을 클립보드에 복사">
+                      <i data-lucide="copy" class="w-3 h-3"></i>
+                      <span>📋 메일 내용 복사</span>
+                    </button>
+                    <button type="button" onclick="sendEmailToUser('${escapeHtml(item.email)}', '${escapeHtml(item.title)}', '${escapeHtml(item.answer)}', '${escapeHtml(item.id)}')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-[10px] transition cursor-pointer" title="기본 메일 클라이언트로 발송">
+                      <i data-lucide="mail" class="w-3 h-3"></i>
+                      <span>✉️ 메일 앱 발송</span>
+                    </button>
+                    <button type="button" onclick="window.open('https://mail.naver.com', '_blank')" class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-[#03C75A] hover:bg-[#02b150] text-white font-bold text-[10px] transition cursor-pointer" title="네이버 메일 바로가기">
+                      <span>🟢 네이버 메일</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ` : ''}
+
+            <!-- Admin Direct Reply Box (Only visible for admin) -->
+            ${isAdmin ? `
+              <div class="pt-2 border-t border-[#F0F0F0] dark:border-[#27272A] mt-2 bg-amber-500/5 -mx-4 -mb-4 p-4 rounded-b-2xl border-t border-amber-500/20">
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="text-[11px] font-bold text-amber-800 dark:text-amber-300 flex items-center gap-1">
+                    <i data-lucide="edit-3" class="w-3.5 h-3.5 text-amber-600"></i>
+                    👑 관리자 답변 작성 및 회신
+                  </span>
+                  ${item.answer ? `
+                    <button type="button" onclick="toggleAdminReplyForm('${item.id}')" class="text-[10px] font-semibold text-amber-700 hover:underline cursor-pointer">
+                      답변 수정하기
+                    </button>
+                  ` : `
+                    <span class="text-[10px] font-bold text-amber-600 animate-pulse">● 답변 대기중</span>
+                  `}
+                </div>
+                <div id="replyForm_${item.id}" class="${item.answer ? 'hidden' : ''} space-y-2 mt-1">
+                  <textarea id="replyInput_${item.id}" rows="2" placeholder="고객님께 전달할 공식 답변을 입력하세요..." class="w-full text-xs p-2.5 rounded-lg border border-[#E4E4E7] dark:border-[#3F3F46] bg-white dark:bg-[#18181B] text-[#18181B] dark:text-white focus:outline-none focus:border-amber-500 leading-relaxed">${escapeHtml(item.answer || '')}</textarea>
+                  <div class="flex items-center justify-between pt-1">
+                    <span class="text-[10px] text-[#71717A]">회신 대상: <strong class="text-[#18181B] dark:text-white font-mono">${escapeHtml(item.email)}</strong></span>
+                    <button type="button" onclick="submitAdminReply('${item.id}')" class="px-3 py-1.5 rounded-lg bg-[#18181B] hover:bg-black text-white dark:bg-white dark:text-black dark:hover:bg-zinc-200 text-xs font-bold transition flex items-center gap-1 cursor-pointer shadow-xs">
+                      <i data-lucide="send" class="w-3 h-3"></i>
+                      답변 등록 완료 (초록색 전환)
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ` : ''}
+
+            <div class="pt-2 border-t border-[#F0F0F0] dark:border-[#27272A] text-[11px] text-[#71717A] flex items-center justify-between">
+              <span>접수 번호: <strong class="font-mono text-[#18181B] dark:text-white">${escapeHtml(item.id)}</strong></span>
+              <span>회신 이메일: ${escapeHtml(item.email)}</span>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
 
   if (window.lucide) lucide.createIcons();
 }
@@ -6800,40 +6850,105 @@ async function submitAdminReply(ticketId) {
     } catch (e) {}
   }
 
-  showFrameToast('운영팀 공식 답변이 성공적으로 등록되었습니다! (답변 완료)', 'success', 3000);
+  showFrameToast('운영팀 공식 답변이 성공적으로 등록되었습니다! (상태: 답변 완료 ●)', 'success', 3500);
   renderSupportHistory();
 
   if (item && item.email && item.email.includes('@')) {
     setTimeout(() => {
-      if (confirm(`답변이 등록되었습니다!\n\n회신 대상 이메일 [${item.email}]로 실제 이메일 발송 창을 여시겠습니까?`)) {
+      if (confirm(`답변이 성공적으로 등록되어 [답변 완료]로 변경되었습니다!\n\n회신 대상 이메일 [${item.email}]로 바로 메일 앱을 띄워 발송하시겠습니까?\n(취소를 누르면 메일 본문이 클립보드에 자동 복사됩니다)`)) {
         sendEmailToUser(item.email, item.title, replyText, ticketId);
+      } else {
+        copyInquiryEmailDraft(item.email, item.title, replyText, ticketId);
       }
-    }, 400);
+    }, 300);
   }
 }
 
 function sendEmailToUser(email, title, answerText, ticketId) {
+  if (!email || !email.includes('@')) {
+    showFrameToast('유효한 회신 이메일 주소가 없습니다.', 'error');
+    return;
+  }
   const subject = encodeURIComponent(`[FRAME 고객센터] 접수하신 문의(${ticketId})에 대한 운영팀 공식 답변입니다.`);
-  const body = encodeURIComponent(`안녕하세요, FRAME 고객센터입니다.
+  const body = encodeURIComponent(`안녕하세요, FRAME 고객센터 지원팀입니다.
 
 고객님께서 접수해 주신 문의에 대해 안내드립니다.
 
 --------------------------------------------------
-[접수 번호] ${ticketId}
-[문의 제목] ${title}
+■ 접수 번호: ${ticketId}
+■ 문의 제목: ${title}
 --------------------------------------------------
 
 [고객센터 공식 답변]
 ${answerText}
 
 --------------------------------------------------
-추가 문의사항이 있으실 경우 고객센터를 통해 언제든 편하게 문의해 주시기 바랍니다.
+추가 문의사항이나 거래 관련 지원이 필요하신 경우 언제든 고객센터를 통해 문의해 주시기 바랍니다.
 감사합니다.
 
 카메라 안심 거래 플랫폼 FRAME 고객센터 드림
 https://inseok5971.github.io/frame/`);
 
-  window.open(`mailto:${email}?subject=${subject}&body=${body}`, '_blank');
+  window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+}
+
+function copyInquiryEmailDraft(email, title, answerText, ticketId) {
+  const content = `[FRAME 고객센터] 접수하신 문의(${ticketId})에 대한 운영팀 공식 답변입니다.
+
+안녕하세요, FRAME 고객센터 지원팀입니다.
+고객님께서 접수해 주신 1:1 문의에 대한 공식 답변을 안내드립니다.
+
+--------------------------------------------------
+■ 접수 번호: ${ticketId}
+■ 문의 제목: ${title}
+■ 회신 대상: ${email}
+--------------------------------------------------
+
+[FRAME 고객센터 공식 답변]
+${answerText}
+
+--------------------------------------------------
+추가 문의사항이나 거래 관련 지원이 필요하신 경우 언제든 편하게 문의해 주시기 바랍니다.
+감사합니다.
+
+카메라·렌즈 프리미엄 중고거래 플랫폼 FRAME
+https://inseok5971.github.io/frame/`;
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(content).then(() => {
+      showFrameToast('📋 답변 메일 내용이 클립보드에 복사되었습니다! 네이버 메일 등에 붙여넣기(Cmd+V)하여 전송하세요.', 'success', 3500);
+    }).catch(() => {
+      prompt('아래 답변 내용을 복사(Cmd+C)하여 메일로 발송하세요:', content);
+    });
+  } else {
+    prompt('아래 답변 내용을 복사(Cmd+C)하여 메일로 발송하세요:', content);
+  }
+}
+
+function quickAdminLoginAndOpenHistory() {
+  const masterUser = {
+    id: '19707b0a-f01f-445f-bce0-c449ae325aea',
+    email: 'admin@frame.com',
+    name: '마스터 관리자',
+    role: 'admin',
+    level: 99,
+    isPhoneVerified: true,
+    isBankVerified: true,
+    isEkycVerified: true,
+    passInfo: { name: '마스터 관리자', phoneMasked: '010-****-0000', carrier: 'SKT (MASTER)' },
+    bankInfo: { bank: '한국은행', maskedAccount: '000-***-0000' },
+    ekycInfo: { livenessCheck: 'PASSED (MASTER PRIVILEGE)' },
+    loginAt: new Date().toISOString()
+  };
+  setCurrentUser(masterUser);
+  showFrameToast('👑 마스터 관리자(admin@frame.com) 권한이 활성화되었습니다! 답변 작성창이 열립니다.', 'success', 3000);
+  renderSupportHistory();
+}
+
+function quickSwitchGuestMode() {
+  setCurrentUser(null);
+  showFrameToast('일반 방문자 모드로 전환되었습니다.', 'info');
+  renderSupportHistory();
 }
 
 function toggleAdminReplyForm(ticketId) {
