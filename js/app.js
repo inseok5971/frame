@@ -3341,9 +3341,31 @@ function handlePassVerifySubmit(e) {
   }
 
   const resultBox = document.getElementById('passSuccessResult');
-  const infoText = document.getElementById('passVerifiedInfoText');
-  if (resultBox) resultBox.classList.remove('hidden');
-  if (infoText) infoText.innerText = `${name} (${phoneMasked}) · ${carrier}`;
+  if (resultBox) {
+    resultBox.className = 'p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/25 space-y-3';
+    resultBox.innerHTML = `
+      <div class="flex items-center justify-between text-xs font-bold text-emerald-700">
+        <span class="flex items-center gap-1.5">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          PASS 실명 인증 완료 (Lv.2 정회원)
+        </span>
+        <span class="text-[10px] font-mono bg-emerald-600 text-white px-2 py-0.5 rounded">본인확인 완료</span>
+      </div>
+      <div class="text-[11px] text-zinc-600 space-y-0.5 font-mono">
+        <div>• 발급 DI: ${escapeHtml(mockDi.substring(0, 18))}... (중복 가입 차단)</div>
+        <div>• 실명/연락처: <span id="passVerifiedInfoText">${escapeHtml(name)} (${escapeHtml(phoneMasked)}) · ${escapeHtml(carrier)}</span></div>
+        <div>• 부여된 권한: 매물 등록 및 1:1 직거래 채팅 개설 활성화</div>
+      </div>
+      <div class="flex items-center gap-2 pt-1">
+        <button type="button" onclick="closeVerificationCenterModal(); openRegisterModal();" class="flex-1 py-2.5 rounded-full bg-[#171717] hover:bg-black text-white text-xs font-bold transition cursor-pointer shadow-sm">
+          즉시 매물 등록하러 가기 →
+        </button>
+        <button type="button" onclick="closeVerificationCenterModal();" class="px-4 py-2.5 rounded-full border border-[#D4D4D8] text-xs font-semibold hover:bg-white transition cursor-pointer">
+          완료 및 닫기
+        </button>
+      </div>
+    `;
+  }
 
   const step2Badge = document.getElementById('step2StatusBadge');
   if (step2Badge) {
