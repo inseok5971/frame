@@ -2347,9 +2347,9 @@ function openChatDrawer(mode = 'header') {
 
   // 채팅창 열람 시 안 읽은 메시지 뱃지 처리
   const chatBadge = document.getElementById('headerChatBadge');
-  if (chatBadge) {
-    chatBadge.classList.add('hidden');
-  }
+  const bottomChatBadge = document.getElementById('bottomNavChatBadge');
+  if (chatBadge) chatBadge.classList.add('hidden');
+  if (bottomChatBadge) bottomChatBadge.classList.add('hidden');
 
   if (mode === 'inquiry') {
     if (title) title.innerText = '1:1 직거래 문의';
@@ -2851,6 +2851,10 @@ function updateHeaderUserState() {
       </div>
     `;
   }
+  const headerChatBadge = document.getElementById('headerChatBadge');
+  const bottomChatBadge = document.getElementById('bottomNavChatBadge');
+  if (headerChatBadge) headerChatBadge.classList.toggle('hidden', !user);
+  if (bottomChatBadge) bottomChatBadge.classList.toggle('hidden', !user);
   syncMyPageUserUI();
   lucide.createIcons();
 }

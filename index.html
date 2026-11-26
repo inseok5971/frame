@@ -162,9 +162,9 @@
             </span>
           </button>
 
-          <button onclick="openChatDrawer('header')" class="p-2.5 rounded-full hover:bg-[#F2F2F2] text-[#171717] transition relative" title="채팅 (안 읽은 메시지 2건)">
+          <button onclick="openChatDrawer('header')" class="p-2.5 rounded-full hover:bg-[#F2F2F2] text-[#171717] transition relative" title="1:1 채팅">
             <i data-lucide="message-square" class="w-5 h-5"></i>
-            <span id="headerChatBadge" class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-[#171717] text-white text-[10px] font-bold flex items-center justify-center leading-none border-2 border-white shadow-xs">
+            <span id="headerChatBadge" class="hidden absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-[#171717] text-white text-[10px] font-bold flex items-center justify-center leading-none border-2 border-white shadow-xs">
               2
             </span>
           </button>
@@ -2546,7 +2546,7 @@
     <button onclick="openChatDrawer('bottomNav')" class="flex flex-col items-center justify-center p-1 text-[#737373] hover:text-[#171717] transition relative">
       <i data-lucide="message-square" class="w-5 h-5 mb-0.5"></i>
       <span class="text-[10px] font-semibold">채팅</span>
-      <span class="absolute top-0.5 right-2 min-w-[14px] h-[14px] px-0.5 rounded-full bg-[#171717] text-white text-[9px] font-bold flex items-center justify-center">2</span>
+      <span id="bottomNavChatBadge" class="hidden absolute top-0.5 right-2 min-w-[14px] h-[14px] px-0.5 rounded-full bg-[#171717] text-white text-[9px] font-bold flex items-center justify-center">2</span>
     </button>
   </nav>
 
