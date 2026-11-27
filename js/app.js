@@ -247,6 +247,12 @@ function renderProductGrid(items) {
 
   countDisplay.innerText = items.length;
 
+  const sampleBanner = document.getElementById('sampleDataNoticeBanner');
+  if (sampleBanner) {
+    const hasSampleItems = items.some(item => item.isSample === true);
+    sampleBanner.classList.toggle('hidden', !hasSampleItems);
+  }
+
   if (items.length === 0) {
     grid.innerHTML = '';
     emptyState.classList.remove('hidden');
@@ -408,14 +414,21 @@ function renderProductGrid(items) {
 
           <!-- Seller line (Temperature & Level completely removed!) -->
           <div class="pt-3 mt-3 border-t border-[#F0F0F0] flex items-center justify-between text-[11px] text-[#737373]">
-            <div class="flex items-center gap-1.5">
-              <img src="${item.seller.avatar}" class="w-5 h-5 rounded-full object-cover border border-[#EAEAEA]">
-              <span class="truncate max-w-[120px] font-medium text-[#171717]">${item.seller.name}</span>
+            <div class="flex items-center gap-1.5 min-w-0">
+              <img src="${item.seller.avatar}" class="w-5 h-5 rounded-full object-cover border border-[#EAEAEA] flex-shrink-0">
+              <span class="truncate max-w-[110px] font-medium text-[#171717]">${item.seller.name}</span>
             </div>
-            <span class="text-[10px] text-[#8A8A8A] flex items-center gap-0.5">
-              <i data-lucide="check" class="w-3 h-3 text-[#171717]"></i>
-              인증 회원
-            </span>
+            <div class="flex items-center gap-1.5 flex-shrink-0">
+              <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-0.5">
+                <i data-lucide="check" class="w-3 h-3 text-emerald-600"></i>
+                검증 완료
+              </span>
+              ${item.isSample ? `
+                <span class="px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500 border border-zinc-200 text-[9px] font-semibold">
+                  샘플 데이터
+                </span>
+              ` : ''}
+            </div>
           </div>
 
         </div>
@@ -2180,6 +2193,7 @@ function handleProductSubmit(e) {
 
   const newProduct = {
     id: SAMPLE_PRODUCTS.length + 1,
+    isSample: false,
     category: category,
     brand: brand,
     mount: mount,
@@ -2682,6 +2696,7 @@ async function loadSupabaseProducts() {
         images: row.images || [row.image_url],
         condition: row.condition || 'A+급',
         verified: row.verified,
+        isSample: Boolean(row.is_sample),
         verificationType: row.verification_type,
         verificationDetails: row.verification_details || {},
         seller: row.seller || { name: '판매자', level: 2 },

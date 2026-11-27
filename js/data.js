@@ -2,6 +2,7 @@
 let SAMPLE_PRODUCTS = [
   {
     id: 1,
+    isSample: true,
     category: 'camera',
     brand: 'Sony',
     mount: 'E-Mount',
@@ -41,6 +42,7 @@ let SAMPLE_PRODUCTS = [
   },
   {
     id: 2,
+    isSample: true,
     category: 'film-camera',
     brand: 'Leica',
     mount: 'M-Mount',
@@ -83,6 +85,7 @@ let SAMPLE_PRODUCTS = [
   },
   {
     id: 3,
+    isSample: true,
     category: 'lens',
     brand: 'Sony',
     mount: 'E-Mount',
@@ -121,6 +124,7 @@ let SAMPLE_PRODUCTS = [
   },
   {
     id: 4,
+    isSample: true,
     category: 'camera',
     brand: 'Canon',
     mount: 'RF-Mount',
@@ -157,6 +161,7 @@ let SAMPLE_PRODUCTS = [
   },
   {
     id: 5,
+    isSample: true,
     category: 'film-camera',
     brand: 'Nikon',
     mount: 'F-Mount',
@@ -197,6 +202,7 @@ let SAMPLE_PRODUCTS = [
   },
   {
     id: 6,
+    isSample: true,
     category: 'camera',
     brand: 'Fujifilm',
     mount: 'X-Mount',
@@ -235,6 +241,7 @@ let SAMPLE_PRODUCTS = [
   },
   {
     id: 7,
+    isSample: true,
     category: 'film-lens',
     brand: 'Leica',
     mount: 'M-Mount',
@@ -272,6 +279,7 @@ let SAMPLE_PRODUCTS = [
   },
   {
     id: 8,
+    isSample: true,
     category: 'lens',
     brand: 'Canon',
     mount: 'RF-Mount',
@@ -310,6 +318,7 @@ let SAMPLE_PRODUCTS = [
 ,
   {
     id: 9,
+    isSample: true,
     category: 'camera',
     brand: 'Leica',
     mount: 'L-Mount',
@@ -348,6 +357,7 @@ let SAMPLE_PRODUCTS = [
   },
   {
     id: 10,
+    isSample: true,
     category: 'film-camera',
     brand: 'Leica',
     mount: 'M-Mount',
@@ -389,6 +399,7 @@ let SAMPLE_PRODUCTS = [
   },
   {
     id: 11,
+    isSample: true,
     category: 'camera',
     brand: 'Leica',
     mount: 'Fixed',
@@ -426,6 +437,7 @@ let SAMPLE_PRODUCTS = [
   },
   {
     id: 12,
+    isSample: true,
     category: 'film-camera',
     brand: 'Fujifilm',
     mount: 'Fixed',
@@ -466,6 +478,7 @@ let SAMPLE_PRODUCTS = [
   },
   {
     id: 13,
+    isSample: true,
     category: 'camera',
     brand: 'Ricoh',
     mount: 'Fixed',
@@ -503,6 +516,7 @@ let SAMPLE_PRODUCTS = [
   },
   {
     id: 14,
+    isSample: true,
     category: 'film-camera',
     brand: 'Leica',
     mount: 'R-Mount',
@@ -543,6 +557,7 @@ let SAMPLE_PRODUCTS = [
   },
   {
     id: 15,
+    isSample: true,
     category: 'film-lens',
     brand: 'Helios',
     mount: 'M42-Mount',
@@ -582,6 +597,7 @@ let SAMPLE_PRODUCTS = [
   },
   {
     id: 16,
+    isSample: true,
     category: 'film-lens',
     brand: 'Light Lens Lab',
     mount: 'M-Mount',
@@ -621,6 +637,7 @@ let SAMPLE_PRODUCTS = [
   },
   {
     id: 17,
+    isSample: true,
     category: 'lens',
     brand: 'Sony',
     mount: 'E-Mount',
@@ -660,6 +677,7 @@ let SAMPLE_PRODUCTS = [
   },
   {
     id: 18,
+    isSample: true,
     category: 'lens',
     brand: 'Canon',
     mount: 'RF-Mount',

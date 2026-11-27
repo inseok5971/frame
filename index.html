@@ -506,6 +506,12 @@
       <button onclick="resetAllFilters()" class="text-xs text-[#171717] font-semibold hover:underline ml-2">필터 초기화</button>
     </div>
 
+    <!-- Sample Data Notice Banner (샘플 매물이 1개 이상일 때만 표시) -->
+    <div id="sampleDataNoticeBanner" class="mb-5 px-4 py-3 rounded-xl bg-zinc-100 border border-zinc-200 text-zinc-700 text-xs flex items-center gap-2.5">
+      <i data-lucide="info" class="w-4 h-4 text-zinc-500 flex-shrink-0"></i>
+      <span class="font-medium leading-relaxed">※ 아래 매물은 서비스 구조를 보여주기 위한 샘플 데이터이며, 실제 거래 매물이 아닙니다</span>
+    </div>
+
     <!-- Product Grid -->
     <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
 
@@ -526,7 +532,10 @@
         </div>
         <div class="px-3.5 pb-3 pt-2 border-t border-[#F5F5F5] flex items-center justify-between text-[11px] text-[#737373]">
           <span class="font-medium text-[#171717]">포토그래퍼김씨</span>
-          <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+            <span class="px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500 border border-zinc-200 text-[9px] font-semibold">샘플 데이터</span>
+          </div>
         </div>
       </div>
 
@@ -547,7 +556,10 @@
         </div>
         <div class="px-3.5 pb-3 pt-2 border-t border-[#F5F5F5] flex items-center justify-between text-[11px] text-[#737373]">
           <span class="font-medium text-[#171717]">아날로그필름</span>
-          <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+            <span class="px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500 border border-zinc-200 text-[9px] font-semibold">샘플 데이터</span>
+          </div>
         </div>
       </div>
 
@@ -568,7 +580,10 @@
         </div>
         <div class="px-3.5 pb-3 pt-2 border-t border-[#F5F5F5] flex items-center justify-between text-[11px] text-[#737373]">
           <span class="font-medium text-[#171717]">렌즈수집가</span>
-          <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+            <span class="px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500 border border-zinc-200 text-[9px] font-semibold">샘플 데이터</span>
+          </div>
         </div>
       </div>
 
@@ -589,7 +604,10 @@
         </div>
         <div class="px-3.5 pb-3 pt-2 border-t border-[#F5F5F5] flex items-center justify-between text-[11px] text-[#737373]">
           <span class="font-medium text-[#171717]">캐논매니아</span>
-          <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+            <span class="px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500 border border-zinc-200 text-[9px] font-semibold">샘플 데이터</span>
+          </div>
         </div>
       </div>
 
@@ -610,7 +628,10 @@
         </div>
         <div class="px-3.5 pb-3 pt-2 border-t border-[#F5F5F5] flex items-center justify-between text-[11px] text-[#737373]">
           <span class="font-medium text-[#171717]">빈티지필름랩</span>
-          <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+            <span class="px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500 border border-zinc-200 text-[9px] font-semibold">샘플 데이터</span>
+          </div>
         </div>
       </div>
 
@@ -631,7 +652,10 @@
         </div>
         <div class="px-3.5 pb-3 pt-2 border-t border-[#F5F5F5] flex items-center justify-between text-[11px] text-[#737373]">
           <span class="font-medium text-[#171717]">후지필름감성</span>
-          <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+            <span class="px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500 border border-zinc-200 text-[9px] font-semibold">샘플 데이터</span>
+          </div>
         </div>
       </div>
 
@@ -652,7 +676,10 @@
         </div>
         <div class="px-3.5 pb-3 pt-2 border-t border-[#F5F5F5] flex items-center justify-between text-[11px] text-[#737373]">
           <span class="font-medium text-[#171717]">라이카러버</span>
-          <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+            <span class="px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500 border border-zinc-200 text-[9px] font-semibold">샘플 데이터</span>
+          </div>
         </div>
       </div>
 
@@ -673,7 +700,10 @@
         </div>
         <div class="px-3.5 pb-3 pt-2 border-t border-[#F5F5F5] flex items-center justify-between text-[11px] text-[#737373]">
           <span class="font-medium text-[#171717]">풍경출사전문</span>
-          <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+            <span class="px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500 border border-zinc-200 text-[9px] font-semibold">샘플 데이터</span>
+          </div>
         </div>
       </div>
 
@@ -694,7 +724,10 @@
         </div>
         <div class="px-3.5 pb-3 pt-2 border-t border-[#F5F5F5] flex items-center justify-between text-[11px] text-[#737373]">
           <span class="font-medium text-[#171717]">스트리트스냅러</span>
-          <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+            <span class="px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500 border border-zinc-200 text-[9px] font-semibold">샘플 데이터</span>
+          </div>
         </div>
       </div>
 
@@ -715,7 +748,10 @@
         </div>
         <div class="px-3.5 pb-3 pt-2 border-t border-[#F5F5F5] flex items-center justify-between text-[11px] text-[#737373]">
           <span class="font-medium text-[#171717]">라이카컬렉터</span>
-          <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+            <span class="px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500 border border-zinc-200 text-[9px] font-semibold">샘플 데이터</span>
+          </div>
         </div>
       </div>
 
@@ -736,7 +772,10 @@
         </div>
         <div class="px-3.5 pb-3 pt-2 border-t border-[#F5F5F5] flex items-center justify-between text-[11px] text-[#737373]">
           <span class="font-medium text-[#171717]">흑백사진가</span>
-          <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+            <span class="px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500 border border-zinc-200 text-[9px] font-semibold">샘플 데이터</span>
+          </div>
         </div>
       </div>
 
@@ -757,7 +796,10 @@
         </div>
         <div class="px-3.5 pb-3 pt-2 border-t border-[#F5F5F5] flex items-center justify-between text-[11px] text-[#737373]">
           <span class="font-medium text-[#171717]">중형매니아</span>
-          <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+            <span class="px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500 border border-zinc-200 text-[9px] font-semibold">샘플 데이터</span>
+          </div>
         </div>
       </div>
 
@@ -778,7 +820,10 @@
         </div>
         <div class="px-3.5 pb-3 pt-2 border-t border-[#F5F5F5] flex items-center justify-between text-[11px] text-[#737373]">
           <span class="font-medium text-[#171717]">스냅포토</span>
-          <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+            <span class="px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500 border border-zinc-200 text-[9px] font-semibold">샘플 데이터</span>
+          </div>
         </div>
       </div>
 
@@ -799,7 +844,10 @@
         </div>
         <div class="px-3.5 pb-3 pt-2 border-t border-[#F5F5F5] flex items-center justify-between text-[11px] text-[#737373]">
           <span class="font-medium text-[#171717]">R시스템매니아</span>
-          <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+            <span class="px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500 border border-zinc-200 text-[9px] font-semibold">샘플 데이터</span>
+          </div>
         </div>
       </div>
 
@@ -820,7 +868,10 @@
         </div>
         <div class="px-3.5 pb-3 pt-2 border-t border-[#F5F5F5] flex items-center justify-between text-[11px] text-[#737373]">
           <span class="font-medium text-[#171717]">빈티지옵틱스</span>
-          <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+            <span class="px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500 border border-zinc-200 text-[9px] font-semibold">샘플 데이터</span>
+          </div>
         </div>
       </div>
 
@@ -841,7 +892,10 @@
         </div>
         <div class="px-3.5 pb-3 pt-2 border-t border-[#F5F5F5] flex items-center justify-between text-[11px] text-[#737373]">
           <span class="font-medium text-[#171717]">아날로그필름</span>
-          <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+            <span class="px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500 border border-zinc-200 text-[9px] font-semibold">샘플 데이터</span>
+          </div>
         </div>
       </div>
 
@@ -862,7 +916,10 @@
         </div>
         <div class="px-3.5 pb-3 pt-2 border-t border-[#F5F5F5] flex items-center justify-between text-[11px] text-[#737373]">
           <span class="font-medium text-[#171717]">포토그래퍼김씨</span>
-          <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+            <span class="px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500 border border-zinc-200 text-[9px] font-semibold">샘플 데이터</span>
+          </div>
         </div>
       </div>
 
@@ -883,7 +940,10 @@
         </div>
         <div class="px-3.5 pb-3 pt-2 border-t border-[#F5F5F5] flex items-center justify-between text-[11px] text-[#737373]">
           <span class="font-medium text-[#171717]">캐논매니아</span>
-          <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[10px] text-emerald-600 font-semibold">✓ 검증 완료</span>
+            <span class="px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500 border border-zinc-200 text-[9px] font-semibold">샘플 데이터</span>
+          </div>
         </div>
       </div>
     </div>
